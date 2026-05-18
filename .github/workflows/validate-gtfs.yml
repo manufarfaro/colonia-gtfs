@@ -1,0 +1,36 @@
+name: Validate GTFS
+
+on:
+  pull_request:
+    paths:
+      - "data/*.txt"
+      - "scripts/build-gtfs-zip.sh"
+      - ".github/workflows/validate-gtfs.yml"
+  push:
+    branches: [main]
+    paths:
+      - "data/*.txt"
+      - "scripts/build-gtfs-zip.sh"
+      - ".github/workflows/validate-gtfs.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: MobilityData Canonical Validator
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build gtfs.zip
+        run: scripts/build-gtfs-zip.sh data/output/gtfs.zip
+
+      - name: Validate with MobilityData Canonical
+        uses: npaun/md-gtfs-validator-action@v2
+        with:
+          gtfs_path: data/output/gtfs.zip
+          md_validator_version: "8.0.1"
+          java_version: "21"
+          node_version: "20"

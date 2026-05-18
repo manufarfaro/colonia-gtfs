@@ -27,9 +27,10 @@ Cortar un release del feed GTFS sigue un ciclo simple: una rama humana de prepar
 2. **Sanity check local**:
 
    ```bash
-   scripts/build-gtfs-zip.sh
-   scripts/validate-gtfs.sh
-   scripts/test-build-deterministic.sh   # opcional
+   uv sync
+   uv run python scripts/build_gtfs_zip.py
+   uv run python scripts/validate_gtfs.py
+   uv run pytest                          # incluye el determinism check
    ```
 
 3. **Si todo OK**, abrir PR `release/X.Y.Z` → `main` y mergear.

@@ -4,6 +4,7 @@
 [![OpenSpec](https://img.shields.io/badge/spec--driven-OpenSpec-7C3AED?style=flat-square)](https://github.com/Fission-AI/OpenSpec)
 [![Validate OpenSpec](https://github.com/manufarfaro/colonia-gtfs/actions/workflows/openspec-validate.yml/badge.svg)](https://github.com/manufarfaro/colonia-gtfs/actions/workflows/openspec-validate.yml)
 [![Validate GTFS](https://github.com/manufarfaro/colonia-gtfs/actions/workflows/validate-gtfs.yml/badge.svg)](https://github.com/manufarfaro/colonia-gtfs/actions/workflows/validate-gtfs.yml)
+[![Python](https://github.com/manufarfaro/colonia-gtfs/actions/workflows/python.yml/badge.svg)](https://github.com/manufarfaro/colonia-gtfs/actions/workflows/python.yml)
 
 [Español](README.md) · **English**
 
@@ -27,3 +28,31 @@ Work starts from a PRD, then an OpenSpec spec, then code.
 - **[`openspec/`](openspec/)** — Specs and change proposals: the *how*.
 - **[`data/`](data/)** — Static GTFS Schedule feed (Sol Antigua urbano Colonia). See [`data/README.md`](data/README.md) for the maintenance contract and update flow.
 - **[`docs/release-process.md`](docs/release-process.md)** — How to cut a release of the feed (open `release/X.Y.Z` → merge → tag `vX.Y.Z` → workflow publishes a GitHub Release with `gtfs.zip`).
+
+## Development
+
+Python toolchain managed via [`uv`](https://github.com/astral-sh/uv):
+
+```bash
+# Install uv (one time)
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Sync deps (includes dev: pytest, ruff)
+uv sync
+
+# Tests
+uv run pytest
+
+# Lint + format check
+uv run ruff check scripts tests
+uv run ruff format --check scripts tests
+
+# Build the gtfs.zip locally
+uv run python scripts/build_gtfs_zip.py
+
+# Sanity check with gtfs-kit
+uv run python scripts/validate_gtfs.py
+
+# Refresh the OSM extract (requires osmium-tool on PATH)
+uv run python scripts/refresh_osm.py
+```

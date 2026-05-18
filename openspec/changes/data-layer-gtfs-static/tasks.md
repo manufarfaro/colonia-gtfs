@@ -83,3 +83,47 @@
 - [x] 12.6 Write `docs/release-process.md` describing the human flow: open `release/X.Y.Z` from main → validate locally → merge PR to main → push tag `vX.Y.Z` on the merge commit. Include the SemVer policy (D-09)
 - [ ] 12.7 Tag a smoke-test `v0.0.0-rc.1` (or similar) after the first feed lands; verify the workflow creates a Release and that `https://github.com/manufarfaro/colonia-gtfs/releases/latest/download/gtfs.zip` redirects (302) to the new asset
 - [ ] 12.8 Once `v0.0.1` ships, prepare the MobilityDatabase submission (out of scope for this change, tracked in PRD §10.2 L3) using the stable "latest" URL
+
+## 13. Migrate `scripts/*.sh` to Python managed by `uv`
+
+Refactor of implementation language (bash → Python). The spec contract (R-11 deterministic bundling, R-12 manual maintenance) is unchanged — the bash and Python implementations are equivalent from the consumer's perspective. Tooling unifies on Python via `uv` so we can add linters and tests consistently.
+
+- [x] 13.1 Initialize `pyproject.toml` with `uv init`; declare project metadata (name `colonia-gtfs`, `requires-python = ">=3.11"` for Ubuntu CI compatibility)
+- [x] 13.2 Add runtime deps via `uv add`: `gtfs-kit`, `httpx` (or `requests`) for Geofabrik download
+- [x] 13.3 Add dev deps via `uv add --dev`: `pytest`, `ruff`
+- [x] 13.4 Configure `ruff` lint+format rules in `pyproject.toml` (target Python 3.11+, sensible defaults: pycodestyle, pyflakes, isort, bugbear)
+- [x] 13.5 Commit `uv.lock` for reproducible installs
+
+## 14. Tests (TDD)
+
+Each Python script SHALL have at least one test that was written and observed failing before the implementation existed. The bash counterpart is deleted only after its Python equivalent passes all its tests.
+
+- [x] 14.1 `tests/conftest.py` — shared fixtures: tiny GTFS feed in a tmp dir (minimal agency, stops, routes, trips, calendar, stop_times)
+- [x] 14.2 `tests/test_build_gtfs_zip.py` — failing test: building a `gtfs.zip` from a fixture data dir produces an archive containing exactly the expected `.txt` files at the root
+- [x] 14.3 Test: two consecutive invocations on unchanged input produce byte-identical zips (replaces `test-build-deterministic.sh`)
+- [x] 14.4 Test: invocation with no args writes to `data/output/gtfs.zip`; with arg supports both absolute and relative paths
+- [x] 14.5 Test: non-zero exit code when the data dir has no `.txt` files
+- [x] 14.6 `tests/test_validate_gtfs.py` — failing test: loading a fixture `gtfs.zip` with `gtfs-kit` prints a summary that includes agency, route, stop, trip counts
+- [x] 14.7 Test: clear error when given a non-existent zip path
+- [x] 14.8 `tests/test_refresh_osm.py` — failing test: invokes the script with a mocked Geofabrik response and verifies a `.pbf` is written at the expected path (uses `subprocess` mock for the osmium clip step)
+- [x] 14.9 Test: clear error when the `osmium` binary is not on PATH
+
+## 15. Python script implementations (each after its tests are red)
+
+- [x] 15.1 `scripts/build_gtfs_zip.py` — Python equivalent of `build-gtfs-zip.sh`. Uses `zipfile.ZipFile` with explicit `ZipInfo(date_time=(2026,1,1,0,0,0))` per entry for byte-determinism. `argparse` for optional output path. Default `data/output/gtfs.zip`. Supports absolute paths
+- [x] 15.2 `scripts/refresh_osm.py` — Python equivalent of `refresh-osm.sh`. Downloads Geofabrik UY pbf via `httpx`; clips via `subprocess` call to `osmium-tool` (the binary stays as an external system dep — pure-Python OSM clipping isn't worth the extra complexity at this scale)
+- [x] 15.3 `scripts/validate_gtfs.py` — Python equivalent of `validate-gtfs.sh`. Direct `gtfs-kit` import (no nested `python3 - <<PY` heredoc). Same summary output
+- [x] 15.4 Delete the four `.sh` scripts after their Python counterparts pass all tests and the workflows are updated
+
+## 16. Workflow update
+
+- [x] 16.1 `.github/workflows/validate-gtfs.yml`: install uv via `astral-sh/setup-uv@v3`, run `uv sync --frozen`, then `uv run python scripts/build_gtfs_zip.py` (replaces direct `.sh` invocation). Path filter adds `pyproject.toml`, `uv.lock`, `scripts/*.py`
+- [x] 16.2 `.github/workflows/release.yml`: same uv-based change
+- [x] 16.3 Add a new workflow `.github/workflows/python.yml`: jobs for `uv run pytest`, `uv run ruff check`, `uv run ruff format --check`. Triggers on changes under `scripts/**`, `tests/**`, `pyproject.toml`, `uv.lock`
+- [x] 16.4 Add status badges for the new workflow to `README.md` and `README.en.md`
+
+## 17. Docs sync
+
+- [x] 17.1 Update `data/README.md` — replace `scripts/*.sh` references with `uv run python scripts/*.py` invocations
+- [x] 17.2 Update `docs/release-process.md` — same
+- [x] 17.3 Extend `README.md` (and EN mirror) with a short "Desarrollo / Development" section: install uv, `uv sync`, `uv run pytest`, `uv run ruff check`

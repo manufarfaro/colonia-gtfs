@@ -12,9 +12,4 @@ Acá viven los PRDs (Product Requirements Documents) del proyecto. Cada PRD desc
 
 ## Índice
 
-_No hay PRDs todavía._
-
-<!--
-Cuando agregues un PRD, sumalo acá:
-- [`<feature>.md`](./<feature>.md) — breve descripción
--->
+- [`mvp-v0.md`](./mvp-v0.md) — Trip planner turístico de Colonia: O→D + stop info + line schedule sobre Google Maps JS, planning local con OTP, realtime vía bridge sobre AVL Sol Antigua. Trigger demo-ready cerrado.

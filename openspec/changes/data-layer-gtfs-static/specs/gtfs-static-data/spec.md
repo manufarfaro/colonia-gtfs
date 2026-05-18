@@ -122,30 +122,30 @@ The feed SHALL declare fares in `fare_attributes.txt` and `fare_rules.txt` per G
 
 ### Requirement: The OSM walking graph SHALL be committed at `data/colonia.osm.pbf`
 
-The repository SHALL contain `data/colonia.osm.pbf`, an OpenStreetMap extract of Colonia urbano covering Real de San Carlos to Algodones (approximate bbox `-57.92,-34.51` to `-57.78,-34.42`). A `scripts/refresh-osm.sh` script SHALL document how to regenerate the file deterministically from Geofabrik Uruguay.
+The repository SHALL contain `data/colonia.osm.pbf`, an OpenStreetMap extract of Colonia urbano covering Real de San Carlos to Algodones (approximate bbox `-57.92,-34.51` to `-57.78,-34.42`). A `tooling/scripts/refresh_osm.py` script SHALL regenerate the file from Geofabrik Uruguay on demand (via `osmium-tool` for the bbox clip).
 
 #### Scenario: OSM extract is committed
 - **WHEN** the repository is cloned
 - **THEN** `data/colonia.osm.pbf` is present and non-empty
 
 #### Scenario: Refresh script exists and is documented
-- **WHEN** `scripts/refresh-osm.sh` is invoked with no arguments
-- **THEN** it prints usage or regenerates `data/colonia.osm.pbf` from the Geofabrik UY source clipped to the documented bbox
+- **WHEN** `uv run --directory tooling python scripts/refresh_osm.py` is invoked with no arguments
+- **THEN** it regenerates `data/colonia.osm.pbf` from the Geofabrik UY source clipped to the documented bbox (or fails with a clear message if `osmium-tool` is missing from PATH)
 
 ### Requirement: A bundling script SHALL produce a deterministic `gtfs.zip`
 
-`scripts/build-gtfs-zip.sh` SHALL package all `data/*.txt` files into a `gtfs.zip` archive suitable for mounting in OpenTripPlanner. The script SHALL accept an optional output path argument (default `data/output/gtfs.zip`). Running the script twice on the same input SHALL produce byte-identical output (deterministic ordering and fixed timestamps).
+`tooling/scripts/build_gtfs_zip.py` SHALL package all `data/*.txt` files into a `gtfs.zip` archive suitable for mounting in OpenTripPlanner. The script SHALL accept an optional output path argument (default `data/output/gtfs.zip` relative to the repo root). Running the script twice on the same input SHALL produce byte-identical output (deterministic ordering and fixed timestamps, regardless of source-file mtimes).
 
 #### Scenario: gtfs.zip contains all required files
-- **WHEN** `scripts/build-gtfs-zip.sh` is invoked and the resulting archive is listed
+- **WHEN** `uv run --directory tooling python scripts/build_gtfs_zip.py` is invoked and the resulting archive is listed
 - **THEN** it contains the eleven canonical GTFS Schedule `.txt` files at the archive root, and no other files
 
 #### Scenario: Output path defaults to data/output/gtfs.zip
 - **WHEN** the script is invoked with no arguments
-- **THEN** the output is written to `data/output/gtfs.zip`
+- **THEN** the output is written to `data/output/gtfs.zip` (relative to the current working directory)
 
 #### Scenario: Output is byte-deterministic
-- **WHEN** the script is invoked twice in succession on unchanged input
+- **WHEN** the script is invoked twice in succession on unchanged input (or even with the source `.txt` files touched in between)
 - **THEN** the SHA-256 of the resulting `gtfs.zip` is identical across the two runs
 
 ### Requirement: Static data updates SHALL be performed manually and tracked in version control
@@ -178,7 +178,7 @@ A GitHub Actions workflow SHALL run the MobilityData Canonical GTFS Validator ag
 
 ### Requirement: Tagged versions SHALL publish `gtfs.zip` as a GitHub Release asset
 
-A GitHub Actions workflow SHALL run on the push of a tag matching `v*.*.*` against the default branch. The workflow SHALL build `gtfs.zip` via `scripts/build-gtfs-zip.sh`, validate it with the MobilityData Canonical Validator, and on success create a GitHub Release named after the tag with `gtfs.zip` attached as a release asset. The asset SHALL remain retrievable at the stable URL `https://github.com/<owner>/<repo>/releases/latest/download/gtfs.zip` so that MobilityDatabase and other downstream consumers can poll a single URL.
+A GitHub Actions workflow SHALL run on the push of a tag matching `v*.*.*` against the default branch. The workflow SHALL build `gtfs.zip` via `tooling/scripts/build_gtfs_zip.py`, validate it with the MobilityData Canonical Validator, and on success create a GitHub Release named after the tag with `gtfs.zip` attached as a release asset. The asset SHALL remain retrievable at the stable URL `https://github.com/<owner>/<repo>/releases/latest/download/gtfs.zip` so that MobilityDatabase and other downstream consumers can poll a single URL.
 
 The human "release cut" process — opening a `release/X.Y.Z` branch from `main`, validating locally, merging to `main`, then pushing the tag — SHALL be documented in `docs/release-process.md`.
 

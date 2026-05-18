@@ -1,0 +1,5 @@
+fare_id,route_id
+standard-pending,3
+standard-pending,4
+standard-pending,5
+standard-pending,8

@@ -1,0 +1,5 @@
+route_id,agency_id,route_short_name,route_long_name,route_type
+3,sol-antigua,3,Centro / Real de San Carlos,3
+4,sol-antigua,4,Centro / El General — vía Los Nogales,3
+5,sol-antigua,5,Centro / El General,3
+8,sol-antigua,8,Centro / El General — vía Algodones,3

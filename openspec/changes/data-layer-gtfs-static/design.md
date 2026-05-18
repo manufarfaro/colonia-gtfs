@@ -113,23 +113,32 @@ El `srv` del operador (estable y único por `(lin, sal, lnm)` según relevamient
 - El fallback ("`lnm.startswith('Centro')` → 0; else → 1") era para el matcheo *runtime* del bridge contra markers AVL que llegaran sin contexto; ahí sí tiene sentido. Acá no aplica.
 - Mantener una sola regla simplifica la spec y los tests.
 
-### D-06 — Script de empaquetado: bash de ~10 LOC
+### D-06 — Script de empaquetado: Python con `uv`
 
-**Decisión:** `scripts/build-gtfs-zip.sh` (POSIX bash + `zip` standard), invocable desde docker-compose o local. Toma `data/*.txt` y produce `data/output/gtfs.zip`.
+**Decisión (revisada durante apply):** `tooling/scripts/build_gtfs_zip.py` en Python, ejecutado vía `uv run --directory tooling`. Usa `zipfile.ZipFile` con `ZipInfo(date_time=(2026,1,1,0,0,0))` por entrada para determinismo byte-a-byte (independiente de los mtimes del filesystem). Lee `data/*.txt` desde el repo root y produce `data/output/gtfs.zip` (paths anclados a `Path(__file__).resolve().parents[2]`).
 
-```bash
-#!/usr/bin/env bash
-set -euo pipefail
-OUT="${1:-data/output/gtfs.zip}"
-mkdir -p "$(dirname "$OUT")"
-( cd data && zip -r "../$OUT" *.txt -x README.md .gitignore )
-```
+**Por qué Python (no bash):**
 
-**Por qué bash y no node/python:**
+- Determinismo más fuerte: el `ZipInfo` permite fijar timestamps explícitamente, mientras que en bash dependés de `touch -d EPOCH` sobre los `.txt` (lo cual cambia el mtime del filesystem y puede confundir a otras herramientas).
+- Tests con `pytest`: el comportamiento es verificable con asserts directos, sin chequear sha256 de un archivo escrito.
+- Toolchain unificada: el repo ya tiene `uv` y `pytest` para lints/tests/CI (D-10). Tener todo en un solo lenguaje reduce friction.
+- La versión bash inicial (`scripts/build-gtfs-zip.sh`) fue el bootstrap; se reemplazó durante el apply una vez que `uv` + tests entraron al repo.
 
-- Es ~5 líneas reales. Cualquier wrapper inflado (`tsc`, `pnpm`, `python -m`) es overkill.
-- `zip` está en cualquier imagen base de Docker que vayamos a usar; no agrega dependencia.
-- Determinista (mismo input → mismo `.zip` byte-a-byte si fijamos el timestamp, lo cual el spec exige para tests).
+### D-10 — Toolchain Python con `uv`, `ruff`, `pytest`
+
+**Decisión:** El toolchain Python vive bajo `tooling/` en la raíz del repo: `tooling/pyproject.toml`, `tooling/uv.lock`, `tooling/scripts/` (módulos importables) y `tooling/tests/` (con TDD: cada test rojo antes de la implementación). Dev deps: `ruff` (lint + format), `pytest`. Runtime deps: `gtfs-kit`, `httpx`. Un workflow `.github/workflows/tooling.yml` corre `uv run ruff check`, `uv run ruff format --check`, `uv run pytest` en cada push/PR que toca `tooling/**`. Los scripts anclan sus defaults al repo root vía `Path(__file__).resolve().parents[2]`, por lo que se comportan igual desde cualquier cwd.
+
+**Por qué `uv`:**
+
+- Resolución de dependencias 10-100× más rápida que `pip` (gracias a Rust + nuevo solver).
+- `uv.lock` reproducible y comiteable; CI corre con `uv sync --frozen` para garantizar la misma versión de cada paquete.
+- Un único comando (`uv run`) elimina la fricción de activar venvs.
+- Compatibilidad estándar con `pyproject.toml` (PEP 621) — si en algún momento queremos migrar a otro tooling, no perdemos nada.
+
+**Por qué `ruff` en vez de black + flake8 + isort:**
+
+- Misma cobertura (formateo + pycodestyle + pyflakes + isort) en una sola tool, escrita en Rust → corre en milisegundos.
+- Configuración centralizada en `pyproject.toml` (`[tool.ruff]`).
 
 ### D-07 — Mantenimiento de los `.txt`: edición manual con commit + validación local
 

@@ -1,0 +1,2 @@
+agency_id,agency_name,agency_url,agency_timezone,agency_lang,agency_phone,agency_email
+sol-antigua,Sol Antigua S.A.,http://www.solantigua.com.uy/,America/Montevideo,es,+598 4522 5505,solantigua@montevideo.com.uy

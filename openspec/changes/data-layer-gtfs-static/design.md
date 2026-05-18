@@ -126,7 +126,7 @@ El `srv` del operador (estable y único por `(lin, sal, lnm)` según relevamient
 
 ### D-10 — Toolchain Python con `uv`, `ruff`, `pytest`
 
-**Decisión:** El toolchain Python vive bajo `tooling/` en la raíz del repo: `tooling/pyproject.toml`, `tooling/uv.lock`, `tooling/scripts/` (módulos importables) y `tooling/tests/` (con TDD: cada test rojo antes de la implementación). Dev deps: `ruff` (lint + format), `pytest`. Runtime deps: `gtfs-kit`, `httpx`. Un workflow `.github/workflows/python.yml` corre `uv run ruff check`, `uv run ruff format --check`, `uv run pytest` en cada push/PR que toca `tooling/**`. Los scripts anclan sus defaults al repo root vía `Path(__file__).resolve().parents[2]`, por lo que se comportan igual desde cualquier cwd.
+**Decisión:** El toolchain Python vive bajo `tooling/` en la raíz del repo: `tooling/pyproject.toml`, `tooling/uv.lock`, `tooling/scripts/` (módulos importables) y `tooling/tests/` (con TDD: cada test rojo antes de la implementación). Dev deps: `ruff` (lint + format), `pytest`. Runtime deps: `gtfs-kit`, `httpx`. Un workflow `.github/workflows/tooling.yml` corre `uv run ruff check`, `uv run ruff format --check`, `uv run pytest` en cada push/PR que toca `tooling/**`. Los scripts anclan sus defaults al repo root vía `Path(__file__).resolve().parents[2]`, por lo que se comportan igual desde cualquier cwd.
 
 **Por qué `uv`:**
 

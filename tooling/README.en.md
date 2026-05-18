@@ -4,7 +4,7 @@
 
 The project's Python toolchain: GTFS feed maintenance scripts, their tests, and everything CI needs. Managed by [`uv`](https://github.com/astral-sh/uv).
 
-[![Python](https://github.com/manufarfaro/colonia-gtfs/actions/workflows/python.yml/badge.svg)](https://github.com/manufarfaro/colonia-gtfs/actions/workflows/python.yml)
+[![Tooling](https://github.com/manufarfaro/colonia-gtfs/actions/workflows/tooling.yml/badge.svg)](https://github.com/manufarfaro/colonia-gtfs/actions/workflows/tooling.yml)
 
 ## Layout
 
@@ -69,7 +69,7 @@ All run from the repo root:
 
 Three workflows in `.github/workflows/` consume this toolchain:
 
-- **`python.yml`** — runs `ruff check`, `ruff format --check`, `pytest` on every push/PR touching `tooling/**`.
+- **`tooling.yml`** — runs `ruff check`, `ruff format --check`, `pytest` on every push/PR touching `tooling/**`.
 - **`validate-gtfs.yml`** — uses `build_gtfs_zip.py` to assemble `gtfs.zip` and validates it with the [MobilityData Canonical Validator](https://github.com/MobilityData/gtfs-validator) (via [`npaun/md-gtfs-validator-action@v2`](https://github.com/npaun/md-gtfs-validator-action)).
 - **`release.yml`** — on `v*.*.*` tag push: build + validate + publish a GitHub Release with `gtfs.zip` attached.
 

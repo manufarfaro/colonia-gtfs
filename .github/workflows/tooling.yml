@@ -1,15 +1,15 @@
-name: Python
+name: Tooling
 
 on:
   pull_request:
     paths:
       - "tooling/**"
-      - ".github/workflows/python.yml"
+      - ".github/workflows/tooling.yml"
   push:
     branches: [main]
     paths:
       - "tooling/**"
-      - ".github/workflows/python.yml"
+      - ".github/workflows/tooling.yml"
   workflow_dispatch:
 
 permissions:

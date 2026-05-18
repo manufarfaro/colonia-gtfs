@@ -119,7 +119,7 @@ Each Python script SHALL have at least one test that was written and observed fa
 
 - [x] 16.1 `.github/workflows/validate-gtfs.yml`: install uv via `astral-sh/setup-uv@v3`, run `uv sync --frozen`, then `uv run python scripts/build_gtfs_zip.py` (replaces direct `.sh` invocation). Path filter adds `pyproject.toml`, `uv.lock`, `scripts/*.py`
 - [x] 16.2 `.github/workflows/release.yml`: same uv-based change
-- [x] 16.3 Add a new workflow `.github/workflows/python.yml`: jobs for `uv run pytest`, `uv run ruff check`, `uv run ruff format --check`. Triggers on changes under `scripts/**`, `tests/**`, `pyproject.toml`, `uv.lock`
+- [x] 16.3 Add a new workflow `.github/workflows/tooling.yml`: jobs for `uv run pytest`, `uv run ruff check`, `uv run ruff format --check`. Triggers on changes under `tooling/**` and on the workflow file itself. (Named after the folder it verifies, matching the purpose-based convention of the other workflows in this repo.)
 - [x] 16.4 Add status badges for the new workflow to `README.md` and `README.en.md`
 
 ## 17. Docs sync

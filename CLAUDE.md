@@ -4,7 +4,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project
 
-Unofficial GTFS feed for urban transit in Colonia del Sacramento, Uruguay. The repository currently contains no source code — only OpenSpec scaffolding for spec-driven development. New features begin as OpenSpec change proposals rather than ad-hoc commits.
+Mobile-first web app that lets tourists plan bus trips in Colonia del Sacramento, Uruguay. Mirrors the Google Maps Transit UX; computes itineraries locally with OpenTripPlanner 2 (no dependency on Google Transit Partners) and combines static GTFS data with realtime vehicle positions from a custom bridge over the Sol Antigua AVL feed.
+
+The repository currently contains no implementation code — only the OpenSpec scaffolding and the v0 PRD ([`docs/prd/mvp-v0.md`](docs/prd/mvp-v0.md)). Implementation will arrive as a series of OpenSpec changes (see PRD §11 for the decomposition).
+
+**Stack (conceptual):** viewer (HTML + Google Maps JS API) → BFF (Express + TypeScript) → OTP (Docker) + bridge (NestJS) → Sol Antigua AVL. Operator scope in v0: Sol Antigua urbano Colonia, lines 3, 4, 5, 8.
 
 ## Workflow: PRD → spec → code
 
@@ -45,3 +49,14 @@ When creating artifacts, the `context`/`rules` blocks from `openspec instruction
 - Change names are **kebab-case** (e.g. `add-route-schema`, not `Add Route Schema`)
 - The data domain is **GTFS** ([General Transit Feed Specification](https://gtfs.org/schedule/reference/)) — its `agency.txt`, `routes.txt`, `stops.txt`, `trips.txt`, `stop_times.txt`, `calendar.txt` schema is the source of truth for any modelling decisions
 - Primary language is **Spanish**. The canonical `README.md` and any other docs (e.g. `docs/prd/README.md`, PRD files themselves) are in Spanish; English translations live next to them as `<name>.en.md` (BCP-47 locale suffix, dot-separated). Cross-link the two with a header like `**Español** · [English](README.en.md)`. Use plain text, **not** flag emojis — flags don't represent languages cleanly
+
+## Product guardrails (from the v0 PRD)
+
+Durable constraints that survive any individual feature. See [`docs/prd/mvp-v0.md`](docs/prd/mvp-v0.md) for the full context.
+
+- **The viewer mimics Google Maps Transit.** Any UI divergence from Google Maps patterns (search bar position, FAB placement, itinerary card layout, polyline conventions) must be justified explicitly. The destino final is for the experience to be indistinguishable in feel from Google Maps when it routes by bus in another city. (PRD §5.1)
+- **Trip planning is OTP, locally.** OpenTripPlanner 2 in Docker is the planning engine. No dependency on Google Directions or Transit Partners in runtime. Google Maps is only the canvas (rendering + Places autocomplete). (PRD §5.3)
+- **GTFS-RT comes from our bridge, not from the operator directly.** The bridge polls Sol Antigua's AVL XML, matches markers against GTFS, and exposes the GTFS-RT `.pb` endpoints that OTP consumes. The AVL endpoint itself is never exposed publicly. (PRD §6.1, §6.4)
+- **Static GTFS lives in `data/` as `.txt` files**, maintained manually. There is no `gtfs-builder` in this repo — the capture/processing infra is external and private. (PRD §3.2, §6.2)
+- **Disclaimers are first-class UI elements**, not errors to hide. v0 trigger is demo-ready *cerrado*; disclaimers (tarifas a confirmar, datos preliminares, operador no oficial) live visibly in chrome persistente. (PRD §5.2)
+- **UI is Spanish-only in v0, with i18n keys from day 1.** All user-facing strings go through `t("key")` even though there is one locale file. Adding `en.json` / `pt.json` later must be additive only — never a refactor. Operator data (stop names, headsigns) stays in Spanish always; do not translate topónimos. (PRD §5.4)

@@ -59,8 +59,9 @@ def test_refresh_osm_errors_clearly_when_osmium_missing(
 def test_refresh_osm_main_uses_default_target(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    """main() with no args writes to data/colonia.osm.pbf under cwd."""
-    monkeypatch.chdir(tmp_path)
+    """main() with no args writes to DEFAULT_TARGET (anchored to the repo root)."""
+    fake_target = tmp_path / "colonia.osm.pbf"
+    monkeypatch.setattr("scripts.refresh_osm.DEFAULT_TARGET", fake_target)
 
     captured_calls = []
 
@@ -77,6 +78,6 @@ def test_refresh_osm_main_uses_default_target(
         exit_code = main([])
 
     assert exit_code == 0
-    assert (tmp_path / "data" / "colonia.osm.pbf").is_file()
+    assert fake_target.is_file()
     assert len(captured_calls) == 1
-    assert captured_calls[0]["target"] == tmp_path / "data" / "colonia.osm.pbf"
+    assert captured_calls[0]["target"] == fake_target

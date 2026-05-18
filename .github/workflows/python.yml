@@ -3,18 +3,12 @@ name: Python
 on:
   pull_request:
     paths:
-      - "scripts/**"
-      - "tests/**"
-      - "pyproject.toml"
-      - "uv.lock"
+      - "tooling/**"
       - ".github/workflows/python.yml"
   push:
     branches: [main]
     paths:
-      - "scripts/**"
-      - "tests/**"
-      - "pyproject.toml"
-      - "uv.lock"
+      - "tooling/**"
       - ".github/workflows/python.yml"
   workflow_dispatch:
 
@@ -25,6 +19,9 @@ jobs:
   lint-and-test:
     name: ruff + pytest
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: tooling
     steps:
       - uses: actions/checkout@v4
 

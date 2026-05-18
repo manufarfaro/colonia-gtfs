@@ -124,6 +124,17 @@ Each Python script SHALL have at least one test that was written and observed fa
 
 ## 17. Docs sync
 
-- [x] 17.1 Update `data/README.md` — replace `scripts/*.sh` references with `uv run python scripts/*.py` invocations
+- [x] 17.1 Update `data/README.md` — replace `scripts/*.sh` references with `uv run --directory tooling python scripts/*.py` invocations
 - [x] 17.2 Update `docs/release-process.md` — same
-- [x] 17.3 Extend `README.md` (and EN mirror) with a short "Desarrollo / Development" section: install uv, `uv sync`, `uv run pytest`, `uv run ruff check`
+- [x] 17.3 Extend `README.md` (and EN mirror) with a short "Desarrollo / Development" section: install uv, `uv sync --directory tooling`, `uv run --directory tooling pytest`, `uv run --directory tooling ruff check`
+
+## 18. Consolidate Python project under `tooling/`
+
+After the initial migration landed at the repo root, the Python project was consolidated into a single folder so the repo root only shows top-level concerns (data, docs, openspec, .github) and the Python-specific files don't add noise.
+
+- [x] 18.1 Move `pyproject.toml`, `uv.lock`, `scripts/`, `tests/` under `tooling/`
+- [x] 18.2 Anchor script defaults to `Path(__file__).resolve().parents[2]` (repo root) so they behave the same regardless of cwd
+- [x] 18.3 Update tests to `monkeypatch.setattr(...DEFAULT_DATA_DIR...)` instead of `monkeypatch.chdir(...)`
+- [x] 18.4 Update workflows to use `working-directory: tooling` or `uv --directory tooling` per step
+- [x] 18.5 Update READMEs, `data/README.md`, `docs/release-process.md` to show `uv run --directory tooling ...` everywhere
+- [x] 18.6 Update spec.md and design.md to reference `tooling/scripts/*.py`

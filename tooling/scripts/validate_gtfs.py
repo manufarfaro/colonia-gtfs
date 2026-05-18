@@ -5,8 +5,9 @@ Validator (see ``.github/workflows/validate-gtfs.yml``); this script is
 a lightweight pre-push check that proves the feed is well-formed enough
 for ``gtfs_kit.read_feed`` to load it.
 
-CLI: ``uv run python scripts/validate_gtfs.py [zip_path]``
-Default: ``data/output/gtfs.zip``
+CLI (from the repo root):
+  ``uv run --directory tooling python scripts/validate_gtfs.py [zip_path]``
+Default: ``<repo-root>/data/output/gtfs.zip``
 """
 
 from __future__ import annotations
@@ -17,7 +18,8 @@ from pathlib import Path
 
 import gtfs_kit as gk
 
-DEFAULT_ZIP = Path("data/output/gtfs.zip")
+REPO_ROOT = Path(__file__).resolve().parents[2]
+DEFAULT_ZIP = REPO_ROOT / "data" / "output" / "gtfs.zip"
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -25,14 +27,17 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "zip_path",
         nargs="?",
-        default=str(DEFAULT_ZIP),
+        default=None,
         help=f"path to the GTFS zip (default: {DEFAULT_ZIP})",
     )
     args = parser.parse_args(argv)
 
-    zip_path = Path(args.zip_path)
-    if not zip_path.is_absolute():
-        zip_path = Path.cwd() / zip_path
+    if args.zip_path is None:
+        zip_path = DEFAULT_ZIP
+    else:
+        zip_path = Path(args.zip_path)
+        if not zip_path.is_absolute():
+            zip_path = REPO_ROOT / zip_path
 
     if not zip_path.is_file():
         print(f"error: {zip_path} does not exist", file=sys.stderr)

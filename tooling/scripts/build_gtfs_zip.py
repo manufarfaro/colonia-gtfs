@@ -1,8 +1,10 @@
 """Package data/*.txt into a byte-deterministic gtfs.zip.
 
-CLI: ``uv run python scripts/build_gtfs_zip.py [output_path]``
-Default output: ``data/output/gtfs.zip`` (relative to the current working
-directory). Supports absolute paths.
+CLI (from the repo root):
+  ``uv run --directory tooling python scripts/build_gtfs_zip.py [output_path]``
+
+Default output: ``<repo-root>/data/output/gtfs.zip``. Supports absolute and
+repo-relative paths.
 """
 
 from __future__ import annotations
@@ -16,8 +18,12 @@ from pathlib import Path
 # are stable across runs regardless of filesystem mtimes.
 FIXED_DATE_TIME = (2026, 1, 1, 0, 0, 0)
 
-DEFAULT_DATA_DIR = Path("data")
-DEFAULT_OUTPUT = Path("data/output/gtfs.zip")
+# Anchor defaults to the repo root so the script behaves the same regardless
+# of cwd. ``tooling/scripts/build_gtfs_zip.py`` -> ``parents[2]`` is the repo
+# root.
+REPO_ROOT = Path(__file__).resolve().parents[2]
+DEFAULT_DATA_DIR = REPO_ROOT / "data"
+DEFAULT_OUTPUT = REPO_ROOT / "data" / "output" / "gtfs.zip"
 
 
 def build_gtfs_zip(data_dir: Path, output_path: Path) -> None:
@@ -38,17 +44,19 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "output",
         nargs="?",
-        default=str(DEFAULT_OUTPUT),
+        default=None,
         help=f"output zip path (default: {DEFAULT_OUTPUT})",
     )
     args = parser.parse_args(argv)
 
-    output_path = Path(args.output)
-    if not output_path.is_absolute():
-        output_path = Path.cwd() / output_path
+    if args.output is None:
+        output_path = DEFAULT_OUTPUT
+    else:
+        output_path = Path(args.output)
+        if not output_path.is_absolute():
+            output_path = REPO_ROOT / output_path
 
-    data_dir = Path.cwd() / DEFAULT_DATA_DIR
-    build_gtfs_zip(data_dir=data_dir, output_path=output_path)
+    build_gtfs_zip(data_dir=DEFAULT_DATA_DIR, output_path=output_path)
     print(f"built {output_path}")
     return 0
 

@@ -115,7 +115,7 @@ El `srv` del operador (estable y único por `(lin, sal, lnm)` según relevamient
 
 ### D-06 — Script de empaquetado: Python con `uv`
 
-**Decisión (revisada durante apply):** `scripts/build_gtfs_zip.py` en Python, ejecutado vía `uv run`. Usa `zipfile.ZipFile` con `ZipInfo(date_time=(2026,1,1,0,0,0))` por entrada para determinismo byte-a-byte (independiente de los mtimes del filesystem). Toma `data/*.txt` y produce `data/output/gtfs.zip`.
+**Decisión (revisada durante apply):** `tooling/scripts/build_gtfs_zip.py` en Python, ejecutado vía `uv run --directory tooling`. Usa `zipfile.ZipFile` con `ZipInfo(date_time=(2026,1,1,0,0,0))` por entrada para determinismo byte-a-byte (independiente de los mtimes del filesystem). Lee `data/*.txt` desde el repo root y produce `data/output/gtfs.zip` (paths anclados a `Path(__file__).resolve().parents[2]`).
 
 **Por qué Python (no bash):**
 
@@ -126,7 +126,7 @@ El `srv` del operador (estable y único por `(lin, sal, lnm)` según relevamient
 
 ### D-10 — Toolchain Python con `uv`, `ruff`, `pytest`
 
-**Decisión:** El repo expone un `pyproject.toml` manejado por `uv`. Dev deps: `ruff` (lint + format), `pytest`. Runtime deps: `gtfs-kit`, `httpx`. Los scripts de mantenimiento (`build_gtfs_zip.py`, `refresh_osm.py`, `validate_gtfs.py`) viven en `scripts/` como módulos importables; sus tests en `tests/` con TDD (cada test rojo antes de la implementación). Un workflow `.github/workflows/python.yml` corre `uv run ruff check`, `uv run ruff format --check`, `uv run pytest` en cada push/PR que toca scripts, tests, o el pyproject.
+**Decisión:** El toolchain Python vive bajo `tooling/` en la raíz del repo: `tooling/pyproject.toml`, `tooling/uv.lock`, `tooling/scripts/` (módulos importables) y `tooling/tests/` (con TDD: cada test rojo antes de la implementación). Dev deps: `ruff` (lint + format), `pytest`. Runtime deps: `gtfs-kit`, `httpx`. Un workflow `.github/workflows/python.yml` corre `uv run ruff check`, `uv run ruff format --check`, `uv run pytest` en cada push/PR que toca `tooling/**`. Los scripts anclan sus defaults al repo root vía `Path(__file__).resolve().parents[2]`, por lo que se comportan igual desde cualquier cwd.
 
 **Por qué `uv`:**
 

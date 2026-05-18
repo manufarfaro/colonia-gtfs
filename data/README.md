@@ -19,10 +19,10 @@ Los archivos `.txt` se editan **a mano**, no se autogeneran. Las fuentes upstrea
 
 1. El operador externo (privado) refresca `data/processed/*.csv` con datos nuevos.
 2. Editor humano traduce los CSV a `data/*.txt` aplicando las reglas del [spec](../openspec/specs/gtfs-static-data/spec.md): `direction_id` derivado de `tra`, `trip_id` sintético + `original_trip_id` = `srv` del operador, omitir stops de confianza baja, etc.
-3. Sanity check local antes de pushear:
+3. Sanity check local antes de pushear (desde la raíz del repo):
    ```bash
-   uv run python scripts/build_gtfs_zip.py
-   uv run python scripts/validate_gtfs.py
+   uv run --directory tooling python scripts/build_gtfs_zip.py
+   uv run --directory tooling python scripts/validate_gtfs.py
    ```
 4. Commit con mensaje `data: refresh GTFS Schedule from processed CSV YYYY-MM-DD`.
 5. Push → el CI corre el MobilityData Canonical Validator (`.github/workflows/validate-gtfs.yml`).

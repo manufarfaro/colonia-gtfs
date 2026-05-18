@@ -4,8 +4,9 @@ Requires ``osmium-tool`` on PATH (``brew install osmium-tool`` on macOS or
 ``apt-get install osmium-tool`` on Debian). The HTTP download is done in
 Python; the bbox clip is delegated to ``osmium extract`` (subprocess).
 
-CLI: ``uv run python scripts/refresh_osm.py [target_path]``
-Default target: ``data/colonia.osm.pbf``
+CLI (from the repo root):
+  ``uv run --directory tooling python scripts/refresh_osm.py [target_path]``
+Default target: ``<repo-root>/data/colonia.osm.pbf``
 """
 
 from __future__ import annotations
@@ -22,7 +23,8 @@ import httpx
 
 GEOFABRIK_URL = "https://download.geofabrik.de/south-america/uruguay-latest.osm.pbf"
 BBOX = "-57.92,-34.51,-57.78,-34.42"
-DEFAULT_TARGET = Path("data/colonia.osm.pbf")
+REPO_ROOT = Path(__file__).resolve().parents[2]
+DEFAULT_TARGET = REPO_ROOT / "data" / "colonia.osm.pbf"
 
 
 def download_pbf(url: str, dest: Path) -> None:
@@ -81,14 +83,17 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "target",
         nargs="?",
-        default=str(DEFAULT_TARGET),
+        default=None,
         help=f"output .pbf path (default: {DEFAULT_TARGET})",
     )
     args = parser.parse_args(argv)
 
-    target = Path(args.target)
-    if not target.is_absolute():
-        target = Path.cwd() / target
+    if args.target is None:
+        target = DEFAULT_TARGET
+    else:
+        target = Path(args.target)
+        if not target.is_absolute():
+            target = REPO_ROOT / target
 
     refresh_osm(target=target)
     size_bytes = target.stat().st_size

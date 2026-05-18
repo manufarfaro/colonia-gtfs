@@ -19,10 +19,11 @@ jobs:
         uses: astral-sh/setup-uv@v3
 
       - name: Sync deps
+        working-directory: tooling
         run: uv sync --frozen
 
       - name: Build gtfs.zip
-        run: uv run python scripts/build_gtfs_zip.py data/output/gtfs.zip
+        run: uv run --directory tooling python scripts/build_gtfs_zip.py
 
       - name: Validate with MobilityData Canonical
         uses: npaun/md-gtfs-validator-action@v2

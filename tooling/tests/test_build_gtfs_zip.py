@@ -60,26 +60,25 @@ def test_build_errors_when_data_dir_has_no_txt_files(tmp_path: Path) -> None:
         build_gtfs_zip(data_dir=empty_dir, output_path=tmp_path / "out.zip")
 
 
-def test_main_defaults_to_data_output_gtfs_zip(
+def test_main_defaults_to_repo_data_output_gtfs_zip(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, tiny_gtfs_data_dir: Path
 ) -> None:
-    """Calling main() with no args writes to {cwd}/data/output/gtfs.zip,
-    using {cwd}/data/ as source. Run from a tmp working dir wired to the
-    fixture data."""
-    # tiny_gtfs_data_dir is at tmp_path / "data". monkeypatch cwd → tmp_path
-    # so the script's relative-path defaults resolve to the fixture.
-    monkeypatch.chdir(tmp_path)
+    """main() with no args reads from DEFAULT_DATA_DIR and writes to DEFAULT_OUTPUT,
+    both anchored to the repo root via __file__."""
+    monkeypatch.setattr("scripts.build_gtfs_zip.DEFAULT_DATA_DIR", tiny_gtfs_data_dir)
+    target = tmp_path / "out" / "gtfs.zip"
+    monkeypatch.setattr("scripts.build_gtfs_zip.DEFAULT_OUTPUT", target)
 
     exit_code = main([])
 
     assert exit_code == 0
-    assert (tmp_path / "data" / "output" / "gtfs.zip").is_file()
+    assert target.is_file()
 
 
 def test_main_accepts_absolute_output_path(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, tiny_gtfs_data_dir: Path
 ) -> None:
-    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr("scripts.build_gtfs_zip.DEFAULT_DATA_DIR", tiny_gtfs_data_dir)
     target = tmp_path / "custom" / "feed.zip"
 
     exit_code = main([str(target)])

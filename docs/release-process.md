@@ -24,13 +24,13 @@ Cortar un release del feed GTFS sigue un ciclo simple: una rama humana de prepar
 
    La rama es una convención humana para señalar "estoy preparando un release"; no dispara una CI propia distinta a las que correrían igual.
 
-2. **Sanity check local**:
+2. **Sanity check local** (desde la raíz del repo):
 
    ```bash
-   uv sync
-   uv run python scripts/build_gtfs_zip.py
-   uv run python scripts/validate_gtfs.py
-   uv run pytest                          # incluye el determinism check
+   uv sync --directory tooling
+   uv run --directory tooling python scripts/build_gtfs_zip.py
+   uv run --directory tooling python scripts/validate_gtfs.py
+   uv run --directory tooling pytest         # incluye el determinism check
    ```
 
 3. **Si todo OK**, abrir PR `release/X.Y.Z` → `main` y mergear.

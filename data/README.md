@@ -1,10 +1,17 @@
 # `data/` — Static GTFS Schedule feed
 
-Este directorio contiene los archivos GTFS Schedule canónicos de **Sol Antigua** urbano Colonia del Sacramento. Es el contrato que consumen:
+Este directorio contiene los archivos GTFS Schedule canónicos del sistema de transporte urbano de Colonia del Sacramento, hasta donde el relevamiento avanzó. Es el contrato que consumen:
 
 - **OpenTripPlanner** (el motor de planning del producto — ver el spec `otp-deployment`).
 - **El bridge** para emitir GTFS-RT contra estos identificadores (ver el spec `bridge-gtfs-rt`).
 - **Consumidores externos** vía el `gtfs.zip` publicado en GitHub Releases.
+
+## Operadores evaluados
+
+| Operador | Líneas en v0 | Estado del relevamiento |
+|---|---|---|
+| **Sol Antigua** | 3, 4, 5, 8 | Captura AVL activa desde 2026-05-13; data suficiente para `routes`, `stops`, `trips`, `stop_times`, `shapes`. |
+| **ABC Coop** | — | Relevamiento pendiente; sin captura ni acuerdo todavía. Entra al feed en v0.1+. |
 
 ## Mantenimiento
 

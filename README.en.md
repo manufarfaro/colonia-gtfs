@@ -31,28 +31,4 @@ Work starts from a PRD, then an OpenSpec spec, then code.
 
 ## Development
 
-The Python toolchain lives in [`tooling/`](tooling/), managed by [`uv`](https://github.com/astral-sh/uv). Run `uv` commands from the repo root and point them at the folder with `--directory tooling`:
-
-```bash
-# Install uv (one time)
-curl -LsSf https://astral.sh/uv/install.sh | sh
-
-# Sync deps (includes dev: pytest, ruff)
-uv sync --directory tooling
-
-# Tests
-uv run --directory tooling pytest
-
-# Lint + format check
-uv run --directory tooling ruff check scripts tests
-uv run --directory tooling ruff format --check scripts tests
-
-# Build the gtfs.zip locally (writes to data/output/gtfs.zip)
-uv run --directory tooling python scripts/build_gtfs_zip.py
-
-# Sanity check with gtfs-kit
-uv run --directory tooling python scripts/validate_gtfs.py
-
-# Refresh the OSM extract (requires osmium-tool on PATH)
-uv run --directory tooling python scripts/refresh_osm.py
-```
+The Python toolchain (build/validate/refresh scripts, tests, lints, CI helpers) lives under [`tooling/`](tooling/). Setup, commands, and dependencies in [`tooling/README.md`](tooling/README.md).

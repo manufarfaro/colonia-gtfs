@@ -24,3 +24,5 @@ Work starts from a PRD, then an OpenSpec spec, then code.
 
 - **[`docs/prd/`](docs/prd/)** — PRDs (Product Requirements Documents): the *what* and *why*.
 - **[`openspec/`](openspec/)** — Specs and change proposals: the *how*.
+- **[`data/`](data/)** — Static GTFS Schedule feed (Sol Antigua urbano Colonia). See [`data/README.md`](data/README.md) for the maintenance contract and update flow.
+- **[`docs/release-process.md`](docs/release-process.md)** — How to cut a release of the feed (open `release/X.Y.Z` → merge → tag `vX.Y.Z` → workflow publishes a GitHub Release with `gtfs.zip`).

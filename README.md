@@ -24,3 +24,5 @@ El trabajo arranca desde un PRD, sigue con un spec en OpenSpec y termina en cód
 
 - **[`docs/prd/`](docs/prd/)** — PRDs (Product Requirements Documents): el *qué* y el *por qué*.
 - **[`openspec/`](openspec/)** — Specs y propuestas de cambio: el *cómo*.
+- **[`data/`](data/)** — Feed GTFS Schedule estático (Sol Antigua urbano Colonia). Ver [`data/README.md`](data/README.md) para el contrato de mantenimiento y el flow de update.
+- **[`docs/release-process.md`](docs/release-process.md)** — Cómo cortar un release del feed (rama `release/X.Y.Z` → merge → tag `vX.Y.Z` → workflow publica GitHub Release con `gtfs.zip`).

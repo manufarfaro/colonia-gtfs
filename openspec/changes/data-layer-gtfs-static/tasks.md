@@ -20,10 +20,10 @@
 
 ## 4. Author structural GTFS files
 
-- [ ] 4.1 Author `data/agency.txt` — single row, Sol Antigua, `America/Montevideo`, `agency_lang = es`, `agency_phone = "+598 4522 5505"`, `agency_email = solantigua@montevideo.com.uy`
-- [ ] 4.2 Author `data/feed_info.txt` — publisher, version, valid date range, and a `feed_contact_email` if desired; include placeholder-mode note while fares are unconfirmed
-- [ ] 4.3 Author `data/calendar.txt` — exactly four service_ids: `weekday`, `saturday`, `sunday`, `holiday`, each with the appropriate weekday flags and a `start_date`/`end_date` covering v0
-- [ ] 4.4 Author `data/calendar_dates.txt` — Uruguay 2026 public holidays as exceptions assigning the `holiday` service (source the list from `process_avl_log.py` URUGUAY_HOLIDAYS)
+- [x] 4.1 Author `data/agency.txt` — single row, Sol Antigua, `America/Montevideo`, `agency_lang = es`, `agency_phone = "+598 4522 5505"`, `agency_email = solantigua@montevideo.com.uy`
+- [x] 4.2 Author `data/feed_info.txt` — publisher, version, valid date range, and a `feed_contact_email` if desired; include placeholder-mode note while fares are unconfirmed
+- [x] 4.3 Author `data/calendar.txt` — exactly four service_ids: `weekday`, `saturday`, `sunday`, `holiday`, each with the appropriate weekday flags and a `start_date`/`end_date` covering v0
+- [x] 4.4 Author `data/calendar_dates.txt` — Uruguay 2026 public holidays as exceptions assigning the `holiday` service (source the list from `process_avl_log.py` URUGUAY_HOLIDAYS)
 
 ## 5. Author routes, stops, shapes
 
@@ -42,9 +42,9 @@
 
 ## 7. Author fares (placeholder mode)
 
-- [ ] 7.1 Author `data/fare_attributes.txt` in **placeholder mode**: single row with `fare_id = standard-pending`, `price = 0.00`, `currency_type = UYU`, `payment_method = 0`, `transfers = 0`
-- [ ] 7.2 Author `data/fare_rules.txt` — one row per route (3, 4, 5, 8) referencing `fare_id = standard-pending`
-- [ ] 7.3 Document in `data/README.md` how to flip to confirmed mode (one fare row change + edit `feed_info.txt` note)
+- [x] 7.1 Author `data/fare_attributes.txt` in **placeholder mode**: single row with `fare_id = standard-pending`, `price = 0.00`, `currency_type = UYU`, `payment_method = 0`, `transfers = 0`
+- [x] 7.2 Author `data/fare_rules.txt` — one row per route (3, 4, 5, 8) referencing `fare_id = standard-pending`
+- [x] 7.3 Document in `data/README.md` how to flip to confirmed mode (one fare row change + edit `feed_info.txt` note)
 
 ## 8. Validate
 
@@ -55,9 +55,9 @@
 
 ## 9. Documentation
 
-- [ ] 9.1 Update repo `README.md` with a short "Data layer" section pointing to `data/README.md` and the build script
-- [ ] 9.2 Update repo `README.en.md` mirror
-- [ ] 9.3 Confirm `CLAUDE.md` "Product guardrails" already covers the data-in-`data/` and no-builder constraints (no changes needed unless a new constraint appears here)
+- [x] 9.1 Update repo `README.md` with a short "Data layer" section pointing to `data/README.md` and the build script
+- [x] 9.2 Update repo `README.en.md` mirror
+- [x] 9.3 Confirm `CLAUDE.md` "Product guardrails" already covers the data-in-`data/` and no-builder constraints (no changes needed unless a new constraint appears here)
 
 ## 10. Acceptance smoke test (sanity check, full OTP integration is in `otp-deployment`)
 

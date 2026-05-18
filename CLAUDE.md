@@ -6,6 +6,16 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Unofficial GTFS feed for urban transit in Colonia del Sacramento, Uruguay. The repository currently contains no source code — only OpenSpec scaffolding for spec-driven development. New features begin as OpenSpec change proposals rather than ad-hoc commits.
 
+## Workflow: PRD → spec → code
+
+The project follows a three-stage flow. Each stage answers a different question and feeds the next:
+
+1. **PRD** — `docs/prd/<feature>.md`. Source of truth for *what* and *why*: user-facing capability, goals, non-goals, constraints. Iterate here until product questions are resolved; many "why" questions that would otherwise interrupt spec-writing get answered up front.
+2. **Spec** — `openspec/specs/` (committed) and `openspec/changes/<name>/` (in-flight). Source of truth for *how*: behavior, data model, interfaces. A spec must reference the PRD it implements.
+3. **Code** — implements the spec. Runs after the change's `tasks.md` is complete.
+
+Always read the relevant PRD in `docs/prd/` before drafting or modifying a spec. Do not skip the PRD step for non-trivial work — if a PRD is missing, write or extend one first.
+
 ## OpenSpec workflow
 
 All non-trivial work goes through OpenSpec. Use the project's slash commands:
@@ -24,6 +34,7 @@ When creating artifacts, the `context`/`rules` blocks from `openspec instruction
 
 ## Layout
 
+- `docs/prd/` — Product Requirements Documents (one file per feature)
 - `openspec/changes/` — in-flight change proposals; `archive/` holds completed ones
 - `openspec/specs/` — committed specifications (currently empty)
 - `.claude/commands/opsx/` — the `/opsx:*` slash command definitions

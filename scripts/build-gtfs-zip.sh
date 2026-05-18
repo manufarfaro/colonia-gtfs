@@ -17,6 +17,13 @@ ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 DATA_DIR="$ROOT/data"
 EPOCH="2026-01-01 00:00:00"
 
+# Resolve OUT to an absolute path: leave as-is if already absolute,
+# otherwise anchor to the repo root.
+case "$OUT" in
+  /*) FULL_OUT="$OUT" ;;
+  *)  FULL_OUT="$ROOT/$OUT" ;;
+esac
+
 if [[ ! -d "$DATA_DIR" ]]; then
   echo "error: $DATA_DIR does not exist" >&2
   exit 1
@@ -29,8 +36,8 @@ if ! ls "$DATA_DIR"/*.txt > /dev/null 2>&1; then
   exit 1
 fi
 
-mkdir -p "$(dirname "$ROOT/$OUT")"
-rm -f "$ROOT/$OUT"
+mkdir -p "$(dirname "$FULL_OUT")"
+rm -f "$FULL_OUT"
 
 # Normalize mtimes so the zip is byte-deterministic across runs.
 find "$DATA_DIR" -maxdepth 1 -name '*.txt' -exec touch -d "$EPOCH" {} \;
@@ -38,6 +45,6 @@ find "$DATA_DIR" -maxdepth 1 -name '*.txt' -exec touch -d "$EPOCH" {} \;
 # Sort filenames lexically so order in the archive is deterministic.
 FILES=$(cd "$DATA_DIR" && ls *.txt | LC_ALL=C sort | tr '\n' ' ')
 
-( cd "$DATA_DIR" && zip -X -q "$ROOT/$OUT" $FILES )
+( cd "$DATA_DIR" && zip -X -q "$FULL_OUT" $FILES )
 
-echo "built $OUT ($(du -h "$ROOT/$OUT" | awk '{print $1}'))"
+echo "built $OUT ($(du -h "$FULL_OUT" | awk '{print $1}'))"

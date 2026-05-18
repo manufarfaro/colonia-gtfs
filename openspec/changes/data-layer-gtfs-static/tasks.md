@@ -27,18 +27,18 @@
 
 ## 5. Author routes, stops, shapes
 
-- [ ] 5.1 Author `data/routes.txt` — four rows for lines 3, 4, 5, 8; `route_short_name = lin`, `route_long_name` in Spanish (derive from the dominant `lnm` for each line), `route_type = 3`, `agency_id = sol-antigua`. Optional: `route_color`
-- [ ] 5.2 Author `data/stops.txt` — filter `data/processed/stops.csv` to `confidence ∈ {alta, media}` (130 stops), map `p1c → stop_id`, `p1n → stop_name`, `lat_mean → stop_lat`, `lon_mean → stop_lon`
-- [ ] 5.3 Build shape geometries for L3, L4, L8 (two shapes each: outbound and inbound) from `data/processed/shapes.geojson`; simplify if necessary to keep `shapes.txt` reasonable
-- [ ] 5.4 Build the three L5 shape geometries (`5-out-r1`, `5-in-r1`, `5-in-direct`) from `data/processed/shapes.geojson`; accept noisier output given sparse capture (per D-02)
-- [ ] 5.5 Author `data/shapes.txt` — emit `shape_id`, `shape_pt_lat`, `shape_pt_lon`, `shape_pt_sequence` for each of the 11 shapes (8 for L3/L4/L8 + 3 for L5)
+- [x] 5.1 Author `data/routes.txt` — four rows for lines 3, 4, 5, 8; `route_short_name = lin`, `route_long_name` in Spanish (derive from the dominant `lnm` for each line), `route_type = 3`, `agency_id = sol-antigua`. Optional: `route_color`
+- [x] 5.2 Author `data/stops.txt` — filter `data/processed/stops.csv` to `confidence ∈ {alta, media}` (130 stops), map `p1c → stop_id`, `p1n → stop_name`, `lat_mean → stop_lat`, `lon_mean → stop_lon`
+- [x] 5.3 Build shape geometries for L3, L4, L8 (two shapes each: outbound and inbound) from `data/processed/shapes_by_direction.geojson`; simplify by deduping consecutive identical points
+- [x] 5.4 Build the three L5 shape geometries (`5-out-r1`, `5-in-r1`, `5-in-direct`) from `data/processed/shapes_by_direction.geojson`; accept noisier output given sparse capture (per D-02)
+- [x] 5.5 Author `data/shapes.txt` — emit `shape_id`, `shape_pt_lat`, `shape_pt_lon`, `shape_pt_sequence` for each of the 9 shapes (2 per L3/L4/L8 + 3 for L5)
 
 ## 6. Author trips and stop_times
 
-- [ ] 6.1 For each row in `data/processed/trips.csv`, derive `direction_id` from the source `tra` value (1 → 1; {2, 4} → 0) and the synthetic `trip_id = {route_id}-{service_id}-{direction_id}-{HHMM}`
-- [ ] 6.2 Author `data/trips.txt` with columns `route_id, service_id, trip_id, trip_headsign, direction_id, shape_id, original_trip_id`. Verify uniqueness of synthetic `trip_id` values
-- [ ] 6.3 Generate `data/stop_times.txt` by applying the inference algorithm from the relevamiento §7 (group markers per trip instance, walk through `p1c` transitions, compute median offsets per template). Source values from `data/processed/` (private, not in this repo); the deliverable here is only the final `.txt`
-- [ ] 6.4 Verify referential integrity: every `stop_id` in `stop_times.txt` exists in `stops.txt`; every `trip_id` exists in `trips.txt`
+- [x] 6.1 For each row in `data/processed/trip_templates.csv`, derive `direction_id` from the source `tra` value (1 → 1; {2, 4} → 0) and the synthetic `trip_id = {route_id}-{service_id}-{direction_id}-{HHMM}`
+- [x] 6.2 Author `data/trips.txt` with columns `route_id, service_id, trip_id, trip_headsign, direction_id, shape_id, original_trip_id`. Verify uniqueness of synthetic `trip_id` values
+- [x] 6.3 Generate `data/stop_times.txt` by applying the inference algorithm from the relevamiento §7 in the (now-extended) private processor; translate `data/processed/stop_times.csv` to GTFS times. Apply monotonicity fixup (≤22% rows shifted by 1s) so median-based offsets do not create earlier-than-previous arrival times within a trip.
+- [x] 6.4 Verify referential integrity: every `stop_id` in `stop_times.txt` exists in `stops.txt`; every `trip_id` exists in `trips.txt`
 
 ## 7. Author fares (placeholder mode)
 

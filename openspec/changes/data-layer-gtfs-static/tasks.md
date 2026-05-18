@@ -14,9 +14,9 @@
 
 ## 3. OSM walking graph
 
-- [ ] 3.1 Run `scripts/refresh-osm.sh` locally to produce `data/colonia.osm.pbf`
-- [ ] 3.2 Verify the bbox covers Real de San Carlos (north end of L3) and Algodones (south end of L8)
-- [ ] 3.3 Commit the binary `data/colonia.osm.pbf` to the repo
+- [x] 3.1 Run `scripts/refresh-osm.sh` locally to produce `data/colonia.osm.pbf`
+- [x] 3.2 Verify the bbox covers Real de San Carlos (north end of L3) and Algodones (south end of L8)
+- [x] 3.3 Commit the binary `data/colonia.osm.pbf` to the repo
 
 ## 4. Author structural GTFS files
 

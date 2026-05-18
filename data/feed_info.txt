@@ -1,2 +1,2 @@
 feed_publisher_name,feed_publisher_url,feed_lang,default_lang,feed_start_date,feed_end_date,feed_version,feed_contact_url
-"colonia-gtfs — datos preliminares, tarifas a confirmar",https://github.com/manufarfaro/colonia-gtfs,es,es,20260513,20261231,0.1.0,https://github.com/manufarfaro/colonia-gtfs/issues
+"colonia-gtfs — datos preliminares, tarifas a confirmar",https://github.com/manufarfaro/colonia-gtfs,es,es,20260513,20261231,0.1.1,https://github.com/manufarfaro/colonia-gtfs/issues

@@ -176,19 +176,25 @@ A GitHub Actions workflow SHALL run the MobilityData Canonical GTFS Validator ag
 - **WHEN** the Canonical Validator emits only notices with severity `WARNING` or `INFO`
 - **THEN** the workflow exits with status code `0`, and the notices appear in the run summary
 
-### Requirement: Tagged versions SHALL publish `gtfs.zip` as a GitHub Release asset
+### Requirement: Merging a `release/X.Y.Z` PR SHALL publish `gtfs.zip` as a GitHub Release asset
 
-A GitHub Actions workflow SHALL run on the push of a tag matching `v*.*.*` against the default branch. The workflow SHALL build `gtfs.zip` via `tooling/scripts/build_gtfs_zip.py`, validate it with the MobilityData Canonical Validator, and on success create a GitHub Release named after the tag with `gtfs.zip` attached as a release asset. The asset SHALL remain retrievable at the stable URL `https://github.com/<owner>/<repo>/releases/latest/download/gtfs.zip` so that MobilityDatabase and other downstream consumers can poll a single URL.
+A GitHub Actions workflow SHALL run when a pull request from a branch matching `release/*` is merged into `main`. The workflow SHALL extract the version from the head ref (`release/X.Y.Z` → `vX.Y.Z`), build `gtfs.zip` via `tooling/scripts/build_gtfs_zip.py`, validate it with the MobilityData Canonical Validator, and on success create both the tag `vX.Y.Z` (pointing at the merge commit on `main`) and a GitHub Release named after the tag with `gtfs.zip` attached as a release asset. The asset SHALL remain retrievable at the stable URL `https://github.com/<owner>/<repo>/releases/latest/download/gtfs.zip` so that MobilityDatabase and other downstream consumers can poll a single URL.
 
-The human "release cut" process — opening a `release/X.Y.Z` branch from `main`, validating locally, merging to `main`, then pushing the tag — SHALL be documented in `docs/release-process.md`.
+The same workflow SHALL also support a `workflow_dispatch` trigger taking a `version` input, so a release can be re-published manually without opening a new `release/X.Y.Z` PR (e.g. after a transient validator failure).
 
-#### Scenario: Tag push creates a GitHub Release with the asset
-- **WHEN** a tag matching `v*.*.*` is pushed to the repository
-- **THEN** a GitHub Release named after the tag is created with `gtfs.zip` attached as an asset
+The human "release cut" process — opening a `release/X.Y.Z` branch from `main`, validating locally, merging to `main` — SHALL be documented in `docs/release-process.md`. No manual `git tag` / `git push origin v*.*.*` step is required.
+
+#### Scenario: Merge of a release/X.Y.Z PR creates a GitHub Release with the asset
+- **WHEN** a pull request from a `release/X.Y.Z` branch is merged into `main`
+- **THEN** the workflow creates the tag `vX.Y.Z` and a GitHub Release named `vX.Y.Z` with `gtfs.zip` attached as an asset
 
 #### Scenario: Release build fails on validation errors
 - **WHEN** the release workflow runs and the Canonical Validator emits any ERROR-severity notice on the bundled `gtfs.zip`
-- **THEN** the GitHub Release is not created and the workflow exits non-zero
+- **THEN** neither the tag nor the GitHub Release is created and the workflow exits non-zero
+
+#### Scenario: Manual workflow_dispatch with a version input re-publishes a release
+- **WHEN** the workflow is dispatched manually with `version: X.Y.Z`
+- **THEN** the workflow produces the same outputs as the PR-merge path for that version (tag `vX.Y.Z` and a corresponding GitHub Release)
 
 #### Scenario: The "latest" URL serves the most recent release
 - **WHEN** the URL `https://github.com/<owner>/<repo>/releases/latest/download/gtfs.zip` is fetched after at least one `v*.*.*` release has been published

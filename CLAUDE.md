@@ -44,4 +44,4 @@ When creating artifacts, the `context`/`rules` blocks from `openspec instruction
 
 - Change names are **kebab-case** (e.g. `add-route-schema`, not `Add Route Schema`)
 - The data domain is **GTFS** ([General Transit Feed Specification](https://gtfs.org/schedule/reference/)) — its `agency.txt`, `routes.txt`, `stops.txt`, `trips.txt`, `stop_times.txt`, `calendar.txt` schema is the source of truth for any modelling decisions
-- The README is bilingual (Spanish/English); user-facing copy in this repo follows the same pattern
+- Primary language is **Spanish**. The canonical `README.md` and any other docs (e.g. `docs/prd/README.md`, PRD files themselves) are in Spanish; English translations live next to them as `<name>.en.md` (BCP-47 locale suffix, dot-separated). Cross-link the two with a header like `**Español** · [English](README.en.md)`. Use plain text, **not** flag emojis — flags don't represent languages cleanly

@@ -1,20 +1,20 @@
-# PRDs / Product Requirements Documents
+# PRDs
 
-Acá viven los PRDs del proyecto. Cada PRD describe una capacidad del producto: el *qué* y el *por qué*. Los specs de OpenSpec (en [`../../openspec/`](../../openspec/)) traducen esos PRDs al *cómo*, y el código implementa los specs.
+**Español** · [English](README.en.md)
 
-This directory holds the project's PRDs. Each PRD describes a product capability — the *what* and *why*. OpenSpec specs (in [`../../openspec/`](../../openspec/)) translate PRDs into the *how*, and code implements the specs.
+Acá viven los PRDs (Product Requirements Documents) del proyecto. Cada PRD describe una capacidad del producto: el *qué* y el *por qué*. Los specs de OpenSpec (en [`../../openspec/`](../../openspec/)) traducen esos PRDs al *cómo*, y el código implementa los specs.
 
-## Convenciones / Conventions
+## Convenciones
 
-- Un archivo por PRD, en kebab-case: `<feature>.md` (ej. `route-schedule-feed.md`). / One file per PRD, kebab-case.
-- Bilingüe español/inglés cuando sea texto orientado al usuario. / Bilingual ES/EN for user-facing copy.
-- Antes de escribir un spec, leé el PRD que lo motiva. / Read the motivating PRD before writing a spec.
+- Un archivo por PRD, en kebab-case: `<feature>.md` (ej. `route-schedule-feed.md`).
+- Cada PRD se escribe en español; si necesitás versión en inglés agregá `<feature>.en.md` al lado.
+- Antes de escribir un spec, leé el PRD que lo motiva.
 
-## Índice / Index
+## Índice
 
-_No hay PRDs todavía. / No PRDs yet._
+_No hay PRDs todavía._
 
 <!--
-Cuando agregues un PRD, sumalo acá: / When you add a PRD, list it here:
-- [`<feature>.md`](./<feature>.md) — breve descripción / short description
+Cuando agregues un PRD, sumalo acá:
+- [`<feature>.md`](./<feature>.md) — breve descripción
 -->

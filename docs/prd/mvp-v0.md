@@ -1,6 +1,6 @@
 # MVP v0 — Trip planner turístico de Colonia
 
-> Estado: **Draft** · Owner: Manu (manufarfaro@proton.me) · Última edición: 2026-05-17
+> Estado: **Draft** · Owner: @manufarfaro · Última edición: 2026-05-17
 >
 > Este PRD describe el v0 del producto colonia-gtfs. Define **qué** se entrega y **por qué**; los **cómo** (stack exacto, contratos, esquemas) viven en los OpenSpec que siguen a este PRD.
 
@@ -187,10 +187,10 @@ Cosas externas al código que tienen que estar resueltas para que v0 pueda darse
 
 | Dependencia | Qué se necesita | Owner | Estado al cierre del PRD |
 |---|---|---|---|
-| **Tarifa Sol Antigua confirmada** | Valor flat o estructura, moneda, política de transbordo. Para poder llenar `fare_attributes.txt` + `fare_rules.txt`. | Manu (consultar al operador o constatar in-situ) | Open |
-| **OSM extract de Colonia urbano** | `colonia.osm.pbf` recortado de Geofabrik UY por bbox. Se commitea en `data/` o se baja en build (decisión spec-level). | Manu | Cerrable sin terceros |
-| **Google Maps API key** | Project en GCP con Maps JavaScript API + Places API habilitadas, restricción por HTTP referrer. | Manu | Cerrable sin terceros |
-| **Hosting v0** | VPS chico o Mac mini con Docker compose; subdominio acotado (`demo.algo.com` o similar). | Manu | Cerrable sin terceros |
+| **Tarifa Sol Antigua confirmada** | Valor flat o estructura, moneda, política de transbordo. Para poder llenar `fare_attributes.txt` + `fare_rules.txt`. | @manufarfaro (consultar al operador o constatar in-situ) | Open |
+| **OSM extract de Colonia urbano** | `colonia.osm.pbf` recortado de Geofabrik UY por bbox. Se commitea en `data/` o se baja en build (decisión spec-level). | @manufarfaro | Cerrable sin terceros |
+| **Google Maps API key** | Project en GCP con Maps JavaScript API + Places API habilitadas, restricción por HTTP referrer. | @manufarfaro | Cerrable sin terceros |
+| **Hosting v0** | VPS chico o Mac mini con Docker compose; subdominio acotado (`demo.algo.com` o similar). | @manufarfaro | Cerrable sin terceros |
 | **Disponibilidad del AVL de Sol Antigua** | El endpoint `solantigua.ddns.net:2780/pub/avl.xml` sigue accesible y respondiendo. Sin acuerdo formal todavía. | Operador externo | Estable de hecho (5 días observados) |
 
 **D10 del relevamiento (permisos legales del AVL) no es bloqueante de v0** porque el trigger es demo cerrado, no público. Pasa a ser bloqueante en v0.1 si se decide hacer URL pública (ver §10).

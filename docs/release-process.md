@@ -33,23 +33,17 @@ Cortar un release del feed GTFS sigue un ciclo simple: una rama humana de prepar
    uv run --directory tooling pytest         # incluye el determinism check
    ```
 
-3. **Si todo OK**, abrir PR `release/X.Y.Z` → `main` y mergear.
+3. **Si todo OK**, abrir PR `release/X.Y.Z` → `main` y mergear. **Eso es todo** — el merge dispara `.github/workflows/release.yml` automáticamente.
 
-4. **Tagear el commit de merge** en `main`:
-
-   ```bash
-   git switch main
-   git pull origin main
-   git tag vX.Y.Z
-   git push origin vX.Y.Z
-   ```
-
-5. El workflow `.github/workflows/release.yml` corre automáticamente y:
-   - Construye `gtfs.zip` con `scripts/build-gtfs-zip.sh`.
+4. El workflow corre y:
+   - Extrae la versión del nombre de la rama (`release/X.Y.Z` → `vX.Y.Z`).
+   - Construye `gtfs.zip` con `tooling/scripts/build_gtfs_zip.py`.
    - Valida con el MobilityData Canonical Validator.
-   - Crea un GitHub Release nombrado como el tag, con `gtfs.zip` adjunto y notas autogeneradas.
+   - Crea el tag `vX.Y.Z` apuntando al commit de merge **y** el GitHub Release nombrado igual, con `gtfs.zip` adjunto y notas autogeneradas (vía `softprops/action-gh-release@v2`).
 
-6. **Verificar el release**:
+   No hace falta `git tag` ni `git push origin vX.Y.Z` manual — el workflow se encarga.
+
+5. **Verificar el release**:
 
    - Página del release: `https://github.com/manufarfaro/colonia-gtfs/releases/tag/vX.Y.Z`
    - URL estable de "latest" (la que polea MobilityDatabase): `https://github.com/manufarfaro/colonia-gtfs/releases/latest/download/gtfs.zip`
@@ -59,6 +53,16 @@ Cortar un release del feed GTFS sigue un ciclo simple: una rama humana de prepar
 ## Consumidores downstream
 
 Una vez que `v0.0.1` esté publicado, registrar el feed en MobilityDatabase abriendo un PR contra [`MobilityData/mobility-database-catalogs`](https://github.com/MobilityData/mobility-database-catalogs) con un JSON apuntando a la URL estable de "latest". MDB polea diaria a 00:00 UTC y archiva versiones nuevas automáticamente cuando el `gtfs.zip` cambia.
+
+## Re-publicar manualmente
+
+Para re-publicar una versión sin abrir un nuevo PR `release/X.Y.Z` (por ejemplo, después de un fallo transitorio del Canonical Validator), correr el workflow vía `workflow_dispatch`:
+
+```bash
+gh workflow run release.yml --field version=X.Y.Z
+```
+
+El workflow se asegura de que el tag exista (lo crea si no) y publica el GitHub Release.
 
 ## Rollback
 

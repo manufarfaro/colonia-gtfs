@@ -1,9 +1,24 @@
 name: Release
 
+# Triggered when a PR from a `release/X.Y.Z` branch is merged into `main`.
+# The workflow extracts the version from the head ref, builds and validates
+# the feed, and publishes a GitHub Release named `vX.Y.Z` with `gtfs.zip`
+# attached (softprops/action-gh-release@v2 creates the tag itself).
+#
+# A `workflow_dispatch` escape hatch is provided for re-publishing a
+# specific version manually (e.g. if a release needs to be re-cut without
+# opening a new release/* PR).
+
 on:
-  push:
-    tags:
-      - "v*.*.*"
+  pull_request:
+    types: [closed]
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to publish (e.g. 0.1.1) — without the leading v"
+        required: true
+        type: string
 
 permissions:
   contents: write
@@ -11,9 +26,34 @@ permissions:
 jobs:
   release:
     name: Build + validate + publish GitHub Release
+    if: >-
+      (github.event_name == 'pull_request'
+        && github.event.pull_request.merged == true
+        && startsWith(github.head_ref, 'release/'))
+      || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Compute tag
+        id: tag
+        env:
+          HEAD_REF: ${{ github.head_ref }}
+          DISPATCH_VERSION: ${{ inputs.version }}
+        run: |
+          set -euo pipefail
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            VERSION="${HEAD_REF#release/}"
+          else
+            VERSION="${DISPATCH_VERSION}"
+          fi
+          if ! [[ "${VERSION}" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[A-Za-z0-9.-]+)?$ ]]; then
+            echo "error: ${VERSION} is not a valid SemVer string" >&2
+            exit 1
+          fi
+          echo "name=v${VERSION}" >> "$GITHUB_OUTPUT"
 
       - name: Install uv
         uses: astral-sh/setup-uv@v3
@@ -36,5 +76,8 @@ jobs:
       - name: Publish GitHub Release
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ steps.tag.outputs.name }}
+          name: ${{ steps.tag.outputs.name }}
+          target_commitish: main
           generate_release_notes: true
           files: data/output/gtfs.zip

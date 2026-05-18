@@ -175,17 +175,26 @@ El `srv` del operador (estable y único por `(lin, sal, lnm)` según relevamient
 
 **Trade-off:** Java arranca en ~30 s; para un feed chico el overhead domina el runtime real. Aceptable — corre en push/PR, no en cada commit.
 
-### D-09 — Release cut: tag `v*.*.*` dispara GitHub Release con `gtfs.zip` adjunto
+### D-09 — Release cut: merge de `release/X.Y.Z` dispara tag + GitHub Release
 
-**Decisión:** Adoptar el patrón "tag-driven release":
+**Decisión (revisada durante apply):** Adoptar el patrón "PR-merge-driven release" en vez del original "tag-driven":
 
-1. Branch `release/X.Y.Z` se abre desde `main` para preparar el release (testing manual, validación local, ajustes finales). Es convención humana, sin automation propia.
-2. Cuando está OK, se mergea a `main` vía PR.
-3. Se pushea el tag `vX.Y.Z` sobre el commit de merge en `main`.
-4. El workflow `.github/workflows/release.yml` corre:
-   - Build `gtfs.zip` via `scripts/build-gtfs-zip.sh`.
-   - Valida con `npaun/md-gtfs-validator-action@v2` (mismo paso que `validate-gtfs.yml`).
-   - Crea GitHub Release con `softprops/action-gh-release@v2`, adjuntando `gtfs.zip` como asset.
+1. Branch `release/X.Y.Z` se abre desde `main` para preparar el release (testing manual, validación local, ajustes finales como bump de `feed_version`).
+2. Cuando está OK, se mergea a `main` vía PR. **Eso es todo — no hay paso manual de `git tag`/`git push`.**
+3. El workflow `.github/workflows/release.yml` dispara con `pull_request: types: [closed]` filtrado por `head_ref` que arranca con `release/`:
+   - Extrae la versión del head ref (`release/X.Y.Z` → `vX.Y.Z`) y valida que sea SemVer.
+   - Build `gtfs.zip` via `uv run --directory tooling python scripts/build_gtfs_zip.py`.
+   - Valida con `npaun/md-gtfs-validator-action@v2`.
+   - Crea el tag y el GitHub Release juntos con `softprops/action-gh-release@v2` (la action acepta `tag_name` y crea el tag si no existe, apuntando a `target_commitish: main`). `gtfs.zip` queda adjunto.
+4. Un trigger `workflow_dispatch` con input `version` queda como escape hatch para re-publicar manualmente (transient validator failure, etc.) sin abrir un nuevo PR.
+
+**Por qué PR-merge-driven y no tag-driven:**
+
+- Cero pasos manuales. Una vez que el PR mergea, el release sale solo. Para un proyecto solo-dev esto reduce drag.
+- El branch `release/X.Y.Z` ya era el ritual humano elegido; capturar la versión desde el head_ref evita duplicar info entre el branch name y un tag separado.
+- `softprops/action-gh-release@v2` ya soporta crear tags al vuelo, así que no necesita un PAT separado (el `GITHUB_TOKEN` con `permissions: contents: write` alcanza).
+
+**Trade-off:** Si alguien quiere publicar sin abrir un PR (caso muy raro: solo re-publish), tiene que usar `workflow_dispatch` con input de versión en vez de un simple `git push origin vX.Y.Z`. Documentado en `docs/release-process.md`.
 
 **URL estable para MobilityDatabase:**
 

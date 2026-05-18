@@ -6,11 +6,21 @@
 
 [Español](README.md) · **English**
 
-Unofficial GTFS feed for urban transit in Colonia del Sacramento, Uruguay.
+Mobile-first web app that lets tourists plan bus trips between two points in Colonia del Sacramento, Uruguay. Mirrors the Google Maps Transit experience, computes itineraries locally with OpenTripPlanner, and combines schedule data with live vehicle positions.
+
+> **Status:** v0 in design. First PRD available at [`docs/prd/mvp-v0.md`](docs/prd/mvp-v0.md) (Spanish). Implementation pending, organized as a series of OpenSpec changes.
+
+## v0 scope
+
+Operator **Sol Antigua** (urban Colonia del Sacramento), lines 3, 4, 5, and 8. Other operators (ABC Coop, suburban routes) and broader geography are v0.1+.
+
+## Conceptual stack
+
+`viewer (Google Maps JS) → BFF (Express + TS) → OpenTripPlanner + bridge` over the Sol Antigua AVL feed. Details in [PRD §6](docs/prd/mvp-v0.md#6-arquitectura-conceptual).
 
 ## Documentation
 
 Work starts from a PRD, then an OpenSpec spec, then code.
 
-- **[`docs/prd/`](docs/prd/)** — PRDs (Product Requirements Documents): the *what* and *why* of each feature.
+- **[`docs/prd/`](docs/prd/)** — PRDs (Product Requirements Documents): the *what* and *why*.
 - **[`openspec/`](openspec/)** — Specs and change proposals: the *how*.

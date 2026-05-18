@@ -12,9 +12,4 @@ This directory holds the project's PRDs (Product Requirements Documents). Each P
 
 ## Index
 
-_No PRDs yet._
-
-<!--
-When you add a PRD, list it here:
-- [`<feature>.md`](./<feature>.md) — short description
--->
+- [`mvp-v0.md`](./mvp-v0.md) (Spanish) — Tourist trip planner for Colonia: O→D + stop info + line schedule on Google Maps JS, local planning via OTP, realtime through a bridge over the Sol Antigua AVL feed. Trigger: closed demo-ready.

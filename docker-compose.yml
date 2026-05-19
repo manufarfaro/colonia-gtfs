@@ -1,0 +1,45 @@
+# Stack v0 — colonia-gtfs
+#
+# Servicios:
+#   - otp: OpenTripPlanner 2 (motor de routing).
+#
+# Boot:
+#   1) uv run --directory tooling python scripts/build_gtfs_zip.py
+#   2) docker compose up otp
+#
+# El bridge (GTFS-RT) y el BFF se sumarán como services siblings en specs
+# posteriores. Contrato declarado: OTP poolea http://bridge:3001/gtfs-rt/...
+#
+# Detalles, troubleshooting y override patterns: deployment/README.md
+# Spec verificable: openspec/specs/otp-routing/spec.md
+
+services:
+  otp:
+    image: opentripplanner/opentripplanner:2.10.0_2026-05-13T17-42
+    # El /docker-entrypoint.sh upstream ya injecta `/var/opentripplanner/`
+    # como base path. Solo pasamos los flags.
+    command: ["--build", "--serve"]
+    # Sin "ports:" — OTP queda solo accesible en la red interna de Docker
+    # como http://otp:8080. Para debug local copiar compose.override.yml.example
+    # a compose.override.yml.
+    volumes:
+      - ./data/output/gtfs.zip:/var/opentripplanner/gtfs.zip:ro
+      - ./data/colonia.osm.pbf:/var/opentripplanner/colonia.osm.pbf:ro
+      - ./deployment/otp/otp-config.json:/var/opentripplanner/otp-config.json:ro
+      - ./deployment/otp/router-config.json:/var/opentripplanner/router-config.json:ro
+    environment:
+      JAVA_TOOL_OPTIONS: "-Xmx1g -Xms512m"
+    # La imagen upstream no trae curl/wget/nc — sí bash con /dev/tcp.
+    # Usamos un one-liner que abre socket TCP, manda un GET HTTP/1.0 al
+    # endpoint de actuators y chequea por "200" en la status line.
+    healthcheck:
+      test:
+        - "CMD"
+        - "bash"
+        - "-c"
+        - "exec 3<>/dev/tcp/localhost/8080 && printf 'GET /otp/actuators/health HTTP/1.0\\r\\nHost: localhost\\r\\n\\r\\n' >&3 && head -1 <&3 | grep -q ' 200 '"
+      start_period: 60s
+      interval: 10s
+      timeout: 5s
+      retries: 6
+    restart: unless-stopped

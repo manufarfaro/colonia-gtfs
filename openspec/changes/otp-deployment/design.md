@@ -149,20 +149,37 @@ otp:
 
 ### D-08 — Healthz endpoint + CI smoke test
 
-**Decisión:** Usar `GET /otp/actuators/health` (incluido en OTP 2.10) como healthz. Compose declara `healthcheck:` con `curl -fsS http://localhost:8080/otp/actuators/health || exit 1`.
+**Decisión:** Usar `GET /otp/actuators/health` (incluido en OTP 2.10) como healthz. Compose declara `healthcheck:` que pega al endpoint vía `bash` + `/dev/tcp` (sin depender de tools externos).
+
+**Por qué no `curl`:** la imagen `opentripplanner/opentripplanner:2.10.0_2026-05-13T17-42` (Ubuntu 26.04 minimal) **no** trae `curl`, `wget`, `nc`, ni `socat`. Sí trae `bash` y `perl`. Para evitar un Dockerfile custom (D-03) usamos un one-liner bash:
+
+```yaml
+healthcheck:
+  test:
+    - CMD
+    - bash
+    - -c
+    - "exec 3<>/dev/tcp/localhost/8080 && printf 'GET /otp/actuators/health HTTP/1.0\\r\\nHost: localhost\\r\\n\\r\\n' >&3 && head -1 <&3 | grep -q ' 200 '"
+```
+
+Si más adelante se introduce un Dockerfile custom (por otra razón), se puede simplificar a `curl -fsS`. La forma del spec solo exige "probar `/otp/actuators/health` y aceptar 200", no un binario específico.
 
 CI: sumar `.github/workflows/otp-smoke.yml` que:
 
 1. Checkout.
 2. Build `gtfs.zip` con `uv run --directory tooling python scripts/build_gtfs_zip.py`.
-3. `docker compose up -d otp`.
-4. Wait for `/otp/actuators/health` con timeout de 60s.
-5. `curl -fsS http://localhost:8081/otp/routers/default/plan?fromPlace=-34.471,-57.852&toPlace=-34.449,-57.815&mode=TRANSIT,WALK` y verificar que devuelva al menos un itinerary.
+3. `docker compose -f docker-compose.yml -f compose.override.ci.yml up -d otp` (override expone 8080 al runner).
+4. Wait for `/otp/actuators/health` con timeout de 90s.
+5. `POST /otp/gtfs/v1` con un GraphQL `plan` query (coords de Colonia urbano) y verificar que `data.plan.itineraries[0].legs[0]` exista.
 6. `docker compose down`.
 
-El workflow corre en push/PR sobre `deployment/otp/**`, `data/**`, `docker-compose.yml`.
+El workflow corre en push/PR sobre `deployment/otp/**`, `data/**`, `docker-compose.yml`, `compose.override.ci.yml`, `tooling/**` y el workflow file mismo.
 
 **Por qué smoke en CI:** validar que OTP arranca con el grafo construido y responde queries reales — el equivalente del Canonical Validator pero para el motor de planning. Sin esto, un error en `router-config.json` solo se detecta en deploy.
+
+**Sobre el endpoint de routing:** OTP 2.10 **removió** la REST `/otp/routers/default/plan` y expone routing solo vía GraphQL en `POST /otp/gtfs/v1`. El CI smoke test y el BFF (spec siguiente `bff-api-and-routes`) consumen ese endpoint.
+
+**Sobre el feature flag de actuators:** OTP 2.10 trae `ActuatorAPI` **off** por default. Para exponer `/otp/actuators/health` agregamos `deployment/otp/otp-config.json` con `{ "otpFeatures": { "ActuatorAPI": true } }` y lo mounteamos al container.
 
 ### D-09 — Logs por stdout, sin file appenders custom
 

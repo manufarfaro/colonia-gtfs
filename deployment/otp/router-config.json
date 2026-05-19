@@ -1,0 +1,18 @@
+{
+  "configVersion": "otp-routing-v0",
+  "updaters": [
+    {
+      "type": "vehicle-positions",
+      "feedId": "sol-antigua",
+      "url": "http://bridge:3001/gtfs-rt/vehicle-positions.pb",
+      "frequency": "15s",
+      "fuzzyTripMatching": true
+    },
+    {
+      "type": "stop-time-updater",
+      "feedId": "sol-antigua",
+      "url": "http://bridge:3001/gtfs-rt/trip-updates.pb",
+      "frequency": "30s"
+    }
+  ]
+}

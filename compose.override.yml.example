@@ -1,0 +1,16 @@
+# Template de override local para debug.
+#
+# Uso:
+#   cp compose.override.yml.example compose.override.yml
+#   docker compose up otp
+#
+# Docker Compose carga `compose.override.yml` automáticamente (si existe)
+# encima del `docker-compose.yml` base. El archivo real está gitignoreado.
+
+services:
+  otp:
+    # Expone el puerto 8080 del container al host para poder pegarle
+    # con curl/postman desde la máquina local:
+    #   curl http://localhost:8080/otp/actuators/health
+    ports:
+      - "8080:8080"

@@ -1,0 +1,11 @@
+# Override usado por .github/workflows/otp-smoke.yml.
+#
+# Expone el puerto 8080 del container al runner de GitHub Actions para que
+# el step de smoke test pueda pegarle vía localhost. La base
+# `docker-compose.yml` mantiene el servicio cerrado al host por default
+# (D-06); este override existe solo para CI.
+
+services:
+  otp:
+    ports:
+      - "8080:8080"

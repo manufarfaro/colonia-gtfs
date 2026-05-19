@@ -1,0 +1,81 @@
+name: OTP Smoke
+
+on:
+  pull_request:
+    paths:
+      - "deployment/otp/**"
+      - "docker-compose.yml"
+      - "compose.override.ci.yml"
+      - "data/*.txt"
+      - "data/colonia.osm.pbf"
+      - "tooling/scripts/build_gtfs_zip.py"
+      - "tooling/pyproject.toml"
+      - "tooling/uv.lock"
+      - ".github/workflows/otp-smoke.yml"
+  push:
+    branches: [main]
+    paths:
+      - "deployment/otp/**"
+      - "docker-compose.yml"
+      - "compose.override.ci.yml"
+      - "data/*.txt"
+      - "data/colonia.osm.pbf"
+      - "tooling/scripts/build_gtfs_zip.py"
+      - "tooling/pyproject.toml"
+      - "tooling/uv.lock"
+      - ".github/workflows/otp-smoke.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    name: docker compose up otp + plan query
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+
+      - name: Sync tooling deps
+        working-directory: tooling
+        run: uv sync --frozen
+
+      - name: Build gtfs.zip
+        run: uv run --directory tooling python scripts/build_gtfs_zip.py
+
+      - name: Start OTP
+        run: docker compose -f docker-compose.yml -f compose.override.ci.yml up -d otp
+
+      - name: Wait for /otp/actuators/health
+        run: |
+          set -euo pipefail
+          for i in $(seq 1 45); do
+            if curl -fsS http://localhost:8080/otp/actuators/health > /dev/null; then
+              echo "OTP healthy after ${i} attempts"
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "OTP did not become healthy within 90s" >&2
+          docker compose logs otp >&2 || true
+          exit 1
+
+      - name: Plan query (Colonia urbano, GraphQL)
+        run: |
+          set -euo pipefail
+          # OTP 2.10 removió la REST /plan; routing es GraphQL en /otp/gtfs/v1.
+          QUERY='{"query":"query { plan(from: {lat: -34.471, lon: -57.852}, to: {lat: -34.449, lon: -57.815}, transportModes: [{mode: TRANSIT},{mode: WALK}]) { itineraries { legs { mode duration } } } }"}'
+          RESP=$(curl -fsS -X POST -H "Content-Type: application/json" --data "$QUERY" http://localhost:8080/otp/gtfs/v1)
+          echo "$RESP" | jq -e '.data.plan.itineraries[0].legs[0]' > /dev/null
+          echo "Itinerary returned with at least one leg"
+
+      - name: OTP logs (on failure)
+        if: failure()
+        run: docker compose logs otp || true
+
+      - name: Tear down
+        if: always()
+        run: docker compose -f docker-compose.yml -f compose.override.ci.yml down

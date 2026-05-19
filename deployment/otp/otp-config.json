@@ -1,0 +1,6 @@
+{
+  "configVersion": "otp-routing-v0",
+  "otpFeatures": {
+    "ActuatorAPI": true
+  }
+}

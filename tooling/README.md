@@ -45,7 +45,7 @@ Todos se corren desde la raíz del repo:
 | `uv run --directory tooling pytest` | Tests (10, incluye determinism check). |
 | `uv run --directory tooling ruff check scripts tests` | Linter. |
 | `uv run --directory tooling ruff format --check scripts tests` | Format check (sin escribir). |
-| `uv run --directory tooling python scripts/build_gtfs_zip.py` | Empaqueta `data/*.txt` → `data/output/gtfs.zip`. |
+| `uv run --directory tooling python scripts/build_gtfs_zip.py` | Empaqueta `data/*.txt` → `data/output/gtfs.zip`. Pre-requisito de `docker compose up otp` — ver [`deployment/README.md`](../deployment/README.md). |
 | `uv run --directory tooling python scripts/validate_gtfs.py` | Sanity check del feed con gtfs-kit. |
 | `uv run --directory tooling python scripts/refresh_osm.py` | Regenera `data/colonia.osm.pbf` (requiere `osmium-tool` en PATH). |
 

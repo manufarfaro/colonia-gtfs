@@ -22,13 +22,20 @@ The `otp` service SHALL mount the following files into the container, all read-o
 |---|---|
 | `./data/output/gtfs.zip` | `/var/opentripplanner/gtfs.zip` |
 | `./data/colonia.osm.pbf` | `/var/opentripplanner/colonia.osm.pbf` |
+| `./deployment/otp/otp-config.json` | `/var/opentripplanner/otp-config.json` |
 | `./deployment/otp/router-config.json` | `/var/opentripplanner/router-config.json` |
 
 The `gtfs.zip` mount references the output of `tooling/scripts/build_gtfs_zip.py` (capability `gtfs-static-data`). The build script SHALL be invoked before `docker compose up otp` so that the file exists.
 
+`otp-config.json` SHALL enable the `ActuatorAPI` feature (off by default in OTP 2.10), which gates the `/otp/actuators/health` endpoint required by R-06.
+
 #### Scenario: Required mounts are present
 - **WHEN** the `otp` service definition is inspected
-- **THEN** the three mounts above are declared, each with the `:ro` flag
+- **THEN** the four mounts above are declared, each with the `:ro` flag
+
+#### Scenario: ActuatorAPI feature is enabled
+- **WHEN** `deployment/otp/otp-config.json` is parsed
+- **THEN** it sets `otpFeatures.ActuatorAPI = true`
 
 #### Scenario: Build precondition is documented
 - **WHEN** `deployment/README.md` is inspected
@@ -85,28 +92,30 @@ The OTP container SHALL expose `GET /otp/actuators/health` returning `200 OK` on
 
 #### Scenario: Compose healthcheck is declared
 - **WHEN** the `otp` service is inspected
-- **THEN** it declares a `healthcheck:` with `test: ["CMD", "curl", "-fsS", "http://localhost:8080/otp/actuators/health"]`, `start_period: 60s`, and a reasonable interval/retries
+- **THEN** it declares a `healthcheck:` whose `test` probes `GET /otp/actuators/health` on `http://localhost:8080` and treats `200` as healthy, with `start_period: 60s` and a reasonable interval/retries. The probe SHALL only depend on binaries that ship with the upstream OTP image (`bash` with `/dev/tcp` is sufficient; `curl`/`wget` are NOT present in `opentripplanner/opentripplanner:2.10.*`)
 
 ### Requirement: A CI workflow SHALL smoke-test OTP on changes to its inputs
 
-A workflow `.github/workflows/otp-smoke.yml` SHALL run on push/PR that touches any of: `deployment/otp/**`, `docker-compose.yml`, `data/*.txt`, `data/colonia.osm.pbf`, `tooling/scripts/build_gtfs_zip.py`, or the workflow file itself. The job SHALL:
+A workflow `.github/workflows/otp-smoke.yml` SHALL run on push/PR that touches any of: `deployment/otp/**`, `docker-compose.yml`, `compose.override.ci.yml`, `data/*.txt`, `data/colonia.osm.pbf`, `tooling/scripts/build_gtfs_zip.py`, `tooling/pyproject.toml`, `tooling/uv.lock`, or the workflow file itself. The job SHALL:
 
 1. Check out the repo.
 2. Build `gtfs.zip` via `uv run --directory tooling python scripts/build_gtfs_zip.py`.
-3. Bring up the `otp` service with `docker compose up -d otp`.
-4. Poll `http://localhost:<mapped>/otp/actuators/health` until `200 OK` or 90s timeout.
-5. Issue a single trip-plan query (`GET /otp/routers/default/plan` with two stop coordinates from Colonia urban) and assert the response contains at least one itinerary.
+3. Bring up the `otp` service with `docker compose up -d otp` (using `compose.override.ci.yml` to publish port 8080 to the runner).
+4. Poll `http://localhost:8080/otp/actuators/health` until `200 OK` or 90s timeout.
+5. Issue a single trip-plan query via the OTP 2.10 GraphQL endpoint (`POST /otp/gtfs/v1`) with two Colonia urban coordinates and assert the response contains at least one itinerary.
 6. Tear the service down.
 
 The workflow SHALL exit non-zero if any of those steps fail.
+
+> **Note on the routing API path:** OTP 2.10 removes the legacy REST `/otp/routers/default/plan` endpoint and only exposes routing via GraphQL at `POST /otp/gtfs/v1`. The CI workflow and the BFF (spec `bff-api-and-routes`) consume this GraphQL endpoint.
 
 #### Scenario: Workflow runs on input changes
 - **WHEN** a pull request modifies `deployment/otp/router-config.json`
 - **THEN** the `otp-smoke` workflow is triggered for that PR
 
 #### Scenario: Workflow asserts at least one itinerary
-- **WHEN** the smoke step issues a plan query from `(-34.471, -57.852)` to `(-34.449, -57.815)` with `mode=TRANSIT,WALK`
-- **THEN** the response is `200 OK` and contains at least one `itineraries[0].legs[0]` element
+- **WHEN** the smoke step issues a GraphQL `plan` query at `POST /otp/gtfs/v1` from `(-34.471, -57.852)` to `(-34.449, -57.815)` with `transportModes: [{mode: TRANSIT},{mode: WALK}]`
+- **THEN** the response is `200 OK`, `data.plan.itineraries` is non-empty, and `data.plan.itineraries[0].legs[0]` exists
 
 ### Requirement: Deployment documentation SHALL describe the OTP service end-to-end
 

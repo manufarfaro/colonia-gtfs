@@ -7,3 +7,7 @@ __pycache__/
 # uv
 .venv/
 .python-version
+
+# Docker Compose — el archivo de override local se ignora; el template
+# vive en compose.override.yml.example (commiteado).
+compose.override.yml

@@ -53,6 +53,17 @@ describe('GET /api/lines/:lineId', () => {
     expect(JSON.stringify(await res.json())).not.toContain('otp:8080');
   });
 
+  it('R-06 re-throws non-OTP errors (translator failure propagates to Next)', async () => {
+    // Poison data: patterns is a string, so route.patterns.map(...) throws.
+    mockPost.mockResolvedValueOnce({
+      data: { data: { route: { gtfsId: 's:4', shortName: '4', longName: 'L4', patterns: 'nope' } } },
+    });
+    const { GET } = await loadHandler();
+    await expect(
+      GET(req(), { params: Promise.resolve({ lineId: '4' }) }),
+    ).rejects.toThrow(TypeError);
+  });
+
   it('R-06 caches within TTL: two consecutive calls hit OTP once', async () => {
     mockPost.mockResolvedValueOnce({ data: fixture });
     const { GET } = await loadHandler();

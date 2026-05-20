@@ -42,4 +42,10 @@ describe('translatePlanResponse', () => {
     const out = translatePlanResponse(empty);
     expect(out.itineraries).toEqual([]);
   });
+
+  it('R-04 returns empty itineraries array when OTP omits plan/itineraries entirely', () => {
+    // Exercises the `?? []` default branch — plan.itineraries undefined.
+    const out = translatePlanResponse({ data: { plan: {} } });
+    expect(out.itineraries).toEqual([]);
+  });
 });

@@ -67,4 +67,20 @@ describe('GET /api/lines/:lineId/vehicles', () => {
     const body = await res.text();
     expect(body).not.toContain('bridge:3001');
   });
+
+  it('R-07 returns 200 with empty vehicles even when the decoder throws on garbage bytes', async () => {
+    // Bridge responds OK, but the bytes are not a valid protobuf — decoder
+    // throws. Handler's defensive catch (non-Bridge error path) still
+    // returns the empty/realtime_available:false body so clients keep
+    // working.
+    const garbage = new ArrayBuffer(8);
+    new Uint8Array(garbage).fill(0xff);
+    mockGet.mockResolvedValueOnce({ data: garbage });
+    const { GET } = await loadHandler();
+    const res = await GET(req(), { params: Promise.resolve({ lineId: '4' }) });
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.vehicles).toEqual([]);
+    expect(body.meta.realtime_available).toBe(false);
+  });
 });

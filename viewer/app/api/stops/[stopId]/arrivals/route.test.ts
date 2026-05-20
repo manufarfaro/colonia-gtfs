@@ -53,6 +53,27 @@ describe('GET /api/stops/:stopId/arrivals', () => {
     expect(JSON.stringify(body)).not.toContain('otp:8080');
   });
 
+  it('R-05 re-throws non-OTP errors (translator failure propagates to Next)', async () => {
+    // Poison data: stoptimes is missing, so item.stoptimes throws when accessed.
+    mockPost.mockResolvedValueOnce({
+      data: {
+        data: {
+          stop: {
+            gtfsId: 'sol-antigua:3',
+            name: 'X',
+            lat: 0,
+            lon: 0,
+            stoptimesForServiceDate: [{ pattern: { route: { shortName: '4' }, headsign: 'C' } }],
+          },
+        },
+      },
+    });
+    const { GET } = await loadHandler();
+    await expect(
+      GET(req(), { params: Promise.resolve({ stopId: 'sol-antigua:3' }) }),
+    ).rejects.toThrow();
+  });
+
   it('R-05 honors ?limit query (default 10, clamped)', async () => {
     mockPost.mockResolvedValueOnce({ data: fixture });
     const { GET } = await loadHandler();
@@ -61,6 +82,18 @@ describe('GET /api/stops/:stopId/arrivals', () => {
       '/otp/gtfs/v1',
       expect.objectContaining({
         variables: expect.objectContaining({ limit: 5 }),
+      }),
+    );
+  });
+
+  it('R-05 falls back to default limit when ?limit is not a finite number', async () => {
+    mockPost.mockResolvedValueOnce({ data: fixture });
+    const { GET } = await loadHandler();
+    await GET(req('?limit=abc'), { params: Promise.resolve({ stopId: 'sol-antigua:3' }) });
+    expect(mockPost).toHaveBeenCalledWith(
+      '/otp/gtfs/v1',
+      expect.objectContaining({
+        variables: expect.objectContaining({ limit: 10 }),
       }),
     );
   });

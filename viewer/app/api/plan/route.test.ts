@@ -60,6 +60,40 @@ describe('POST /api/plan', () => {
     expect(mockPost).not.toHaveBeenCalled();
   });
 
+  it('R-04 returns 400 when the body is not valid JSON', async () => {
+    const POST = await loadHandler();
+    const req = new Request('http://localhost/api/plan', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: 'this is not JSON',
+    });
+    const res = await POST(req);
+    expect(res.status).toBe(400);
+    const body = await res.json();
+    expect(body.error).toBe('invalid_request');
+    expect(body.details).toContain('body must be JSON');
+  });
+
+  it('R-04 re-throws non-OTP errors (translator failure propagates to Next)', async () => {
+    // Poison data: legs is a string, so it.legs.map(...) throws TypeError.
+    // queryOtp succeeds; the translator throws; the route's defensive
+    // catch sees a non-OtpUnavailableError and re-throws to Next.js.
+    mockPost.mockResolvedValueOnce({
+      data: { data: { plan: { itineraries: [{ duration: 1, walkDistance: 0, legs: 'not-an-array' }] } } },
+    });
+    const POST = await loadHandler();
+    await expect(
+      POST(
+        makeRequest({
+          from: { lat: -34.47, lon: -57.85 },
+          to: { lat: -34.44, lon: -57.81 },
+          date: '2026-06-02',
+          time: '08:30',
+        }),
+      ),
+    ).rejects.toThrow(TypeError);
+  });
+
   it('R-04 returns 502 when OTP rejects, without surfacing the OTP URL in the body', async () => {
     const axiosErr = Object.assign(new Error('ECONNREFUSED'), {
       isAxiosError: true,

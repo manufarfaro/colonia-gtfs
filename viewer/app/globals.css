@@ -1,5 +1,9 @@
 @import "tailwindcss";
 
+/* Tailwind v4 dark-mode variant: enable the `.dark` class strategy so
+   next-themes can flip themes by toggling that class on <html>. */
+@custom-variant dark (&:is(.dark *));
+
 /* shadcn/ui — neutral baseColor with CSS variables. */
 @layer base {
   :root {

@@ -46,4 +46,25 @@ describe('translateArrivalsResponse', () => {
     expect(out.stop).toBeNull();
     expect(out.arrivals).toEqual([]);
   });
+
+  it('R-05 defaults to empty arrivals when the stop has no stoptimesForServiceDate field', () => {
+    const out = translateArrivalsResponse(
+      {
+        data: {
+          stop: {
+            gtfsId: 'sol-antigua:3',
+            name: 'X',
+            lat: 0,
+            lon: 0,
+            // stoptimesForServiceDate intentionally omitted to exercise the
+            // `?? []` default branch.
+          },
+        },
+      },
+      '2026-06-02',
+    );
+    expect(out.stop).not.toBeNull();
+    expect(out.arrivals).toEqual([]);
+    expect(out.meta.realtime_available).toBe(false);
+  });
 });

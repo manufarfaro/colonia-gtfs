@@ -51,4 +51,16 @@ describe('viewer CORS middleware', () => {
     expect(warn).toHaveBeenCalled();
     warn.mockRestore();
   });
+
+  it('R-12 whitespace-only origin → no CORS header (trims to empty)', async () => {
+    const { middleware } = await loadMiddleware({ VIEWER_CORS_ORIGINS: '   ' });
+    const res = await middleware(apiReq('http://example.com'));
+    expect(res.headers.get('access-control-allow-origin')).toBeNull();
+  });
+
+  it('R-12 undefined env var → no CORS header (default path)', async () => {
+    const { middleware } = await loadMiddleware({ VIEWER_CORS_ORIGINS: undefined });
+    const res = await middleware(apiReq('http://example.com'));
+    expect(res.headers.get('access-control-allow-origin')).toBeNull();
+  });
 });

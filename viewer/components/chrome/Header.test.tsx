@@ -6,6 +6,10 @@ import { Header } from './Header';
 const messages = {
   chrome: {
     title: 'colonia-gtfs',
+    // Header now hosts ThemeToggle, which calls t('themeToggle') for its
+    // aria-label. The key must be present or next-intl throws under CI
+    // (production-mode next-intl is strict; dev only logs).
+    themeToggle: 'Cambiar tema',
   },
 };
 

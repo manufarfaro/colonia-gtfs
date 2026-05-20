@@ -22,8 +22,11 @@ function renderToggle(initial: 'light' | 'dark' = 'light'): void {
 
 beforeEach(() => {
   // next-themes persists to localStorage; reset between tests so each
-  // assertion starts from a clean slate.
-  window.localStorage.clear();
+  // assertion starts from a clean slate. happy-dom occasionally surfaces
+  // `window.localStorage` as undefined under certain CI configurations,
+  // so guard the access — the next-themes provider regenerates state
+  // from defaultTheme regardless.
+  window.localStorage?.clear?.();
   document.documentElement.className = '';
 });
 afterEach(() => {

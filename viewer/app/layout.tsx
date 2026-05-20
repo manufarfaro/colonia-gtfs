@@ -26,7 +26,7 @@ export default async function RootLayout({
     <html lang={locale} suppressHydrationWarning>
       <body className="min-h-screen flex flex-col">
         <ThemeProvider>
-          <NextIntlClientProvider messages={messages}>
+          <NextIntlClientProvider locale={locale} messages={messages}>
             <Header />
             <main className="flex-1">{children}</main>
             <DisclaimerBanner />

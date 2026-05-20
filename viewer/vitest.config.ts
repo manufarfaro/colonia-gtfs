@@ -4,6 +4,11 @@ import path from 'node:path';
 
 export default defineConfig({
   plugins: [react()],
+  // vitest pipes .css imports through Vite's PostCSS pipeline, which
+  // explodes on Tailwind v4's `@import "tailwindcss"` inside a test
+  // harness. Tests never render styled output — disable the PostCSS
+  // step so any `import './foo.css'` becomes a no-op.
+  css: { postcss: { plugins: [] } },
   test: {
     environment: 'happy-dom',
     setupFiles: ['./test/setup.ts'],
@@ -20,13 +25,9 @@ export default defineConfig({
       include: ['app/**/*.{ts,tsx}', 'components/**/*.{ts,tsx}', 'lib/**/*.{ts,tsx}', 'middleware.ts'],
       // Exclusions:
       //   - components/ui/**     → shadcn upstream primitives (own tests upstream)
-      //   - app/layout.tsx       → server component, covered by the smoke E2E
-      //   - app/page.tsx         → placeholder server component, covered by smoke
       //   - **/*.test.{ts,tsx}   → the tests themselves
       exclude: [
         'components/ui/**',
-        'app/layout.tsx',
-        'app/page.tsx',
         '**/*.{test,spec}.{ts,tsx}',
       ],
       thresholds: {

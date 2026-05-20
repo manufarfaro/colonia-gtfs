@@ -1,0 +1,10 @@
+{
+  "chrome": {
+    "title": "colonia-gtfs",
+    "disclaimer": "Datos preliminares · operador no oficial · tarifas a confirmar"
+  },
+  "landing": {
+    "title": "Viajes en bus en Colonia",
+    "subtitle": "Próximamente: planificá tu viaje en colectivo desde el celular."
+  }
+}

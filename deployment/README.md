@@ -2,7 +2,11 @@
 
 **Español** · [English](README.en.md)
 
-Config de infraestructura para los services del stack v0. Por ahora un solo service: OpenTripPlanner 2 (`otp`), el motor de routing que consume los outputs del [data layer](../data/README.md) y va a alimentar al bridge, BFF y viewer en specs siguientes.
+Config de infraestructura para los services del stack v0:
+
+- **`otp`** — OpenTripPlanner 2, motor de routing sobre el feed estático.
+- **`bridge`** — Service NestJS que poolea el AVL y expone GTFS-RT a OTP. Detalle en [`bridge/README.md`](../bridge/README.md).
+- **`viewer`** — App Next.js (UI + API routes / BFF). Único container con puerto público. Detalle en [`viewer/README.md`](../viewer/README.md).
 
 [![OTP Smoke](https://github.com/manufarfaro/colonia-gtfs/actions/workflows/otp-smoke.yml/badge.svg)](https://github.com/manufarfaro/colonia-gtfs/actions/workflows/otp-smoke.yml)
 
@@ -47,18 +51,15 @@ El BFF (spec siguiente `bff-api-and-routes`) va a proxear este endpoint hacia el
 
 ## Puertos y red
 
-- OTP escucha en `8080` **dentro** del container.
-- El `docker-compose.yml` base **no** publica ese puerto al host (decisión [D-06](../openspec/changes/otp-deployment/design.md#d-06--puerto-interno-8080-expuesto-solo-dentro-de-la-red-docker)). Los services siblings (bridge, BFF) llegan a OTP como `http://otp:8080` vía red interna de Docker.
-- Para debug local desde tu máquina:
+En v0 el **único service con `ports:` en el `docker-compose.yml` base es el viewer** (puerto público `${VIEWER_PORT:-8080}`). OTP y bridge solo son alcanzables vía la red interna de Docker:
 
-```bash
-cp compose.override.yml.example compose.override.yml
-docker compose up otp
-# ahora podés:
-curl http://localhost:8080/otp/actuators/health
-```
+| Service | Puerto interno | Expuesto al host por default | Cómo lo alcanza el cliente |
+|---|---|---|---|
+| `viewer` | 8080 | sí (`8080`) | navegador → `http://localhost:8080` |
+| `otp` | 8080 | no | viewer → `http://otp:8080` |
+| `bridge` | 3001 | no | viewer + otp → `http://bridge:3001` |
 
-`compose.override.yml` está en `.gitignore`. CI usa un archivo paralelo `compose.override.ci.yml` (commiteado) que el workflow `otp-smoke.yml` invoca explícito con `-f`.
+Para debug local con `curl` directo contra OTP o el bridge desde tu máquina, copiá [`compose.override.yml.example`](../compose.override.yml.example) → `compose.override.yml` y descomentá los puertos. El override real está en `.gitignore`. CI usa un archivo paralelo `compose.override.ci.yml` (commiteado) que los workflows invocan explícito con `-f`.
 
 ## JVM heap
 

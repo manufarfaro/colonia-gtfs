@@ -53,10 +53,9 @@ Aunque ABC Coop figura en stakeholders, **v0 sigue cubriendo solo data de Sol An
 ### 3.3 Stack (conceptual)
 
 ```
-viewer (HTML + JS + Google Maps JS API + Places Autocomplete)
-   │
-   ▼
-BFF (Express + TypeScript)      ← /tickets, /pois como stubs documentados
+Next.js app  (App Router — UI mobile-first + API routes / BFF)
+   │  Google Maps JS API + Places Autocomplete del lado del cliente
+   │  /tickets, /pois como stubs documentados
    │
    ├──► OTP (Docker, motor planning)
    │      ├─ mounts gtfs.zip ← data/*.txt
@@ -127,10 +126,9 @@ El detalle de implementación (config, esquemas, contratos exactos) vive en el O
 
 | Servicio | Stack | Responsabilidad | Superficie pública |
 |---|---|---|---|
-| **viewer** | HTML + JS + Google Maps JS API + Places | Renderiza el mapa, captura input del turista (origen/destino, tap-on-stop), muestra itinerarios y ETAs. No piensa: solo dibuja lo que el BFF le da. | Sirve estáticos al navegador |
-| **BFF** | Express + TypeScript | Sirve el viewer estático y proxea las APIs internas. Punto único de entrada al sistema; agrega/transforma respuestas si hace falta. En v0 deja `/tickets` y `/pois` como stubs documentados. | URL pública, único entry point |
-| **OTP** | OpenTripPlanner 2 (Docker, Java) | Motor de planning. Recibe `(lat,lon) origen` + destino → devuelve JSON con itinerarios (legs walk + bus, geometrías, horarios). Consume GTFS estático + GTFS-RT. | Solo interno; el BFF la proxea |
-| **bridge** | NestJS + axios + fast-xml-parser + iconv-lite + gtfs-realtime-bindings | Polea AVL Sol Antigua cada 30 s, matchea markers contra GTFS, emite GTFS-RT como `.pb` HTTP. | Solo interno; OTP la polea |
+| **Next.js app** (`viewer/`) | Next.js 16 App Router + React 19 + TypeScript + Tailwind v4 + shadcn/ui + next-intl | Combina la UI mobile-first (chrome persistente con header + disclaimer, Google Maps JS canvas para el render, Places Autocomplete del lado cliente) y las API routes (BFF) que proxean a OTP/bridge y exponen `/api/plan`, `/api/stops/:id/arrivals`, `/api/lines/:id`, `/api/lines/:id/vehicles`. Deja `/api/tickets` y `/api/pois` como stubs `501` documentados. | Único entry point público |
+| **OTP** | OpenTripPlanner 2 (Docker, Java) | Motor de planning. Recibe `(lat,lon) origen` + destino → devuelve JSON con itinerarios (legs walk + bus, geometrías, horarios). Consume GTFS estático + GTFS-RT. | Solo interno; el Next.js app la proxea |
+| **bridge** | NestJS + axios + fast-xml-parser + iconv-lite + gtfs-realtime-bindings | Polea AVL Sol Antigua cada 30 s, matchea markers contra GTFS, emite GTFS-RT como `.pb` HTTP. | Solo interno; OTP la polea, y el Next.js app la consulta para `/api/lines/:id/vehicles` |
 
 ### 6.2 Capa de datos
 
@@ -143,17 +141,17 @@ El detalle de implementación (config, esquemas, contratos exactos) vive en el O
 ```
 PLANNING (request del turista):
 
-   turista → viewer
+   turista → Next.js app
               │ Places Autocomplete (Google) → (lat,lon) origen + destino
               │
-              │ POST /api/plan?from=...&to=...
+              │ POST /api/plan
               ▼
-            BFF  ──proxy──►  OTP
-                              │
-                              ▼
-                            JSON con itineraries[].legs[]
+            API route  ──GraphQL──►  OTP
+                                       │
+                                       ▼
+                                  JSON con itineraries[].legs[]
               ◄──────────────────
-            BFF  ──pasa al viewer──►
+            API route ──pasa al cliente──►
                               │
                               ▼
                        viewer dibuja en Google Maps JS
@@ -177,7 +175,7 @@ REALTIME (background, sin interacción del turista):
 
 ### 6.4 Boundaries públicas vs. privadas
 
-- **Público (URL del demo):** solo el BFF. Todo lo demás vive en la red interna de Docker.
+- **Público (URL del demo):** solo la Next.js app (UI + API routes). Es el único container con `ports:` en `docker-compose.yml`. OTP y bridge viven en la red interna de Docker.
 - **Privado de la operación (no se publica nunca):** la infraestructura de captura del AVL (poller, jsonl crudos, procesador) que produce los `.txt` originales. Vive en otro repo / otra máquina; el producto no la incluye.
 - **De terceros:** Google Maps JS API (canvas + Places). Es la única dependencia externa en runtime.
 
@@ -249,8 +247,8 @@ Lista cerrada. Si todos los items están ✓ y los disclaimers están visibles, 
 | Q1 | ¿`trip_id` = `srv` del operador o sintético `route-service-dir-time`? (D3 del relevamiento) | Spec del bridge |
 | Q2 | ¿L5 modelado como 1 route con 2 shapes o con 3? (D2 del relevamiento) | Spec del data layer |
 | Q3 | ¿`colonia.osm.pbf` se commitea o se baja en build? | Spec del data layer |
-| Q4 | ¿Stack exacto del viewer: Vite + Vanilla TS, Vite + React, Vite + Svelte? | Spec del viewer |
-| Q5 | ¿Librería i18n: `i18next`, `formatjs`, custom 30-LOC? | Spec del viewer |
+| ~~Q4~~ | ~~¿Stack exacto del viewer: Vite + Vanilla TS, Vite + React, Vite + Svelte?~~ | **Resuelto en `viewer-shell-and-api`:** Next.js 16 App Router + React 19 + TypeScript (+ shadcn/ui + Tailwind v4) |
+| ~~Q5~~ | ~~¿Librería i18n: `i18next`, `formatjs`, custom 30-LOC?~~ | **Resuelto en `viewer-shell-and-api`:** `next-intl` |
 
 ### 10.2 Diferidas a versiones posteriores
 
@@ -285,8 +283,7 @@ Tras la aprobación de este PRD:
    | `data-layer-gtfs-static` | Estructura de `data/*.txt`, esquema, fares confirmadas, OSM extract, scripts de boot que arman `gtfs.zip` |
    | `otp-deployment` | Container de OTP, `router-config.json`, updaters apuntando al bridge, mounts |
    | `bridge-gtfs-rt` | Parseo del AVL XML (ISO-8859-1), matching markers → trip_id (Q1: `srv` vs sintético), emisión `.pb`, healthz, backoff |
-   | `bff-api-and-routes` | Express + TS, endpoints `/api/plan`, `/api/stops/:id/arrivals`, `/api/lines/:id`, stubs de `/api/tickets` y `/api/pois`, CORS |
-   | `viewer-shell-and-i18n` | Stack del viewer (Q4), i18n infra (Q5), chrome persistente, disclaimer banner, language toggle preparado |
+   | `viewer-shell-and-api` | Una sola Next.js app (App Router) que combina **viewer shell + i18n + API routes**: stack del viewer (Q4), i18n infra (Q5), chrome persistente, disclaimer banner, language toggle preparado, endpoints `/api/plan`, `/api/stops/:id/arrivals`, `/api/lines/:id`, `/api/lines/:id/vehicles`, stubs `/api/tickets` y `/api/pois`, healthz aggregate, CORS por env. Reemplaza al pair `bff-api-and-routes` + `viewer-shell-and-i18n` del plan original |
    | `viewer-od-mode` | Modo O→D con Places autocomplete, render de itinerario, card de tarifa |
    | `viewer-stop-info-mode` | Bottom sheet con próximos buses, distinción live vs programado |
    | `viewer-line-schedule-mode` | Vista de línea con trazado, paradas, vehículos live |

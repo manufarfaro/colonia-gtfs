@@ -8,6 +8,8 @@
 [![OTP Smoke](https://github.com/manufarfaro/colonia-gtfs/actions/workflows/otp-smoke.yml/badge.svg)](https://github.com/manufarfaro/colonia-gtfs/actions/workflows/otp-smoke.yml)
 [![Bridge](https://github.com/manufarfaro/colonia-gtfs/actions/workflows/bridge.yml/badge.svg)](https://github.com/manufarfaro/colonia-gtfs/actions/workflows/bridge.yml)
 [![Bridge RT validate](https://github.com/manufarfaro/colonia-gtfs/actions/workflows/bridge-rt-validate.yml/badge.svg)](https://github.com/manufarfaro/colonia-gtfs/actions/workflows/bridge-rt-validate.yml)
+[![Viewer](https://github.com/manufarfaro/colonia-gtfs/actions/workflows/viewer.yml/badge.svg)](https://github.com/manufarfaro/colonia-gtfs/actions/workflows/viewer.yml)
+[![Viewer Smoke](https://github.com/manufarfaro/colonia-gtfs/actions/workflows/viewer-smoke.yml/badge.svg)](https://github.com/manufarfaro/colonia-gtfs/actions/workflows/viewer-smoke.yml)
 
 **Español** · [English](README.en.md)
 
@@ -21,7 +23,7 @@ Operador **Sol Antigua** (urbano Colonia del Sacramento), líneas 3, 4, 5 y 8. O
 
 ## Stack conceptual
 
-`viewer (Google Maps JS) → BFF (Express + TS) → OpenTripPlanner + bridge` sobre el AVL de Sol Antigua. Detalles en el [PRD §6](docs/prd/mvp-v0.md#6-arquitectura-conceptual).
+Tres services en Docker Compose: `viewer` (Next.js — UI + API routes, único container público) → `otp` (motor de routing OTP 2) + `bridge` (NestJS, AVL → GTFS-RT). Detalles en el [PRD §6](docs/prd/mvp-v0.md#6-arquitectura-conceptual).
 
 ## Documentación
 
@@ -32,6 +34,7 @@ El trabajo arranca desde un PRD, sigue con un spec en OpenSpec y termina en cód
 - **[`data/`](data/)** — Feed GTFS Schedule estático (Sol Antigua urbano Colonia). Ver [`data/README.md`](data/README.md) para el contrato de mantenimiento y el flow de update.
 - **[`deployment/`](deployment/)** — Stack runtime (Docker Compose): OpenTripPlanner 2 sobre el feed estático. Ver [`deployment/README.md`](deployment/README.md) para boot, healthz y troubleshooting.
 - **[`bridge/`](bridge/)** — Service NestJS que poolea el AVL del operador y emite GTFS-Realtime para OTP. Ver [`bridge/README.md`](bridge/README.md) para el contrato de endpoints, healthz, comportamiento ante AVL caído, y manejo del secret `ORIGIN_AVL`.
+- **[`viewer/`](viewer/)** — App Next.js (App Router) que combina la UI mobile-first y las API routes (BFF). Único container con puerto público. Ver [`viewer/README.md`](viewer/README.md) para boot, dev mode, endpoints, chrome persistente, i18n y CORS.
 - **[`docs/release-process.md`](docs/release-process.md)** — Cómo cortar un release del feed (rama `release/X.Y.Z` → merge → tag `vX.Y.Z` → workflow publica GitHub Release con `gtfs.zip`).
 
 ## Desarrollo

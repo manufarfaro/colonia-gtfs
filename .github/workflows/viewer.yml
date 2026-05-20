@@ -1,0 +1,44 @@
+name: Viewer
+
+on:
+  pull_request:
+    paths:
+      - "viewer/**"
+      - ".github/workflows/viewer.yml"
+  push:
+    branches: [main]
+    paths:
+      - "viewer/**"
+      - ".github/workflows/viewer.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    working-directory: viewer
+
+jobs:
+  lint-and-test:
+    name: lint + vitest + next build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 26.x
+
+      - name: npm ci
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Unit tests (vitest)
+        run: npm test -- --reporter=default
+
+      - name: Build (next build, standalone)
+        run: npm run build

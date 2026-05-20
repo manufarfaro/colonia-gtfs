@@ -2,15 +2,21 @@
 #
 # Uso:
 #   cp compose.override.yml.example compose.override.yml
-#   docker compose up otp
+#   docker compose up viewer
 #
 # Docker Compose carga `compose.override.yml` automáticamente (si existe)
 # encima del `docker-compose.yml` base. El archivo real está gitignoreado.
+#
+# En v0 el único servicio con `ports:` en el compose base es el viewer
+# (puerto público :8080). Si necesitás pegarle a OTP o al bridge desde el
+# host directo (debug del motor de routing o de los .pb), descomentá los
+# bloques de abajo. Sin override, OTP y bridge solo son alcanzables vía
+# `docker compose exec` o desde la red interna.
 
 services:
-  otp:
-    # Expone el puerto 8080 del container al host para poder pegarle
-    # con curl/postman desde la máquina local:
-    #   curl http://localhost:8080/otp/actuators/health
-    ports:
-      - "8080:8080"
+  # otp:
+  #   ports:
+  #     - "8081:8080"   # http://localhost:8081/otp/actuators/health
+  # bridge:
+  #   ports:
+  #     - "3001:3001"   # http://localhost:3001/healthz

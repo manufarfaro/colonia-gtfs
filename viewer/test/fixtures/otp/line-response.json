@@ -1,36 +1,38 @@
 {
   "data": {
-    "route": {
-      "gtfsId": "sol-antigua:4",
-      "shortName": "4",
-      "longName": "Línea 4 — Real de San Carlos",
-      "patterns": [
-        {
-          "directionId": 0,
-          "headsign": "Centro",
-          "stops": [
-            { "gtfsId": "sol-antigua:s-1", "name": "Terminal", "lat": -34.4706, "lon": -57.8471 },
-            { "gtfsId": "sol-antigua:s-2", "name": "Plaza Mayor", "lat": -34.4711, "lon": -57.8434 }
-          ],
-          "geometry": { "points": "_p~iF~ps|U_ulLnnqC" },
-          "trips": [
-            { "gtfsId": "sol-antigua:t-100", "stoptimes": [{ "scheduledDeparture": 21600 }] },
-            { "gtfsId": "sol-antigua:t-101", "stoptimes": [{ "scheduledDeparture": 25200 }] }
-          ]
-        },
-        {
-          "directionId": 1,
-          "headsign": "Real de San Carlos",
-          "stops": [
-            { "gtfsId": "sol-antigua:s-2", "name": "Plaza Mayor", "lat": -34.4711, "lon": -57.8434 },
-            { "gtfsId": "sol-antigua:s-1", "name": "Terminal", "lat": -34.4706, "lon": -57.8471 }
-          ],
-          "geometry": { "points": "_ulLnnqC_p~iF~ps|U" },
-          "trips": [
-            { "gtfsId": "sol-antigua:t-200", "stoptimes": [{ "scheduledDeparture": 23400 }] }
-          ]
-        }
-      ]
-    }
+    "routes": [
+      {
+        "gtfsId": "1:4",
+        "shortName": "4",
+        "longName": "Línea 4 — Real de San Carlos",
+        "patterns": [
+          {
+            "directionId": 0,
+            "headsign": "Centro",
+            "stops": [
+              { "gtfsId": "1:1", "name": "Terminal", "lat": -34.4706, "lon": -57.8471 },
+              { "gtfsId": "1:2", "name": "Plaza Mayor", "lat": -34.4711, "lon": -57.8434 }
+            ],
+            "patternGeometry": { "points": "_p~iF~ps|U_ulLnnqC" },
+            "trips": [
+              { "gtfsId": "1:t-100", "stoptimes": [{ "scheduledDeparture": 21600 }] },
+              { "gtfsId": "1:t-101", "stoptimes": [{ "scheduledDeparture": 25200 }] }
+            ]
+          },
+          {
+            "directionId": 1,
+            "headsign": "Real de San Carlos",
+            "stops": [
+              { "gtfsId": "1:2", "name": "Plaza Mayor", "lat": -34.4711, "lon": -57.8434 },
+              { "gtfsId": "1:1", "name": "Terminal", "lat": -34.4706, "lon": -57.8471 }
+            ],
+            "patternGeometry": { "points": "_ulLnnqC_p~iF~ps|U" },
+            "trips": [
+              { "gtfsId": "1:t-200", "stoptimes": [{ "scheduledDeparture": 23400 }] }
+            ]
+          }
+        ]
+      }
+    ]
   }
 }

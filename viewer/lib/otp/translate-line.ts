@@ -14,18 +14,23 @@ export interface OtpPattern {
   directionId: number;
   headsign: string;
   stops: OtpStop[];
-  geometry: { points: string };
+  // OTP 2.10 returns the encoded polyline under `patternGeometry`; the
+  // older `geometry` field returns `[Coordinate]` (lat/lon pairs).
+  // patternGeometry can be null when OTP has not computed it yet.
+  patternGeometry: { points: string } | null;
   trips: OtpTrip[];
 }
 
-export interface OtpRouteResponse {
+export interface OtpRoute {
+  gtfsId: string;
+  shortName: string;
+  longName: string;
+  patterns: OtpPattern[];
+}
+
+export interface OtpRoutesResponse {
   data: {
-    route: {
-      gtfsId: string;
-      shortName: string;
-      longName: string;
-      patterns: OtpPattern[];
-    } | null;
+    routes: OtpRoute[];
   };
 }
 
@@ -63,10 +68,14 @@ function secondsToHHMM(secs: number): string {
 }
 
 export function translateLineResponse(
-  raw: OtpRouteResponse,
+  raw: OtpRoutesResponse,
+  shortName: string,
   date: string,
 ): RestLineResponse {
-  const route = raw.data.route;
+  // `routes(name:)` is a partial-match filter in OTP — narrow to an exact
+  // shortName hit to avoid surfacing the wrong line when names overlap
+  // ("4" could match "40" etc. in a larger operator).
+  const route = raw.data.routes.find((r) => r.shortName === shortName) ?? null;
   if (route === null) {
     return { line: null, shape: [], directions: [], meta: { date } };
   }
@@ -79,10 +88,12 @@ export function translateLineResponse(
       .sort((a, b) => a - b)
       .map(secondsToHHMM),
   }));
-  const shape: RestShape[] = route.patterns.map((p) => ({
-    directionId: p.directionId,
-    points: p.geometry.points,
-  }));
+  const shape: RestShape[] = route.patterns
+    .filter((p): p is OtpPattern & { patternGeometry: { points: string } } => p.patternGeometry !== null)
+    .map((p) => ({
+      directionId: p.directionId,
+      points: p.patternGeometry.points,
+    }));
   return {
     line: { id: route.gtfsId, shortName: route.shortName, longName: route.longName },
     shape,

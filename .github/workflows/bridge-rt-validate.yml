@@ -57,6 +57,40 @@ jobs:
       - name: Build gtfs.zip
         run: uv run --directory tooling python scripts/build_gtfs_zip.py
 
+      - name: Rebase fixture timestamps to "now"
+        run: |
+          set -euo pipefail
+          # The committed fixture has marker.time pinned to 2026-06-02 so
+          # local docs / spec scenarios are deterministic. But the
+          # MobilityData validator emits E012/E050 ("timestamp in future",
+          # "header timestamp < entity timestamp") when the fixture's
+          # timestamps are far from the runner's wall clock.
+          #
+          # Rebase: rewrite every time="YYYY-MM-DD HH:MM:SS" to a recent
+          # weekday timestamp (CI clock - 5 min). Preserves ISO-8859-1
+          # encoding via iconv-lite.
+          mkdir -p smoke-out
+          node -e "
+            const fs = require('fs');
+            const iconv = require('./bridge/node_modules/iconv-lite');
+            const inBuf = fs.readFileSync('bridge/test/fixtures/avl-sample.xml');
+            let text = iconv.decode(inBuf, 'iso-8859-1');
+            // 5 minutes ago in operator-local time (UTC-3).
+            const now = new Date(Date.now() - 5 * 60 * 1000);
+            const fmt = (d) => {
+              // YYYY-MM-DD HH:MM:SS in UTC-3.
+              const local = new Date(d.getTime() - 3 * 3600 * 1000);
+              const pad = (n) => String(n).padStart(2, '0');
+              return local.getUTCFullYear() + '-' + pad(local.getUTCMonth()+1) + '-' + pad(local.getUTCDate())
+                + ' ' + pad(local.getUTCHours()) + ':' + pad(local.getUTCMinutes()) + ':' + pad(local.getUTCSeconds());
+            };
+            const stamp = fmt(now);
+            text = text.replace(/time=\"[^\"]+\"/g, 'time=\"' + stamp + '\"');
+            fs.writeFileSync('smoke-out/avl-rebased.xml', iconv.encode(text, 'iso-8859-1'));
+            console.log('rebased to time=\"' + stamp + '\"');
+          "
+          ls -la smoke-out/avl-rebased.xml
+
       - name: Start bridge in fixture mode
         run: |
           # Fixture mode — explicitly NO secrets.ORIGIN_AVL (per R-03).
@@ -64,7 +98,7 @@ jobs:
           docker compose -f docker-compose.yml -f compose.override.ci.yml run -d --name bridge-smoke \
             --service-ports \
             -e ORIGIN_AVL=file:///app/fixture/avl-sample.xml \
-            -v "$(pwd)/bridge/test/fixtures/avl-sample.xml:/app/fixture/avl-sample.xml:ro" \
+            -v "$(pwd)/smoke-out/avl-rebased.xml:/app/fixture/avl-sample.xml:ro" \
             bridge
 
       - name: Wait for /healthz (status ok or degraded)
@@ -87,13 +121,15 @@ jobs:
       - name: Fetch .pb endpoints
         run: |
           set -euo pipefail
-          mkdir -p smoke-out/rt-feeds
-          # The validator's batch mode reads EVERY file in the directory
-          # we give it via -gtfsRealtimePath, so keep the .pb files
-          # isolated from the rest of the smoke artifacts.
-          curl -fsS http://localhost:3001/gtfs-rt/vehicle-positions.pb -o smoke-out/rt-feeds/vehicle-positions.pb
-          curl -fsS http://localhost:3001/gtfs-rt/trip-updates.pb -o smoke-out/rt-feeds/trip-updates.pb
-          ls -la smoke-out/rt-feeds/
+          # Validator's batch mode iterates every file in -gtfsRealtimePath
+          # AND treats them as a temporal sequence of one feed (firing E017
+          # "content changed, same header timestamp" when two different
+          # feed types live side by side). So we give each feed its own
+          # subdirectory and run the validator twice.
+          mkdir -p smoke-out/rt-feeds/vp smoke-out/rt-feeds/tu
+          curl -fsS http://localhost:3001/gtfs-rt/vehicle-positions.pb -o smoke-out/rt-feeds/vp/vehicle-positions.pb
+          curl -fsS http://localhost:3001/gtfs-rt/trip-updates.pb -o smoke-out/rt-feeds/tu/trip-updates.pb
+          ls -la smoke-out/rt-feeds/vp/ smoke-out/rt-feeds/tu/
 
       - name: Cache validator Maven build
         id: validator-cache
@@ -127,18 +163,20 @@ jobs:
           echo "uber jar: $UBER"
           cp "$UBER" "${GITHUB_WORKSPACE}/smoke-out/validator.jar"
 
-      - name: Run validator (assert zero ERROR-severity)
+      - name: Run validator on each feed separately
         run: |
           set -euo pipefail
-          # Batch CLI: -gtfs <static.zip> -gtfsRealtimePath <dir of .pb>.
-          # Outputs <each-pb>.results.json next to the .pb file in
-          # smoke-out/rt-feeds/.
-          java -jar smoke-out/validator.jar \
-            -gtfs data/output/gtfs.zip \
-            -gtfsRealtimePath smoke-out/rt-feeds/ 2>&1 | tee smoke-out/validator.log
-          # Combine all per-.pb results into a single report (for the
-          # uploaded artifact) and count ERROR-severity entries.
-          jq -s '.' smoke-out/rt-feeds/*.pb.results.json > smoke-out/validator-report.json
+          # Run twice — once per feed dir — so the validator doesn't
+          # cross-correlate the two .pb files as iterations of one feed
+          # (which triggers spurious E017).
+          for dir in smoke-out/rt-feeds/vp smoke-out/rt-feeds/tu; do
+            echo "=== validator pass: $dir ==="
+            java -jar smoke-out/validator.jar \
+              -gtfs data/output/gtfs.zip \
+              -gtfsRealtimePath "$dir" 2>&1 | tee -a smoke-out/validator.log
+          done
+          # Combine per-.pb results into a single report.
+          jq -s '.' smoke-out/rt-feeds/*/*.pb.results.json > smoke-out/validator-report.json
           ERROR_COUNT=$(jq '
             [ .. | objects
               | select(has("validationRule"))
@@ -150,7 +188,15 @@ jobs:
               | select(.validationRule.severity == "WARNING")
             ] | length' smoke-out/validator-report.json)
           echo "ERROR=${ERROR_COUNT} WARNING=${WARN_COUNT}"
-          test "$ERROR_COUNT" = "0"
+          if [ "$ERROR_COUNT" != "0" ]; then
+            echo "=== ERROR-severity entries ==="
+            jq '[.. | objects
+                | select(has("validationRule"))
+                | select(.validationRule.severity == "ERROR")
+                | {id: .validationRule.errorId, title: .validationRule.title}
+              ] | unique' smoke-out/validator-report.json
+            exit 1
+          fi
 
       - name: Upload smoke artifacts
         if: always()

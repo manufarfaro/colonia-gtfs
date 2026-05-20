@@ -6,6 +6,8 @@
 [![Validate GTFS](https://github.com/manufarfaro/colonia-gtfs/actions/workflows/validate-gtfs.yml/badge.svg)](https://github.com/manufarfaro/colonia-gtfs/actions/workflows/validate-gtfs.yml)
 [![Tooling](https://github.com/manufarfaro/colonia-gtfs/actions/workflows/tooling.yml/badge.svg)](https://github.com/manufarfaro/colonia-gtfs/actions/workflows/tooling.yml)
 [![OTP Smoke](https://github.com/manufarfaro/colonia-gtfs/actions/workflows/otp-smoke.yml/badge.svg)](https://github.com/manufarfaro/colonia-gtfs/actions/workflows/otp-smoke.yml)
+[![Bridge](https://github.com/manufarfaro/colonia-gtfs/actions/workflows/bridge.yml/badge.svg)](https://github.com/manufarfaro/colonia-gtfs/actions/workflows/bridge.yml)
+[![Bridge RT validate](https://github.com/manufarfaro/colonia-gtfs/actions/workflows/bridge-rt-validate.yml/badge.svg)](https://github.com/manufarfaro/colonia-gtfs/actions/workflows/bridge-rt-validate.yml)
 
 **Español** · [English](README.en.md)
 
@@ -29,6 +31,7 @@ El trabajo arranca desde un PRD, sigue con un spec en OpenSpec y termina en cód
 - **[`openspec/`](openspec/)** — Specs y propuestas de cambio: el *cómo*.
 - **[`data/`](data/)** — Feed GTFS Schedule estático (Sol Antigua urbano Colonia). Ver [`data/README.md`](data/README.md) para el contrato de mantenimiento y el flow de update.
 - **[`deployment/`](deployment/)** — Stack runtime (Docker Compose): OpenTripPlanner 2 sobre el feed estático. Ver [`deployment/README.md`](deployment/README.md) para boot, healthz y troubleshooting.
+- **[`bridge/`](bridge/)** — Service NestJS que poolea el AVL del operador y emite GTFS-Realtime para OTP. Ver [`bridge/README.md`](bridge/README.md) para el contrato de endpoints, healthz, comportamiento ante AVL caído, y manejo del secret `ORIGIN_AVL`.
 - **[`docs/release-process.md`](docs/release-process.md)** — Cómo cortar un release del feed (rama `release/X.Y.Z` → merge → tag `vX.Y.Z` → workflow publica GitHub Release con `gtfs.zip`).
 
 ## Desarrollo

@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<markers>
+  <marker id="V42" lin="4" dir="0" lat="-34.470578" lon="-57.847103" time="2026-01-05 08:04:00" speed="30" head="90" srv="T-WK-1234" label="Línea 4"/>
+  <marker id="V43" lin="4" dir="1" lat="-34.470692" lon="-57.852200" time="2026-01-05 08:30:00" speed="0" head="270"/>
+</markers>

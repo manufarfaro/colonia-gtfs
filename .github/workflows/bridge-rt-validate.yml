@@ -1,0 +1,209 @@
+name: Bridge RT validate
+
+on:
+  pull_request:
+    paths:
+      - "bridge/**"
+      - "data/*.txt"
+      - "docker-compose.yml"
+      - "compose.override.ci.yml"
+      - ".github/workflows/bridge-rt-validate.yml"
+  push:
+    branches: [main]
+    paths:
+      - "bridge/**"
+      - "data/*.txt"
+      - "docker-compose.yml"
+      - "compose.override.ci.yml"
+      - ".github/workflows/bridge-rt-validate.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    name: docker compose up bridge + MobilityData validator
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 26.x
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - name: Cache Maven repository (for validator build)
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository
+          # Pinned key = pinned validator commit. Bumping the commit
+          # invalidates the cache automatically.
+          key: maven-grv-7041fa3
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+
+      - name: Sync tooling deps
+        working-directory: tooling
+        run: uv sync --frozen
+
+      - name: Build gtfs.zip
+        run: uv run --directory tooling python scripts/build_gtfs_zip.py
+
+      - name: Rebase fixture timestamps to "now"
+        run: |
+          set -euo pipefail
+          # The committed fixture has marker.time pinned to 2026-06-02
+          # for deterministic docs/scenarios, but the MobilityData
+          # validator emits E012/E050 ("timestamp in future", "header
+          # timestamp < entity timestamp") when fixture stamps are far
+          # from the runner's wall clock. Rewrite every
+          # `time="YYYY-MM-DD HH:MM:SS"` attribute to `now - 5min` in the
+          # operator's local TZ (America/Montevideo, UTC-3 fixed).
+          #
+          # sed on the raw bytes — the `time=` attribute is pure ASCII so
+          # the high-bit chars of the ISO-8859-1 fixture (e.g. acentuados
+          # in `label="..."`) pass through untouched.
+          mkdir -p smoke-out
+          STAMP=$(TZ=America/Montevideo date -d '5 minutes ago' '+%Y-%m-%d %H:%M:%S')
+          echo "rebasing all marker.time → \"$STAMP\""
+          # LC_ALL=C makes sed treat the file as plain bytes so the
+          # 0xed (ISO-8859-1 "í") and other high-bit chars in label="…"
+          # pass through untouched. Without it, BSD/macOS sed errors;
+          # GNU sed silently drops bytes it can't decode as UTF-8.
+          LC_ALL=C sed -E "s/time=\"[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}\"/time=\"$STAMP\"/g" \
+            bridge/test/fixtures/avl-sample.xml > smoke-out/avl-rebased.xml
+          # Sanity: should still contain ISO-8859-1 0xed byte and the new
+          # timestamp.
+          ls -la smoke-out/avl-rebased.xml
+          grep -c "$STAMP" smoke-out/avl-rebased.xml || true
+
+      - name: Start bridge in fixture mode
+        run: |
+          # Fixture mode — explicitly NO secrets.ORIGIN_AVL (per R-03).
+          docker compose -f docker-compose.yml -f compose.override.ci.yml build bridge
+          docker compose -f docker-compose.yml -f compose.override.ci.yml run -d --name bridge-smoke \
+            --service-ports \
+            -e ORIGIN_AVL=file:///app/fixture/avl-sample.xml \
+            -v "$(pwd)/smoke-out/avl-rebased.xml:/app/fixture/avl-sample.xml:ro" \
+            bridge
+
+      - name: Wait for /healthz (status ok or degraded)
+        run: |
+          set -euo pipefail
+          mkdir -p smoke-out
+          for i in $(seq 1 30); do
+            BODY=$(curl -fsS http://localhost:3001/healthz || true)
+            echo "poll $i: $BODY"
+            if echo "$BODY" | grep -Eq '"status"\s*:\s*"(ok|degraded)"'; then
+              echo "$BODY" > smoke-out/healthz.json
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "bridge did not reach ok/degraded within 60 s" >&2
+          docker compose -f docker-compose.yml -f compose.override.ci.yml logs bridge >&2 || true
+          exit 1
+
+      - name: Fetch .pb endpoints
+        run: |
+          set -euo pipefail
+          # Validator's batch mode iterates every file in -gtfsRealtimePath
+          # AND treats them as a temporal sequence of one feed (firing E017
+          # "content changed, same header timestamp" when two different
+          # feed types live side by side). So we give each feed its own
+          # subdirectory and run the validator twice.
+          mkdir -p smoke-out/rt-feeds/vp smoke-out/rt-feeds/tu
+          curl -fsS http://localhost:3001/gtfs-rt/vehicle-positions.pb -o smoke-out/rt-feeds/vp/vehicle-positions.pb
+          curl -fsS http://localhost:3001/gtfs-rt/trip-updates.pb -o smoke-out/rt-feeds/tu/trip-updates.pb
+          ls -la smoke-out/rt-feeds/vp/ smoke-out/rt-feeds/tu/
+
+      - name: Cache validator Maven build
+        id: validator-cache
+        uses: actions/cache@v4
+        with:
+          # Cache key includes the pinned validator commit so a bump
+          # invalidates automatically.
+          key: gtfs-rt-validator-jar-7041fa3
+          path: smoke-out/validator.jar
+
+      - name: Build MobilityData gtfs-realtime-validator from source
+        if: steps.validator-cache.outputs.cache-hit != 'true'
+        run: |
+          set -euo pipefail
+          # The validator is not published as a GitHub release nor on
+          # public Maven Central — only on GitHub Packages (which requires
+          # auth). We build the `gtfs-realtime-validator-lib` module from
+          # source, pinned to commit 7041fa3 (2026-04-14). Maven dep cache
+          # below speeds up subsequent runs.
+          git clone --depth 1 https://github.com/MobilityData/gtfs-realtime-validator /tmp/grv
+          cd /tmp/grv
+          git fetch --depth 1 origin 7041fa3fcaf674bf730e17325c179d329cdff6f2
+          git checkout 7041fa3fcaf674bf730e17325c179d329cdff6f2
+          cd gtfs-realtime-validator-lib
+          mvn -B --no-transfer-progress package -DskipTests
+          # Shade plugin produces target/<artifactId>-<version>.jar (uber)
+          # plus target/original-<artifactId>-<version>.jar (pre-shade). We
+          # want the uber one. Copy with a stable name to smoke-out/.
+          ls -la target/ | grep -E '\.jar$'
+          UBER=$(ls target/gtfs-realtime-validator-lib-*.jar | grep -v '^target/original-' | head -1)
+          echo "uber jar: $UBER"
+          cp "$UBER" "${GITHUB_WORKSPACE}/smoke-out/validator.jar"
+
+      - name: Run validator on each feed separately
+        run: |
+          set -euo pipefail
+          # Run twice — once per feed dir — so the validator doesn't
+          # cross-correlate the two .pb files as iterations of one feed
+          # (which triggers spurious E017).
+          for dir in smoke-out/rt-feeds/vp smoke-out/rt-feeds/tu; do
+            echo "=== validator pass: $dir ==="
+            java -jar smoke-out/validator.jar \
+              -gtfs data/output/gtfs.zip \
+              -gtfsRealtimePath "$dir" 2>&1 | tee -a smoke-out/validator.log
+          done
+          # Combine per-.pb results into a single report.
+          jq -s '.' smoke-out/rt-feeds/*/*.pb.results.json > smoke-out/validator-report.json
+          ERROR_COUNT=$(jq '
+            [ .. | objects
+              | select(has("validationRule"))
+              | select(.validationRule.severity == "ERROR")
+            ] | length' smoke-out/validator-report.json)
+          WARN_COUNT=$(jq '
+            [ .. | objects
+              | select(has("validationRule"))
+              | select(.validationRule.severity == "WARNING")
+            ] | length' smoke-out/validator-report.json)
+          echo "ERROR=${ERROR_COUNT} WARNING=${WARN_COUNT}"
+          if [ "$ERROR_COUNT" != "0" ]; then
+            echo "=== ERROR-severity entries ==="
+            jq '[.. | objects
+                | select(has("validationRule"))
+                | select(.validationRule.severity == "ERROR")
+                | {id: .validationRule.errorId, title: .validationRule.title}
+              ] | unique' smoke-out/validator-report.json
+            exit 1
+          fi
+
+      - name: Upload smoke artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bridge-rt-validate-${{ github.run_id }}-${{ github.run_attempt }}
+          path: smoke-out/
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Tear down
+        if: always()
+        run: |
+          docker compose -f docker-compose.yml -f compose.override.ci.yml logs bridge > smoke-out/bridge.log || true
+          docker rm -f bridge-smoke || true
+          docker compose -f docker-compose.yml -f compose.override.ci.yml down || true

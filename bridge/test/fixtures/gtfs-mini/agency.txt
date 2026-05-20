@@ -1,0 +1,2 @@
+agency_id,agency_name,agency_url,agency_timezone,agency_lang
+sol-antigua,Sol Antigua S.A.,http://example.test/,America/Montevideo,es

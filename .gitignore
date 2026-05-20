@@ -11,3 +11,7 @@ __pycache__/
 # Docker Compose — el archivo de override local se ignora; el template
 # vive en compose.override.yml.example (commiteado).
 compose.override.yml
+
+# Environment secrets — la URL real del AVL upstream (ORIGIN_AVL) nunca se
+# committea. El template vive en .env.example. Ver spec bridge-gtfs-rt R-03.
+.env

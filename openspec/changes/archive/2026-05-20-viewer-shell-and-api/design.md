@@ -179,7 +179,9 @@ cp messages/es.json messages/en.json
 
 Cero refactor en el código de componentes.
 
-### D-10 — Chrome persistente: Header + DisclaimerBanner
+### D-10 — Chrome persistente: Header + DisclaimerBanner (client components)
+
+**Refinement durante apply — chrome como client components, no server:** el server-component pattern con `getTranslations()` requiere request-scoped context que vitest + RTL no provee. Switch a `useTranslations()` (client). El chrome es trivial + estático + no hay ganancia performance de render server-side. `app/layout.tsx` queda server component (popula `<NextIntlClientProvider messages={...}>`); los children del provider corren client.
 
 **Decisión:** Dos componentes mínimos en `components/chrome/`:
 
@@ -210,6 +212,35 @@ Si en algún momento la app pasa a multi-origin (CDN para frontend, BFF separado
 
 API routes se testean con un wrapper `supertest`-like sobre `node:http` que usa el handler exportado por `route.ts`.
 
+### D-16 — UI library: shadcn/ui + Tailwind v4
+
+**Decisión (refinement durante apply):** El shell + futuros modes del viewer usan **shadcn/ui** como component library, con Tailwind CSS v4 como styling layer. El layout del repo suma:
+
+- `components.json` — config de shadcn al root del viewer.
+- `components/ui/` — components copy-pasted por shadcn (Button, Dialog, Sheet, etc., según se vayan necesitando).
+- `lib/utils.ts` — helper `cn()` (merge de classNames vía `clsx` + `tailwind-merge`).
+- `app/globals.css` — `@import "tailwindcss"` + CSS variables del theme de shadcn.
+- `tailwind.config.ts` — opcional con v4; los tokens se setean en `globals.css` por default.
+
+Deps adicionales runtime: `class-variance-authority`, `clsx`, `tailwind-merge`, `lucide-react` (iconos default de shadcn), `@radix-ui/*` (peer-installed por cada component shadcn que sumemos).
+
+Dev: `tailwindcss` v4 + `@tailwindcss/postcss` + `autoprefixer`.
+
+**Por qué shadcn/ui (y no Radix puro / Headless UI / MUI / Mantine):**
+
+- **No es una dep externa con versionado propio** — los components se copy-paste a `components/ui/`, así que somos owners del code y no estamos atados al release schedule de la lib.
+- **Radix-based** debajo: accessibility + keyboard navigation gratis.
+- **Tailwind-first**: zero CSS-in-JS overhead, build time minimal, sin runtime style injection.
+- **Default visual del demo**: minimal, neutro, responsive — alinea con PRD §5.1 "mimetizar Google Maps Transit" mejor que algo más opinado como Mantine o MUI.
+- **Adopción mainstream** en Next.js apps modernas — la app es legible por cualquier dev que llegue.
+
+**Por qué Tailwind v4 (no v3):** estable, CSS-first config, mejor DX. shadcn soporta v4 oficialmente desde Q4 2025.
+
+**Lo que NO viene en este apply:**
+
+- Los components específicos (Button, Sheet, etc.) solo se agregan cuando algún feature los necesita. Para el shell de esta capability solo se inicializa el setup (`components.json`, `lib/utils.ts`, `globals.css`, Tailwind config) + opcional el `Button` para el LocaleSwitcher.
+- Los specs siguientes del viewer (od-mode, stop-info, line-schedule) van a hacer `npx shadcn add <component>` según necesiten.
+
 ### D-15 — CI: dos workflows (lint+test + smoke E2E stack completo)
 
 **Decisión:** Igual que el patrón del bridge:
@@ -218,6 +249,23 @@ API routes se testean con un wrapper `supertest`-like sobre `node:http` que usa 
 - `.github/workflows/viewer-smoke.yml` — stack completo en fixture mode. setup-node 26, setup-java 21, uv. `docker compose up -d otp bridge viewer` con `ORIGIN_AVL=file://./bridge/test/fixtures/avl-sample.xml`. Poll `/api/healthz` hasta `ok|degraded`. Hit `/api/plan`, `/api/lines/4`, `/api/lines/4/vehicles`. Asserta shapes. Sube `smoke-out/` como artifact.
 
 Smoke NO referencia `secrets.ORIGIN_AVL` (fixture mode only — herencia del contract de `bridge-gtfs-rt` R-03).
+
+### D-17 — ESLint config: minimal flat config, sin `eslint-config-next`
+
+**Decisión:** El flat config (`eslint.config.js`) usa solamente `@typescript-eslint` + el parser + reglas mínimas. **No** extiende `eslint-config-next`.
+
+**Por qué:** Al correr `npm run lint` contra ESLint 10.4 + `eslint-config-next@16.x` durante la verificación, el `eslint-plugin-react@7.x` que la config bundlea crashea en cada archivo `.ts/.tsx` con `TypeError: contextOrFilename.getFilename is not a function` (chequea por una API pre-ESLint-10). El upstream todavía no actualizó la versión bundleada.
+
+**Trade-off aceptado:**
+
+- Perdemos las reglas semánticas de React (hooks-rules, JSX-no-target-blank, etc.) que aporta `eslint-config-next`. A v0 (chrome estática + componentes triviales) no aplica de manera práctica.
+- `next build` sigue cubriendo el type-check completo del codebase.
+- Cuando el upstream chain alinee (`eslint-plugin-react` con soporte ESLint 10), revisitar y volver a extender la config oficial.
+
+**Cómo aplica:**
+
+- `npm run lint` corre rápido y verde con la config minimal.
+- Si un feature siguiente necesita una regla React específica, agregarla puntualmente en `eslint.config.js` o esperar al unfreeze del upstream.
 
 ## Risks / Trade-offs
 

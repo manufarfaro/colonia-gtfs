@@ -87,10 +87,13 @@ jobs:
       - name: Fetch .pb endpoints
         run: |
           set -euo pipefail
-          mkdir -p smoke-out
-          curl -fsS http://localhost:3001/gtfs-rt/vehicle-positions.pb -o smoke-out/vehicle-positions.pb
-          curl -fsS http://localhost:3001/gtfs-rt/trip-updates.pb -o smoke-out/trip-updates.pb
-          ls -la smoke-out/
+          mkdir -p smoke-out/rt-feeds
+          # The validator's batch mode reads EVERY file in the directory
+          # we give it via -gtfsRealtimePath, so keep the .pb files
+          # isolated from the rest of the smoke artifacts.
+          curl -fsS http://localhost:3001/gtfs-rt/vehicle-positions.pb -o smoke-out/rt-feeds/vehicle-positions.pb
+          curl -fsS http://localhost:3001/gtfs-rt/trip-updates.pb -o smoke-out/rt-feeds/trip-updates.pb
+          ls -la smoke-out/rt-feeds/
 
       - name: Cache validator Maven build
         id: validator-cache
@@ -128,13 +131,14 @@ jobs:
         run: |
           set -euo pipefail
           # Batch CLI: -gtfs <static.zip> -gtfsRealtimePath <dir of .pb>.
-          # Outputs <each-pb>.results.json next to the .pb file.
+          # Outputs <each-pb>.results.json next to the .pb file in
+          # smoke-out/rt-feeds/.
           java -jar smoke-out/validator.jar \
             -gtfs data/output/gtfs.zip \
-            -gtfsRealtimePath smoke-out/ 2>&1 | tee smoke-out/validator.log
+            -gtfsRealtimePath smoke-out/rt-feeds/ 2>&1 | tee smoke-out/validator.log
           # Combine all per-.pb results into a single report (for the
           # uploaded artifact) and count ERROR-severity entries.
-          jq -s '.' smoke-out/*.pb.results.json > smoke-out/validator-report.json
+          jq -s '.' smoke-out/rt-feeds/*.pb.results.json > smoke-out/validator-report.json
           ERROR_COUNT=$(jq '
             [ .. | objects
               | select(has("validationRule"))

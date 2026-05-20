@@ -9,7 +9,6 @@ on:
       - "data/*.txt"
       - "data/colonia.osm.pbf"
       - "docker-compose.yml"
-      - "compose.override.ci.yml"
       - "tooling/scripts/build_gtfs_zip.py"
       - "tooling/pyproject.toml"
       - "tooling/uv.lock"
@@ -23,7 +22,6 @@ on:
       - "data/*.txt"
       - "data/colonia.osm.pbf"
       - "docker-compose.yml"
-      - "compose.override.ci.yml"
       - "tooling/scripts/build_gtfs_zip.py"
       - "tooling/pyproject.toml"
       - "tooling/uv.lock"
@@ -72,20 +70,35 @@ jobs:
           LC_ALL=C sed -E "s/time=\"[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}\"/time=\"$STAMP\"/g" \
             bridge/test/fixtures/avl-sample.xml > smoke-out/avl-rebased.xml
 
+      - name: Write smoke-specific compose override
+        run: |
+          # Reusing compose.override.ci.yml here is wrong: that file maps OTP
+          # to host :8080, colliding with the viewer (which legitimately owns
+          # :8080 in v0). For this smoke we only need the viewer published —
+          # otp and bridge stay internal because the viewer is the one
+          # talking to them. The override below just plumbs the fixture
+          # ORIGIN_AVL into bridge without exposing additional ports.
+          cat > compose.override.viewer-smoke.yml <<EOF
+          services:
+            bridge:
+              environment:
+                ORIGIN_AVL: file:///app/fixture/avl-sample.xml
+              volumes:
+                - $(pwd)/smoke-out/avl-rebased.xml:/app/fixture/avl-sample.xml:ro
+          EOF
+          cat compose.override.viewer-smoke.yml
+
       - name: Build stack (otp + bridge + viewer)
         run: |
           # Fixture mode — explicitly NO secrets.ORIGIN_AVL (per R-11).
-          docker compose -f docker-compose.yml -f compose.override.ci.yml build otp bridge viewer
+          docker compose -f docker-compose.yml -f compose.override.viewer-smoke.yml build otp bridge viewer
 
       - name: Start stack
         run: |
           set -euo pipefail
-          docker compose -f docker-compose.yml -f compose.override.ci.yml run -d --name bridge-smoke \
-            --service-ports \
-            -e ORIGIN_AVL=file:///app/fixture/avl-sample.xml \
-            -v "$(pwd)/smoke-out/avl-rebased.xml:/app/fixture/avl-sample.xml:ro" \
-            bridge
-          docker compose -f docker-compose.yml -f compose.override.ci.yml up -d otp viewer
+          # depends_on with condition: service_healthy waits for otp + bridge
+          # healthchecks before viewer comes up.
+          docker compose -f docker-compose.yml -f compose.override.viewer-smoke.yml up -d viewer
 
       - name: Wait for viewer /api/healthz (ok or degraded)
         run: |
@@ -137,9 +150,9 @@ jobs:
         if: always()
         run: |
           mkdir -p smoke-out
-          docker compose -f docker-compose.yml -f compose.override.ci.yml logs viewer > smoke-out/viewer.log 2>&1 || true
-          docker compose -f docker-compose.yml -f compose.override.ci.yml logs otp > smoke-out/otp.log 2>&1 || true
-          docker logs bridge-smoke > smoke-out/bridge.log 2>&1 || true
+          docker compose -f docker-compose.yml -f compose.override.viewer-smoke.yml logs viewer > smoke-out/viewer.log 2>&1 || true
+          docker compose -f docker-compose.yml -f compose.override.viewer-smoke.yml logs otp > smoke-out/otp.log 2>&1 || true
+          docker compose -f docker-compose.yml -f compose.override.viewer-smoke.yml logs bridge > smoke-out/bridge.log 2>&1 || true
 
       - name: Upload smoke artifacts
         if: always()
@@ -153,5 +166,4 @@ jobs:
       - name: Tear down
         if: always()
         run: |
-          docker rm -f bridge-smoke || true
-          docker compose -f docker-compose.yml -f compose.override.ci.yml down || true
+          docker compose -f docker-compose.yml -f compose.override.viewer-smoke.yml down || true

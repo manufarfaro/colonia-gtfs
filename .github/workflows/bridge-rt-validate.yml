@@ -38,6 +38,7 @@ jobs:
         with:
           distribution: temurin
           java-version: "21"
+          cache: maven
 
       - name: Install uv
         uses: astral-sh/setup-uv@v3
@@ -84,29 +85,58 @@ jobs:
           curl -fsS http://localhost:3001/gtfs-rt/trip-updates.pb -o smoke-out/trip-updates.pb
           ls -la smoke-out/
 
-      - name: Download MobilityData gtfs-realtime-validator
-        run: |
-          set -euo pipefail
-          # Pin a known release. If the URL changes (404), bump this PR.
-          VALIDATOR_URL="https://github.com/MobilityData/gtfs-realtime-validator/releases/download/v1.0.0/gtfs-realtime-validator-lib-1.0.0.jar"
-          curl -fsSL "$VALIDATOR_URL" -o smoke-out/validator.jar
-          ls -la smoke-out/validator.jar
+      - name: Cache validator Maven build
+        id: validator-cache
+        uses: actions/cache@v4
+        with:
+          # Cache key includes the pinned validator commit so a bump
+          # invalidates automatically.
+          key: gtfs-rt-validator-jar-7041fa3
+          path: smoke-out/validator.jar
 
-      - name: Run validator (assert zero P0/P1)
+      - name: Build MobilityData gtfs-realtime-validator from source
+        if: steps.validator-cache.outputs.cache-hit != 'true'
         run: |
           set -euo pipefail
-          # Run validator against the two .pb files plus gtfs.zip.
-          # Output JSON to parse; assert zero ERROR-severity issues.
+          # The validator is not published as a GitHub release nor on
+          # public Maven Central — only on GitHub Packages (which requires
+          # auth). We build the `gtfs-realtime-validator-lib` module from
+          # source, pinned to commit 7041fa3 (2026-04-14). Maven dep cache
+          # below speeds up subsequent runs.
+          git clone --depth 1 https://github.com/MobilityData/gtfs-realtime-validator /tmp/grv
+          cd /tmp/grv
+          git fetch --depth 1 origin 7041fa3fcaf674bf730e17325c179d329cdff6f2
+          git checkout 7041fa3fcaf674bf730e17325c179d329cdff6f2
+          cd gtfs-realtime-validator-lib
+          mvn -B --no-transfer-progress package -DskipTests
+          # The packaged JAR has a date-stamped name in target/. Copy with
+          # a stable name to smoke-out/.
+          cp target/gtfs-realtime-validator-lib-*-with-dependencies.jar \
+             "${GITHUB_WORKSPACE}/smoke-out/validator.jar"
+
+      - name: Run validator (assert zero ERROR-severity)
+        run: |
+          set -euo pipefail
+          # Batch CLI: -gtfs <static.zip> -gtfsRealtimePath <dir of .pb>.
+          # Outputs <each-pb>.results.json next to the .pb file.
           java -jar smoke-out/validator.jar \
             -gtfs data/output/gtfs.zip \
-            -gtfsRealtime smoke-out/vehicle-positions.pb \
-            -gtfsRealtime smoke-out/trip-updates.pb \
-            -output smoke-out/validator-report.json | tee smoke-out/validator.log
-          # Heuristic: the JSON report has a `results` array with `errorCount` per rule.
-          # Fail the build if any error-level count is > 0.
-          ERR_COUNT=$(jq '[.. | objects | .errorCount? // 0] | add // 0' smoke-out/validator-report.json)
-          echo "total errorCount=$ERR_COUNT"
-          test "$ERR_COUNT" = "0"
+            -gtfsRealtimePath smoke-out/ 2>&1 | tee smoke-out/validator.log
+          # Combine all per-.pb results into a single report (for the
+          # uploaded artifact) and count ERROR-severity entries.
+          jq -s '.' smoke-out/*.pb.results.json > smoke-out/validator-report.json
+          ERROR_COUNT=$(jq '
+            [ .. | objects
+              | select(has("validationRule"))
+              | select(.validationRule.severity == "ERROR")
+            ] | length' smoke-out/validator-report.json)
+          WARN_COUNT=$(jq '
+            [ .. | objects
+              | select(has("validationRule"))
+              | select(.validationRule.severity == "WARNING")
+            ] | length' smoke-out/validator-report.json)
+          echo "ERROR=${ERROR_COUNT} WARNING=${WARN_COUNT}"
+          test "$ERROR_COUNT" = "0"
 
       - name: Upload smoke artifacts
         if: always()

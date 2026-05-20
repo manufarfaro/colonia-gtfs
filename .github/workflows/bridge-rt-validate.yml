@@ -116,10 +116,13 @@ jobs:
           git checkout 7041fa3fcaf674bf730e17325c179d329cdff6f2
           cd gtfs-realtime-validator-lib
           mvn -B --no-transfer-progress package -DskipTests
-          # The packaged JAR has a date-stamped name in target/. Copy with
-          # a stable name to smoke-out/.
-          cp target/gtfs-realtime-validator-lib-*-with-dependencies.jar \
-             "${GITHUB_WORKSPACE}/smoke-out/validator.jar"
+          # Shade plugin produces target/<artifactId>-<version>.jar (uber)
+          # plus target/original-<artifactId>-<version>.jar (pre-shade). We
+          # want the uber one. Copy with a stable name to smoke-out/.
+          ls -la target/ | grep -E '\.jar$'
+          UBER=$(ls target/gtfs-realtime-validator-lib-*.jar | grep -v '^target/original-' | head -1)
+          echo "uber jar: $UBER"
+          cp "$UBER" "${GITHUB_WORKSPACE}/smoke-out/validator.jar"
 
       - name: Run validator (assert zero ERROR-severity)
         run: |

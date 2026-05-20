@@ -38,7 +38,14 @@ jobs:
         with:
           distribution: temurin
           java-version: "21"
-          cache: maven
+
+      - name: Cache Maven repository (for validator build)
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository
+          # Pinned key = pinned validator commit. Bumping the commit
+          # invalidates the cache automatically.
+          key: maven-grv-7041fa3
 
       - name: Install uv
         uses: astral-sh/setup-uv@v3

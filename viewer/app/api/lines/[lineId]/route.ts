@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { OtpUnavailableError, queryOtp } from '@/lib/otp/client';
 import { LINE_QUERY } from '@/lib/otp/queries';
 import {
-  type OtpRouteResponse,
+  type OtpRoutesResponse,
   type RestLineResponse,
   translateLineResponse,
 } from '@/lib/otp/translate-line';
@@ -31,11 +31,15 @@ export async function GET(
 
   try {
     const result = await cache.getOrCompute(cacheKey, async () => {
+      // The viewer's lineId URL param is the route's *short name* (e.g.
+      // "4"), not the feed-namespaced GTFS id ("1:4"). OTP's GraphQL
+      // exposes `routes(name:)` for partial-match filtering — the
+      // translator narrows to exact shortName.
       const { data } = await queryOtp({
         query: LINE_QUERY,
-        variables: { lineId },
+        variables: { shortName: lineId },
       });
-      return translateLineResponse(data as OtpRouteResponse, date);
+      return translateLineResponse(data as OtpRoutesResponse, lineId, date);
     });
 
     if (result.line === null) {

@@ -25,9 +25,16 @@ export const ARRIVALS_QUERY = `
   }
 `;
 
+// OTP 2.10 notes:
+//   - `route(id)` expects the full feed-namespaced ID (e.g. "1:4"); the
+//     viewer's public contract takes the human-facing short name ("4")
+//     so we lookup via `routes(name: ...)` and take the first match
+//     whose shortName matches exactly.
+//   - `Pattern.geometry` returns `[Coordinate]` (lat/lon pairs); for the
+//     encoded polyline we want `Pattern.patternGeometry { points }`.
 export const LINE_QUERY = `
-  query Line($lineId: String!) {
-    route(id: $lineId) {
+  query Line($shortName: String!) {
+    routes(name: $shortName) {
       gtfsId
       shortName
       longName
@@ -35,7 +42,7 @@ export const LINE_QUERY = `
         directionId
         headsign
         stops { gtfsId name lat lon }
-        geometry { points }
+        patternGeometry { points }
         trips {
           gtfsId
           stoptimes { scheduledDeparture }

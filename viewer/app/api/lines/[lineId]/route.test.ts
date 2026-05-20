@@ -32,8 +32,8 @@ describe('GET /api/lines/:lineId', () => {
     expect(body.shape.length).toBe(2);
   });
 
-  it('R-06 returns 404 when OTP route is null', async () => {
-    mockPost.mockResolvedValueOnce({ data: { data: { route: null } } });
+  it('R-06 returns 404 when OTP returns no matching routes', async () => {
+    mockPost.mockResolvedValueOnce({ data: { data: { routes: [] } } });
     const { GET } = await loadHandler();
     const res = await GET(req(), { params: Promise.resolve({ lineId: 'missing' }) });
     expect(res.status).toBe(404);
@@ -54,9 +54,11 @@ describe('GET /api/lines/:lineId', () => {
   });
 
   it('R-06 re-throws non-OTP errors (translator failure propagates to Next)', async () => {
-    // Poison data: patterns is a string, so route.patterns.map(...) throws.
+    // Poison: patterns is a string on the matched route — `.map` throws.
     mockPost.mockResolvedValueOnce({
-      data: { data: { route: { gtfsId: 's:4', shortName: '4', longName: 'L4', patterns: 'nope' } } },
+      data: {
+        data: { routes: [{ gtfsId: '1:4', shortName: '4', longName: 'L4', patterns: 'nope' }] },
+      },
     });
     const { GET } = await loadHandler();
     await expect(

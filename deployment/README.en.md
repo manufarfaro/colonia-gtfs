@@ -2,7 +2,11 @@
 
 [Español](README.md) · **English**
 
-Infrastructure config for the v0 stack services. Just one service for now: OpenTripPlanner 2 (`otp`), the routing engine that consumes outputs from the [data layer](../data/README.md) and will feed the bridge, BFF, and viewer in subsequent specs.
+Infrastructure config for the v0 stack services:
+
+- **`otp`** — OpenTripPlanner 2, the routing engine over the static feed.
+- **`bridge`** — NestJS service that polls the AVL and exposes GTFS-RT to OTP. Detail in [`bridge/README.en.md`](../bridge/README.en.md).
+- **`viewer`** — Next.js app (UI + API routes / BFF). The only container with a public port. Detail in [`viewer/README.en.md`](../viewer/README.en.md).
 
 [![OTP Smoke](https://github.com/manufarfaro/colonia-gtfs/actions/workflows/otp-smoke.yml/badge.svg)](https://github.com/manufarfaro/colonia-gtfs/actions/workflows/otp-smoke.yml)
 
@@ -47,18 +51,15 @@ The BFF (next spec `bff-api-and-routes`) will proxy this endpoint to the viewer.
 
 ## Ports and network
 
-- OTP listens on `8080` **inside** the container.
-- The base `docker-compose.yml` does **not** publish that port to the host (decision [D-06](../openspec/changes/otp-deployment/design.md#d-06--puerto-interno-8080-expuesto-solo-dentro-de-la-red-docker)). Sibling services (bridge, BFF) reach OTP as `http://otp:8080` via Docker's internal network.
-- For local debug from your machine:
+In v0 the **only service with `ports:` in the base `docker-compose.yml` is the viewer** (public port `${VIEWER_PORT:-8080}`). OTP and the bridge are only reachable via Docker's internal network:
 
-```bash
-cp compose.override.yml.example compose.override.yml
-docker compose up otp
-# now you can:
-curl http://localhost:8080/otp/actuators/health
-```
+| Service | Internal port | Exposed to host by default | How clients reach it |
+|---|---|---|---|
+| `viewer` | 8080 | yes (`8080`) | browser → `http://localhost:8080` |
+| `otp` | 8080 | no | viewer → `http://otp:8080` |
+| `bridge` | 3001 | no | viewer + otp → `http://bridge:3001` |
 
-`compose.override.yml` is gitignored. CI uses a parallel committed file `compose.override.ci.yml` that the `otp-smoke.yml` workflow invokes explicitly via `-f`.
+To `curl` OTP or the bridge directly from your machine, copy [`compose.override.yml.example`](../compose.override.yml.example) → `compose.override.yml` and uncomment the ports. The real override is gitignored. CI uses a parallel committed file `compose.override.ci.yml` that workflows invoke explicitly via `-f`.
 
 ## JVM heap
 

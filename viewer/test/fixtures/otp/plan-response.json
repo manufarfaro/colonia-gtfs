@@ -1,0 +1,108 @@
+{
+  "data": {
+    "plan": {
+      "itineraries": [
+        {
+          "duration": 2735,
+          "walkDistance": 3637.5,
+          "legs": [
+            {
+              "mode": "WALK",
+              "duration": 2735,
+              "distance": 3637.5,
+              "startTime": "2026-06-02T11:30:00.000Z",
+              "endTime": "2026-06-02T12:15:35.000Z",
+              "realTime": false,
+              "realtimeState": null,
+              "route": null,
+              "from": {
+                "name": "Origin",
+                "lat": -34.4712,
+                "lon": -57.852,
+                "stop": null
+              },
+              "to": {
+                "name": "Destination",
+                "lat": -34.447,
+                "lon": -57.844,
+                "stop": null
+              }
+            }
+          ]
+        },
+        {
+          "duration": 2211,
+          "walkDistance": 2399.7,
+          "legs": [
+            {
+              "mode": "WALK",
+              "duration": 233,
+              "distance": 301.2,
+              "startTime": "2026-06-02T11:30:00.000Z",
+              "endTime": "2026-06-02T11:33:53.000Z",
+              "realTime": false,
+              "realtimeState": null,
+              "route": null,
+              "from": {
+                "name": "Origin",
+                "lat": -34.4712,
+                "lon": -57.852,
+                "stop": null
+              },
+              "to": {
+                "name": "ITUZAINGO",
+                "lat": -34.470615,
+                "lon": -57.849233,
+                "stop": { "gtfsId": "sol-antigua:2" }
+              }
+            },
+            {
+              "mode": "BUS",
+              "duration": 404,
+              "distance": 1825.2,
+              "startTime": "2026-06-02T11:33:53.000Z",
+              "endTime": "2026-06-02T11:40:37.000Z",
+              "realTime": true,
+              "realtimeState": "UPDATED",
+              "route": { "shortName": "4", "longName": "Línea 4" },
+              "from": {
+                "name": "ITUZAINGO",
+                "lat": -34.470615,
+                "lon": -57.849233,
+                "stop": { "gtfsId": "sol-antigua:2" }
+              },
+              "to": {
+                "name": "AV JOSE P VARELA",
+                "lat": -34.448,
+                "lon": -57.835,
+                "stop": { "gtfsId": "sol-antigua:42" }
+              }
+            },
+            {
+              "mode": "WALK",
+              "duration": 1574,
+              "distance": 2098.0,
+              "startTime": "2026-06-02T11:40:37.000Z",
+              "endTime": "2026-06-02T12:06:51.000Z",
+              "realTime": false,
+              "realtimeState": null,
+              "route": null,
+              "from": {
+                "name": "AV JOSE P VARELA",
+                "lat": -34.448,
+                "lon": -57.835,
+                "stop": { "gtfsId": "sol-antigua:42" }
+              },
+              "to": {
+                "name": "Destination",
+                "lat": -34.447,
+                "lon": -57.844,
+                "stop": null
+              }
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

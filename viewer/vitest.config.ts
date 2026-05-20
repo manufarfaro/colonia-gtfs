@@ -1,0 +1,46 @@
+import { defineConfig } from 'vitest/config';
+import react from '@vitejs/plugin-react';
+import path from 'node:path';
+
+export default defineConfig({
+  plugins: [react()],
+  // vitest pipes .css imports through Vite's PostCSS pipeline, which
+  // explodes on Tailwind v4's `@import "tailwindcss"` inside a test
+  // harness. Tests never render styled output — disable the PostCSS
+  // step so any `import './foo.css'` becomes a no-op.
+  css: { postcss: { plugins: [] } },
+  test: {
+    environment: 'happy-dom',
+    setupFiles: ['./test/setup.ts'],
+    include: [
+      '{app,components,lib,test}/**/*.{test,spec}.{ts,tsx}',
+      'middleware.{test,spec}.{ts,tsx}',
+    ],
+    // Enables @testing-library/react's auto-cleanup after each test.
+    globals: true,
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'html'],
+      // Cover all first-party app code under these dirs + the root middleware.
+      include: ['app/**/*.{ts,tsx}', 'components/**/*.{ts,tsx}', 'lib/**/*.{ts,tsx}', 'middleware.ts'],
+      // Exclusions:
+      //   - components/ui/**     → shadcn upstream primitives (own tests upstream)
+      //   - **/*.test.{ts,tsx}   → the tests themselves
+      exclude: [
+        'components/ui/**',
+        '**/*.{test,spec}.{ts,tsx}',
+      ],
+      thresholds: {
+        lines: 100,
+        functions: 100,
+        branches: 100,
+        statements: 100,
+      },
+    },
+  },
+  resolve: {
+    alias: {
+      '@': path.resolve(__dirname, './'),
+    },
+  },
+});

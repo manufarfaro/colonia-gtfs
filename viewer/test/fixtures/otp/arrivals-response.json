@@ -1,0 +1,34 @@
+{
+  "data": {
+    "stop": {
+      "gtfsId": "sol-antigua:3",
+      "name": "INT SUAREZ",
+      "lat": -34.470578,
+      "lon": -57.847103,
+      "stoptimesForServiceDate": [
+        {
+          "pattern": {
+            "route": { "shortName": "4", "longName": "Línea 4" },
+            "headsign": "Centro"
+          },
+          "stoptimes": [
+            {
+              "scheduledArrival": 30240,
+              "realtimeArrival": 30270,
+              "arrivalDelay": 30,
+              "realtime": true,
+              "realtimeState": "UPDATED"
+            },
+            {
+              "scheduledArrival": 33840,
+              "realtimeArrival": 33840,
+              "arrivalDelay": 0,
+              "realtime": false,
+              "realtimeState": "SCHEDULED"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

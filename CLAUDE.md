@@ -48,7 +48,23 @@ When creating artifacts, the `context`/`rules` blocks from `openspec instruction
 
 - Change names are **kebab-case** (e.g. `add-route-schema`, not `Add Route Schema`)
 - The data domain is **GTFS** ([General Transit Feed Specification](https://gtfs.org/schedule/reference/)) — its `agency.txt`, `routes.txt`, `stops.txt`, `trips.txt`, `stop_times.txt`, `calendar.txt` schema is the source of truth for any modelling decisions
-- Primary language is **Spanish**. The canonical `README.md` and any other docs (e.g. `docs/prd/README.md`, PRD files themselves) are in Spanish; English translations live next to them as `<name>.en.md` (BCP-47 locale suffix, dot-separated). Cross-link the two with a header like `**Español** · [English](README.en.md)`. Use plain text, **not** flag emojis — flags don't represent languages cleanly
+- Primary language is **Spanish**, split by audience — see below.
+
+### Language by audience
+
+| Layer | Audience | Language | Examples |
+|---|---|---|---|
+| Product narrative | Stakeholders (Intendencia, operadores, owner) | **Spanish** | `docs/prd/*.md`, `README.md`, `data/README.md`, `deployment/README.md`, `tooling/README.md` |
+| Change rationale | Stakeholders + tech lead | **Spanish** | `openspec/changes/<name>/proposal.md`, `openspec/changes/<name>/design.md` |
+| Formal contract | Engineers + `openspec validate` parser | **English** | `openspec/specs/<cap>/spec.md`, `openspec/changes/<name>/specs/**/*.md` |
+| Implementation checklist | Engineers executing apply | **English** | `openspec/changes/<name>/tasks.md` |
+| English mirrors | International readers | **English** | any `<name>.en.md` file |
+
+**Why specs and tasks stay English** even though the rest of the repo is Spanish: their content is dominated by English technical vocabulary (RFC 2119 keywords `SHALL`/`MUST`/`SHALL NOT` parsed by `openspec validate`; GTFS field names like `agency_id`/`route_short_name`/`stop_times.txt`; structural markers `### Requirement:` / `#### Scenario:` / `**WHEN**` / `**THEN**`; JSON keys; GraphQL types; file extensions; Docker/CI commands). An audit of translated specs showed that even after rewriting the prose to Spanish, English tokens still outnumbered Spanish ones — the conectoras-in-Spanish-around-English-keywords hybrid was harder to read than either language pure. So: specs and tasks read like RFCs (English with technical jargon); proposals and designs read like product memos (Spanish, conversational).
+
+**English mirrors:** for narrative docs in Spanish, the English translation lives next to the original as `<name>.en.md` (BCP-47 locale suffix, dot-separated). Cross-link the two with a header like `**Español** · [English](README.en.md)`. Use plain text, **not** flag emojis — flags don't represent languages cleanly. Spec files do not get `.en.md` mirrors (the spec itself is already English).
+
+**Inside a Spanish doc:** technical identifiers stay in their original form — never translate `gtfs.zip`, `stop_times`, `direction_id`, command names, library names, etc. Code blocks are always literal.
 
 ## Product guardrails (from the v0 PRD)
 

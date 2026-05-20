@@ -66,15 +66,43 @@ jobs:
       - name: Plan query (Colonia urbano, GraphQL)
         run: |
           set -euo pipefail
+          mkdir -p smoke-out
           # OTP 2.10 removió la REST /plan; routing es GraphQL en /otp/gtfs/v1.
-          QUERY='{"query":"query { plan(from: {lat: -34.471, lon: -57.852}, to: {lat: -34.449, lon: -57.815}, transportModes: [{mode: TRANSIT},{mode: WALK}]) { itineraries { legs { mode duration } } } }"}'
-          RESP=$(curl -fsS -X POST -H "Content-Type: application/json" --data "$QUERY" http://localhost:8080/otp/gtfs/v1)
-          echo "$RESP" | jq -e '.data.plan.itineraries[0].legs[0]' > /dev/null
+          # date+time están pineados a un miércoles 14:00 (servicio weekday
+          # activo per data/calendar.txt; dentro de feed_start/end_date).
+          # Sin pin el smoke depende de la hora a la que CI corre — la noche
+          # no tiene ninguna conexión transit para este OD.
+          QUERY='{"query":"query { plan(from: {lat: -34.471, lon: -57.852}, to: {lat: -34.449, lon: -57.815}, date: \"2026-05-20\", time: \"14:00\", transportModes: [{mode: TRANSIT},{mode: WALK}]) { itineraries { duration walkDistance legs { mode duration distance route { shortName longName } from { name } to { name } } } } }"}'
+          echo "$QUERY" | jq . > smoke-out/plan-request.json
+          # Capture status, headers, body separately for the artifact bundle.
+          HTTP_CODE=$(curl -sS -o smoke-out/plan-response.json -D smoke-out/plan-response.headers.txt -w "%{http_code}" \
+            -X POST -H "Content-Type: application/json" --data "$QUERY" \
+            http://localhost:8080/otp/gtfs/v1)
+          echo "HTTP $HTTP_CODE" | tee smoke-out/plan-status.txt
+          test "$HTTP_CODE" = "200"
+          jq -e '.data.plan.itineraries[0].legs[0]' smoke-out/plan-response.json > /dev/null
           echo "Itinerary returned with at least one leg"
+          # Pretty summary for the run log (and the artifact).
+          jq -r '.data.plan.itineraries
+                 | to_entries[]
+                 | "  #\(.key+1) (\(.value.duration)s, walk=\(.value.walkDistance|floor)m): "
+                   + ((.value.legs | map((.route.shortName // .mode)) | join(" + ")))' \
+            smoke-out/plan-response.json | tee smoke-out/plan-summary.txt
 
-      - name: OTP logs (on failure)
-        if: failure()
-        run: docker compose logs otp || true
+      - name: Collect OTP logs
+        if: always()
+        run: |
+          mkdir -p smoke-out
+          docker compose logs otp > smoke-out/otp.log 2>&1 || true
+
+      - name: Upload smoke artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: otp-smoke-${{ github.run_id }}-${{ github.run_attempt }}
+          path: smoke-out/
+          if-no-files-found: warn
+          retention-days: 14
 
       - name: Tear down
         if: always()

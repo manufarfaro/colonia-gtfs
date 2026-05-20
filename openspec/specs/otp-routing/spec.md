@@ -108,20 +108,27 @@ A workflow `.github/workflows/otp-smoke.yml` SHALL run on push/PR that touches a
 2. Build `gtfs.zip` via `uv run --directory tooling python scripts/build_gtfs_zip.py`.
 3. Bring up the `otp` service with `docker compose up -d otp` (using `compose.override.ci.yml` to publish port 8080 to the runner).
 4. Poll `http://localhost:8080/otp/actuators/health` until `200 OK` or 90s timeout.
-5. Issue a single trip-plan query via the OTP 2.10 GraphQL endpoint (`POST /otp/gtfs/v1`) with two Colonia urban coordinates and assert the response contains at least one itinerary.
-6. Tear the service down.
+5. Issue a single trip-plan query via the OTP 2.10 GraphQL endpoint (`POST /otp/gtfs/v1`) with two Colonia urban coordinates **pinned to a known weekday-service date and service-hour time** (so the smoke result is independent of when the runner happens to fire) and assert the response contains at least one itinerary.
+6. Upload the request, response, response headers, status, summary, and the `docker compose logs otp` output as a workflow artifact (`actions/upload-artifact@v4`, `if: always()`, ~14-day retention) so reviewers can inspect the actual OTP behavior from a CI run.
+7. Tear the service down.
 
 The workflow SHALL exit non-zero if any of those steps fail.
 
 > **Note on the routing API path:** OTP 2.10 removes the legacy REST `/otp/routers/default/plan` endpoint and only exposes routing via GraphQL at `POST /otp/gtfs/v1`. The CI workflow and the BFF (spec `bff-api-and-routes`) consume this GraphQL endpoint.
+
+> **Note on the pinned date/time:** without a pin the GraphQL `plan` query defaults to the runner's current time, which makes the smoke flaky after service hours (Sol Antigua urbano stops by ~23:18 weekdays per `data/stop_times.txt`). The pinned date+time SHALL fall inside `feed_info.feed_start_date` / `feed_end_date` and on a day that `data/calendar.txt` marks as in-service.
 
 #### Scenario: Workflow runs on input changes
 - **WHEN** a pull request modifies `deployment/otp/router-config.json`
 - **THEN** the `otp-smoke` workflow is triggered for that PR
 
 #### Scenario: Workflow asserts at least one itinerary
-- **WHEN** the smoke step issues a GraphQL `plan` query at `POST /otp/gtfs/v1` from `(-34.471, -57.852)` to `(-34.449, -57.815)` with `transportModes: [{mode: TRANSIT},{mode: WALK}]`
+- **WHEN** the smoke step issues a GraphQL `plan` query at `POST /otp/gtfs/v1` from `(-34.471, -57.852)` to `(-34.449, -57.815)` with a `date`+`time` pinned to a weekday inside the feed validity window during service hours, and `transportModes: [{mode: TRANSIT},{mode: WALK}]`
 - **THEN** the response is `200 OK`, `data.plan.itineraries` is non-empty, and `data.plan.itineraries[0].legs[0]` exists
+
+#### Scenario: Workflow uploads the smoke results as an artifact
+- **WHEN** the smoke job finishes (success or failure)
+- **THEN** an `actions/upload-artifact@v4` step has uploaded a directory containing at minimum: the request body sent to OTP, the HTTP status code, the response headers, the response body JSON, a human-readable summary of the returned itinerary, and the captured `docker compose logs otp` output
 
 ### Requirement: Deployment documentation SHALL describe the OTP service end-to-end
 

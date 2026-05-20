@@ -1,0 +1,3 @@
+route_id,service_id,trip_id,trip_headsign,direction_id,original_trip_id
+4,weekday,4-weekday-0-0800,Centro,0,T-WK-1234
+4,weekday,4-weekday-1-0830,El General,1,T-WK-5678

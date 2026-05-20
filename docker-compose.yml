@@ -14,6 +14,28 @@
 # Spec verificable: openspec/specs/otp-routing/spec.md
 
 services:
+  bridge:
+    build: ./bridge
+    # Sin "ports:" — el bridge solo escucha en la red interna de Docker
+    # como http://bridge:3001. OTP poolea ese host name directo.
+    env_file:
+      - path: .env
+        required: false
+    volumes:
+      - ./data:/var/bridge/gtfs:ro
+    healthcheck:
+      # node:26-alpine no trae bash/curl/wget/nc. Usamos node para probar
+      # el endpoint /healthz desde adentro (bin/healthcheck.js abre un
+      # socket TCP, manda un GET HTTP/1.0, matchea "ok" o "degraded" en
+      # el body JSON). Mismo principio que el bash + /dev/tcp del
+      # otp-routing R-06, adaptado a la imagen del bridge.
+      test: ["CMD", "node", "bin/healthcheck.js"]
+      start_period: 30s
+      interval: 10s
+      timeout: 5s
+      retries: 6
+    restart: unless-stopped
+
   otp:
     image: opentripplanner/opentripplanner:2.10.0_2026-05-13T17-42
     # El /docker-entrypoint.sh upstream ya injecta `/var/opentripplanner/`

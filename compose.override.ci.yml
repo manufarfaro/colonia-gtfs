@@ -9,3 +9,10 @@ services:
   otp:
     ports:
       - "8080:8080"
+  bridge:
+    # Solo el smoke workflow del bridge (bridge-rt-validate.yml) usa este
+    # override, vía `docker compose -f docker-compose.yml -f compose.override.ci.yml up bridge`.
+    # otp-smoke.yml NO bajea este archivo — ese workflow existe justamente
+    # para probar que OTP tolera al bridge ausente.
+    ports:
+      - "3001:3001"

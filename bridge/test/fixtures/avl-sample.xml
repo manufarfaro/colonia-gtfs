@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<markers>
+  <marker id="OPAQUE-001" lin="3" dir="0" lat="-34.441258" lon="-57.853689" time="2026-06-02 08:30:00" speed="0" head="180" label="L3 Centro"/>
+  <marker id="OPAQUE-002" lin="3" dir="1" lat="-34.471" lon="-57.84" time="2026-06-02 08:35:30" speed="28" head="90" label="L3 hacia El General"/>
+  <marker id="OPAQUE-003" lin="4" dir="0" lat="-34.436904" lon="-57.802365" time="2026-06-02 08:30:00" speed="0" head="270" label="Línea 4 Centro"/>
+  <marker id="OPAQUE-004" lin="4" dir="1" lat="-34.47" lon="-57.836" time="2026-06-02 08:32:15" speed="35" head="270" label="L4 hacia Algodones"/>
+  <marker id="OPAQUE-005" lin="5" dir="0" lat="-34.440749" lon="-57.804908" time="2026-06-02 08:00:00" speed="0" head="0" label="L5 inicio"/>
+  <marker id="OPAQUE-006" lin="5" dir="1" lat="-34.455353" lon="-57.815925" time="2026-06-02 07:30:00" speed="0" head="270" label="L5 hacia inicio"/>
+  <marker id="OPAQUE-007" lin="8" dir="0" lat="-34.443939" lon="-57.79122" time="2026-06-02 08:30:00" speed="0" head="270" label="L8 inicio"/>
+  <marker id="OPAQUE-008" lin="8" dir="1" lat="-34.46" lon="-57.82" time="2026-06-02 08:35:00" speed="40" head="90" label="L8 vuelta"/>
+</markers>

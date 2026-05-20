@@ -71,6 +71,17 @@ services:
       JAVA_TOOL_OPTIONS: "-Xmx2g -Xms512m"
 ```
 
+## Realtime (bridge)
+
+El service `bridge` poolea el AVL del operador, matchea markers contra el GTFS estático, y expone los dos endpoints `.pb` que OTP poolea cada 15/30 s.
+
+- **Service runtime:** ver [`bridge/README.md`](../bridge/README.md) — stack NestJS, contrato de endpoints, healthz JSON rico, manejo del secret `ORIGIN_AVL`.
+- **Spec contract:** [`openspec/specs/bridge-gtfs-rt/spec.md`](../openspec/specs/bridge-gtfs-rt/spec.md) (post-archive del change).
+- **Boot:** `docker compose up bridge otp` (o solo `docker compose up` para todo). El bridge resuelve `ORIGIN_AVL` desde `.env` (gitignored).
+- **Smoke offline:** `ORIGIN_AVL=file:///app/test/fixtures/avl-sample.xml` permite correr el stack sin pegarle al operador real — usado por el workflow `bridge-rt-validate.yml`.
+
+OTP arranca y rutea sobre el feed estático con o sin bridge corriendo (R-05 scenario 3 de `otp-routing`). Si querés desmontarlo para probar el path stale, ver la sub-sección siguiente.
+
 ## Bridge ausente — comportamiento esperado
 
 El `router-config.json` declara dos updaters GTFS-RT que apuntan al service `bridge` (puerto 3001):

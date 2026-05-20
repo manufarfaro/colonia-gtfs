@@ -1,0 +1,44 @@
+name: Bridge
+
+on:
+  pull_request:
+    paths:
+      - "bridge/**"
+      - ".github/workflows/bridge.yml"
+  push:
+    branches: [main]
+    paths:
+      - "bridge/**"
+      - ".github/workflows/bridge.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    working-directory: bridge
+
+jobs:
+  lint-and-test:
+    name: lint + jest
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 26.x
+
+      - name: npm ci
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Unit tests (jest)
+        run: npm test -- --ci --reporters=default
+
+      - name: Build
+        run: npm run build

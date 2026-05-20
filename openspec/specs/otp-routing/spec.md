@@ -1,26 +1,26 @@
 ## Purpose
 
-Trip-planning engine for the v0 stack: OpenTripPlanner 2 deployed as a Docker Compose service that consumes the [`gtfs-static-data`](../gtfs-static-data/spec.md) outputs (`data/output/gtfs.zip` + `data/colonia.osm.pbf`) and exposes a routing API on the internal Docker network for the downstream specs (`bridge-gtfs-rt`, `bff-api-and-routes`, `viewer-od-mode`). Covers the compose service definition, the OTP config files, the read-only mounts, the JVM heap budget, the GTFS-RT updater contract that the bridge SHALL honor, the healthcheck, and the CI smoke workflow that exercises the end-to-end boot path.
+Motor de trip planning del stack v0: OpenTripPlanner 2 desplegado como service Docker Compose que consume los outputs de [`gtfs-static-data`](../gtfs-static-data/spec.md) (`data/output/gtfs.zip` + `data/colonia.osm.pbf`) y expone una API de routing en la red interna de Docker para los specs downstream (`bridge-gtfs-rt`, `bff-api-and-routes`, `viewer-od-mode`). Cubre la definición del service en compose, los archivos de config de OTP, los mounts read-only, el presupuesto de heap JVM, el contrato de updaters GTFS-RT que el bridge SHALL cumplir, el healthcheck, y el workflow de CI smoke que ejercita el path de boot end-to-end.
 
 ## Requirements
 
 ### Requirement: The repository SHALL declare an OpenTripPlanner 2 service in `docker-compose.yml`
 
-The repo SHALL include a `docker-compose.yml` at the repository root that declares a service named `otp`, using the upstream image `opentripplanner/opentripplanner` pinned to a specific tag (no `:latest`). The image tag SHALL be `2.10.0_2026-05-13T17-42` (or a later pinned tag bumped via PR + smoke test).
+El repo SHALL incluir un `docker-compose.yml` en la raíz del repositorio que declare un service llamado `otp`, usando la imagen upstream `opentripplanner/opentripplanner` pineada a un tag específico (sin `:latest`). El tag de la imagen SHALL ser `2.10.0_2026-05-13T17-42` (o un tag pineado posterior bumpeado vía PR + smoke test).
 
-The service SHALL listen on the container port `8080` and SHALL NOT expose that port to the host by default. Other services on the same Docker network reach it via `http://otp:8080`.
+El service SHALL escuchar en el puerto 8080 del container y SHALL NOT exponer ese puerto al host por default. Otros services en la misma red Docker lo alcanzan vía `http://otp:8080`.
 
 #### Scenario: Compose file declares an otp service with a pinned image
-- **WHEN** the repository is inspected and `docker-compose.yml` is read
-- **THEN** it declares a service named `otp` whose `image` is `opentripplanner/opentripplanner:<tag>` with an explicit tag (not `latest`)
+- **WHEN** se inspecciona el repositorio y se lee `docker-compose.yml`
+- **THEN** declara un service llamado `otp` cuya `image` es `opentripplanner/opentripplanner:<tag>` con un tag explícito (no `latest`)
 
 #### Scenario: OTP is not exposed on the host by default
-- **WHEN** the `otp` service in the base `docker-compose.yml` is inspected
-- **THEN** it has no `ports:` mapping (consumers on the host can still use `docker compose port otp 8080` or a `compose.override.yml` for debug)
+- **WHEN** se inspecciona el service `otp` en el `docker-compose.yml` base
+- **THEN** no tiene mapeo `ports:` (los consumidores en el host pueden seguir usando `docker compose port otp 8080` o un `compose.override.yml` para debug)
 
 ### Requirement: OTP SHALL mount the GTFS feed, OSM extract, and config files read-only
 
-The `otp` service SHALL mount the following files into the container, all read-only (`:ro`), at the paths shown:
+El service `otp` SHALL montar los siguientes archivos en el container, todos read-only (`:ro`), en los paths indicados:
 
 | Host path | Container path |
 |---|---|
@@ -29,118 +29,118 @@ The `otp` service SHALL mount the following files into the container, all read-o
 | `./deployment/otp/otp-config.json` | `/var/opentripplanner/otp-config.json` |
 | `./deployment/otp/router-config.json` | `/var/opentripplanner/router-config.json` |
 
-The `gtfs.zip` mount references the output of `tooling/scripts/build_gtfs_zip.py` (capability `gtfs-static-data`). The build script SHALL be invoked before `docker compose up otp` so that the file exists.
+El mount de `gtfs.zip` referencia el output de `tooling/scripts/build_gtfs_zip.py` (capability `gtfs-static-data`). El script de build SHALL ser invocado antes de `docker compose up otp` para que el archivo exista.
 
-`otp-config.json` SHALL enable the `ActuatorAPI` feature (off by default in OTP 2.10), which gates the `/otp/actuators/health` endpoint required by the healthcheck requirement.
+`otp-config.json` SHALL habilitar el feature `ActuatorAPI` (off por default en OTP 2.10), que gatea el endpoint `/otp/actuators/health` requerido por el requirement del healthcheck.
 
 #### Scenario: Required mounts are present
-- **WHEN** the `otp` service definition is inspected
-- **THEN** the four mounts above are declared, each with the `:ro` flag
+- **WHEN** se inspecciona la definición del service `otp`
+- **THEN** los cuatro mounts de arriba están declarados, cada uno con el flag `:ro`
 
 #### Scenario: ActuatorAPI feature is enabled
-- **WHEN** `deployment/otp/otp-config.json` is parsed
-- **THEN** it sets `otpFeatures.ActuatorAPI = true`
+- **WHEN** se parsea `deployment/otp/otp-config.json`
+- **THEN** setea `otpFeatures.ActuatorAPI = true`
 
 #### Scenario: Build precondition is documented
-- **WHEN** `deployment/README.md` is inspected
-- **THEN** it documents that `uv run --directory tooling python scripts/build_gtfs_zip.py` must be run before `docker compose up otp`
+- **WHEN** se inspecciona `deployment/README.md`
+- **THEN** documenta que `uv run --directory tooling python scripts/build_gtfs_zip.py` debe correrse antes de `docker compose up otp`
 
 ### Requirement: OTP SHALL build its graph at container start
 
-The service command SHALL include `--build --serve` (or the equivalent for the pinned OTP version) so OTP constructs the routing graph from the mounted inputs at startup and then serves HTTP queries. The graph SHALL NOT be persisted to a Docker volume in v0; each restart rebuilds it.
+El command del service SHALL incluir `--build --serve` (o el equivalente para la versión de OTP pineada) de modo que OTP construya el grafo de routing desde los inputs montados al startup y luego sirva queries HTTP. El grafo SHALL NOT persistirse a un volumen Docker en v0; cada restart lo reconstruye.
 
 #### Scenario: Container command builds and serves
-- **WHEN** the `otp` service command is inspected
-- **THEN** it includes `--build` and `--serve` flags (the upstream `/docker-entrypoint.sh` injects `/var/opentripplanner/` as the base path automatically)
+- **WHEN** se inspecciona el command del service `otp`
+- **THEN** incluye los flags `--build` y `--serve` (el `/docker-entrypoint.sh` upstream injecta `/var/opentripplanner/` como base path automáticamente)
 
 #### Scenario: No graph persistence volume
-- **WHEN** the `otp` service is inspected
-- **THEN** it does not declare a named volume for the graph data (only the read-only mounts of `gtfs.zip`, `colonia.osm.pbf`, `otp-config.json`, `router-config.json`)
+- **WHEN** se inspecciona el service `otp`
+- **THEN** no declara un volumen nombrado para los datos del grafo (solo los mounts read-only de `gtfs.zip`, `colonia.osm.pbf`, `otp-config.json`, `router-config.json`)
 
 ### Requirement: OTP SHALL run with a pinned JVM heap budget
 
-The service SHALL set `JAVA_TOOL_OPTIONS` (or the OTP-specific env var if the image documents one) to apply `-Xmx1g -Xms512m`. These values cap the JVM at 1 GB heap and start with a 512 MB allocation.
+El service SHALL setear `JAVA_TOOL_OPTIONS` (o la env var OTP-específica si la imagen documenta una) para aplicar `-Xmx1g -Xms512m`. Estos valores capean la JVM a 1 GB de heap y arrancan con 512 MB asignados.
 
 #### Scenario: JVM heap flags are declared
-- **WHEN** the `otp` service environment is inspected
-- **THEN** an env var sets `-Xmx1g` and `-Xms512m`
+- **WHEN** se inspecciona el environment del service `otp`
+- **THEN** una env var setea `-Xmx1g` y `-Xms512m`
 
 ### Requirement: `router-config.json` SHALL declare two GTFS-RT updaters pointing at the bridge
 
-`deployment/otp/router-config.json` SHALL contain an `updaters` array with exactly two entries that poll the sibling `bridge` service for realtime data:
+`deployment/otp/router-config.json` SHALL contener un array `updaters` con exactamente dos entries que pollean al service sibling `bridge` para datos realtime:
 
-1. A `vehicle-positions` updater with `feedId: "sol-antigua"`, `url: "http://bridge:3001/gtfs-rt/vehicle-positions.pb"`, `frequency: "15s"`, `fuzzyTripMatching: true`.
-2. A `stop-time-updater` (TripUpdates) with `feedId: "sol-antigua"`, `url: "http://bridge:3001/gtfs-rt/trip-updates.pb"`, `frequency: "30s"`.
+1. Un updater `vehicle-positions` con `feedId: "sol-antigua"`, `url: "http://bridge:3001/gtfs-rt/vehicle-positions.pb"`, `frequency: "15s"`, `fuzzyTripMatching: true`.
+2. Un updater `stop-time-updater` (TripUpdates) con `feedId: "sol-antigua"`, `url: "http://bridge:3001/gtfs-rt/trip-updates.pb"`, `frequency: "30s"`.
 
-The bridge service SHALL be defined by a subsequent change (`bridge-gtfs-rt`). Until then, OTP will log connection errors at the configured frequency and continue serving the static feed without realtime augmentation — that behavior is acceptable for v0 demo.
+El service `bridge` SHALL ser definido por un change posterior (`bridge-gtfs-rt`). Hasta entonces, OTP va a loguear errores de conexión a la frecuencia configurada y seguir sirviendo el feed estático sin augmentation realtime — ese comportamiento es aceptable para el demo v0.
 
 #### Scenario: Two updaters are declared
-- **WHEN** `deployment/otp/router-config.json` is parsed
-- **THEN** the `updaters` array has exactly two entries with `type` values `vehicle-positions` and `stop-time-updater`
+- **WHEN** se parsea `deployment/otp/router-config.json`
+- **THEN** el array `updaters` tiene exactamente dos entries con valores de `type` `vehicle-positions` y `stop-time-updater`
 
 #### Scenario: Updater URLs target the bridge contract
-- **WHEN** the updaters are inspected
-- **THEN** their `url` fields are `http://bridge:3001/gtfs-rt/vehicle-positions.pb` and `http://bridge:3001/gtfs-rt/trip-updates.pb` respectively
+- **WHEN** se inspeccionan los updaters
+- **THEN** sus campos `url` son `http://bridge:3001/gtfs-rt/vehicle-positions.pb` y `http://bridge:3001/gtfs-rt/trip-updates.pb` respectivamente
 
 #### Scenario: Updaters tolerate a missing bridge at startup
-- **WHEN** `docker compose up otp` is run without the bridge service running
-- **THEN** OTP starts successfully, logs the failed updater attempts, and responds to routing queries using the static feed
+- **WHEN** se corre `docker compose up otp` sin el service bridge corriendo
+- **THEN** OTP arranca exitosamente, loguea los intentos fallidos del updater, y responde a queries de routing usando el feed estático
 
 ### Requirement: OTP SHALL expose a healthcheck endpoint and the compose service SHALL declare a healthcheck
 
-The OTP container SHALL expose `GET /otp/actuators/health` returning `200 OK` once the graph is built and the HTTP server is ready. The compose `otp` service SHALL declare a `healthcheck:` block that probes this endpoint and waits up to 60 seconds at startup.
+El container de OTP SHALL exponer `GET /otp/actuators/health` devolviendo `200 OK` una vez que el grafo está construido y el servidor HTTP está listo. El service `otp` del compose SHALL declarar un bloque `healthcheck:` que probe este endpoint y espere hasta 60 segundos al startup.
 
-The probe SHALL only depend on binaries that ship with the upstream OTP image (`bash` with `/dev/tcp` is sufficient; `curl`/`wget` are NOT present in `opentripplanner/opentripplanner:2.10.*`).
+El probe SHALL solo depender de binarios que vienen en la imagen upstream de OTP (`bash` con `/dev/tcp` alcanza; `curl`/`wget` NO están presentes en `opentripplanner/opentripplanner:2.10.*`).
 
 #### Scenario: Health endpoint returns 200 when ready
-- **WHEN** the container has finished building the graph and is serving
-- **THEN** `GET http://otp:8080/otp/actuators/health` from within the Docker network returns `200`
+- **WHEN** el container terminó de construir el grafo y está sirviendo
+- **THEN** `GET http://otp:8080/otp/actuators/health` desde dentro de la red Docker devuelve `200`
 
 #### Scenario: Compose healthcheck is declared
-- **WHEN** the `otp` service is inspected
-- **THEN** it declares a `healthcheck:` whose `test` probes `GET /otp/actuators/health` on `http://localhost:8080` and treats `200` as healthy, with `start_period: 60s` and a reasonable interval/retries
+- **WHEN** se inspecciona el service `otp`
+- **THEN** declara un `healthcheck:` cuyo `test` probea `GET /otp/actuators/health` en `http://localhost:8080` y trata `200` como healthy, con `start_period: 60s` y un interval/retries razonable
 
 ### Requirement: A CI workflow SHALL smoke-test OTP on changes to its inputs
 
-A workflow `.github/workflows/otp-smoke.yml` SHALL run on push/PR that touches any of: `deployment/otp/**`, `docker-compose.yml`, `compose.override.ci.yml`, `data/*.txt`, `data/colonia.osm.pbf`, `tooling/scripts/build_gtfs_zip.py`, `tooling/pyproject.toml`, `tooling/uv.lock`, or the workflow file itself. The job SHALL:
+Un workflow `.github/workflows/otp-smoke.yml` SHALL correr en push/PR que toque cualquiera de: `deployment/otp/**`, `docker-compose.yml`, `compose.override.ci.yml`, `data/*.txt`, `data/colonia.osm.pbf`, `tooling/scripts/build_gtfs_zip.py`, `tooling/pyproject.toml`, `tooling/uv.lock`, o el workflow file mismo. El job SHALL:
 
-1. Check out the repo.
-2. Build `gtfs.zip` via `uv run --directory tooling python scripts/build_gtfs_zip.py`.
-3. Bring up the `otp` service with `docker compose up -d otp` (using `compose.override.ci.yml` to publish port 8080 to the runner).
-4. Poll `http://localhost:8080/otp/actuators/health` until `200 OK` or 90s timeout.
-5. Issue a single trip-plan query via the OTP 2.10 GraphQL endpoint (`POST /otp/gtfs/v1`) with two Colonia urban coordinates **pinned to a known weekday-service date and service-hour time** (so the smoke result is independent of when the runner happens to fire) and assert the response contains at least one itinerary.
-6. Upload the request, response, response headers, status, summary, and the `docker compose logs otp` output as a workflow artifact (`actions/upload-artifact@v4`, `if: always()`, ~14-day retention) so reviewers can inspect the actual OTP behavior from a CI run.
-7. Tear the service down.
+1. Checkout del repo.
+2. Construir `gtfs.zip` vía `uv run --directory tooling python scripts/build_gtfs_zip.py`.
+3. Levantar el service `otp` con `docker compose up -d otp` (usando `compose.override.ci.yml` para publicar el puerto 8080 al runner).
+4. Pollear `http://localhost:8080/otp/actuators/health` hasta `200 OK` o timeout de 90 s.
+5. Lanzar una query de trip-plan vía el endpoint GraphQL de OTP 2.10 (`POST /otp/gtfs/v1`) con dos coordenadas de Colonia urbano **pineadas a una fecha de día de semana en servicio y una hora dentro del rango de operación** (de modo que el resultado del smoke sea independiente de cuándo el runner se dispara) y assertar que la respuesta contiene al menos un itinerary.
+6. Subir el request, el response, los response headers, el status, el summary, y el output de `docker compose logs otp` como un artifact del workflow (`actions/upload-artifact@v4`, `if: always()`, retención ~14 días) para que los reviewers puedan inspeccionar el comportamiento real de OTP desde una run de CI.
+7. Bajar el service.
 
-The workflow SHALL exit non-zero if any of those steps fail.
+El workflow SHALL salir no-cero si cualquiera de esos pasos falla.
 
-> **Note on the routing API path:** OTP 2.10 removes the legacy REST `/otp/routers/default/plan` endpoint and only exposes routing via GraphQL at `POST /otp/gtfs/v1`. The CI workflow and the BFF (spec `bff-api-and-routes`) consume this GraphQL endpoint.
+> **Nota sobre el path de la routing API:** OTP 2.10 removió el endpoint legacy REST `/otp/routers/default/plan` y solo expone routing vía GraphQL en `POST /otp/gtfs/v1`. El workflow de CI y el BFF (spec `bff-api-and-routes`) consumen ese endpoint GraphQL.
 
-> **Note on the pinned date/time:** without a pin the GraphQL `plan` query defaults to the runner's current time, which makes the smoke flaky after service hours (Sol Antigua urbano stops by ~23:18 weekdays per `data/stop_times.txt`). The pinned date+time SHALL fall inside `feed_info.feed_start_date` / `feed_end_date` and on a day that `data/calendar.txt` marks as in-service.
+> **Nota sobre el pin de date/time:** sin el pin, la GraphQL `plan` query usa la hora actual del runner por default, lo que hace al smoke flaky fuera de horario de servicio (Sol Antigua urbano corta ~23:18 los días de semana según `data/stop_times.txt`). La fecha+hora pineada SHALL caer dentro de `feed_info.feed_start_date` / `feed_end_date` y en un día que `data/calendar.txt` marca en servicio.
 
 #### Scenario: Workflow runs on input changes
-- **WHEN** a pull request modifies `deployment/otp/router-config.json`
-- **THEN** the `otp-smoke` workflow is triggered for that PR
+- **WHEN** un pull request modifica `deployment/otp/router-config.json`
+- **THEN** el workflow `otp-smoke` se dispara para ese PR
 
 #### Scenario: Workflow asserts at least one itinerary
-- **WHEN** the smoke step issues a GraphQL `plan` query at `POST /otp/gtfs/v1` from `(-34.471, -57.852)` to `(-34.449, -57.815)` with a `date`+`time` pinned to a weekday inside the feed validity window during service hours, and `transportModes: [{mode: TRANSIT},{mode: WALK}]`
-- **THEN** the response is `200 OK`, `data.plan.itineraries` is non-empty, and `data.plan.itineraries[0].legs[0]` exists
+- **WHEN** el smoke step lanza una GraphQL `plan` query en `POST /otp/gtfs/v1` desde `(-34.471, -57.852)` a `(-34.449, -57.815)` con un `date`+`time` pineado a un día de semana dentro del feed validity window durante horario de servicio, y `transportModes: [{mode: TRANSIT},{mode: WALK}]`
+- **THEN** la respuesta es `200 OK`, `data.plan.itineraries` no está vacío, y `data.plan.itineraries[0].legs[0]` existe
 
 #### Scenario: Workflow uploads the smoke results as an artifact
-- **WHEN** the smoke job finishes (success or failure)
-- **THEN** an `actions/upload-artifact@v4` step has uploaded a directory containing at minimum: the request body sent to OTP, the HTTP status code, the response headers, the response body JSON, a human-readable summary of the returned itinerary, and the captured `docker compose logs otp` output
+- **WHEN** el job de smoke termina (success o failure)
+- **THEN** un step `actions/upload-artifact@v4` subió un directorio conteniendo al menos: el body del request mandado a OTP, el código de status HTTP, los headers de la respuesta, el body JSON de la respuesta, un summary human-readable del itinerary devuelto, y el output capturado de `docker compose logs otp`
 
 ### Requirement: Deployment documentation SHALL describe the OTP service end-to-end
 
-A `deployment/README.md` SHALL document, at minimum:
+Un `deployment/README.md` SHALL documentar, como mínimo:
 
-- How to build `gtfs.zip` before bringing up OTP.
-- The `docker compose up otp` command and the typical 5–15 second graph-build time.
-- The container port (`8080`), the lack of host port mapping, and how to enable a debug port via `compose.override.yml`.
-- The JVM heap configuration and how to override it if needed.
-- The expected behavior when the bridge is not yet running (updater errors are logged; OTP still serves the static feed).
-- Where the spec contract lives (link to `openspec/specs/otp-routing/spec.md`).
+- Cómo construir `gtfs.zip` antes de levantar OTP.
+- El command `docker compose up otp` y el tiempo típico de build del grafo de 5–15 segundos.
+- El puerto del container (`8080`), la ausencia de mapping al host, y cómo habilitar un puerto de debug vía `compose.override.yml`.
+- La configuración del heap JVM y cómo overridearla si hace falta.
+- El comportamiento esperado cuando el bridge no está corriendo todavía (los errores de updater se loguean; OTP sigue sirviendo el feed estático).
+- Dónde vive el spec contract (link a `openspec/specs/otp-routing/spec.md`).
 
 #### Scenario: deployment/README.md exists and is linked from the root README
-- **WHEN** the repository is inspected
-- **THEN** `deployment/README.md` is present, and the root `README.md` references it from its Documentation / Stack section
+- **WHEN** se inspecciona el repositorio
+- **THEN** `deployment/README.md` está presente, y el `README.md` root lo referencia desde su sección de Documentation / Stack

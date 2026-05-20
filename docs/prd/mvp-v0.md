@@ -191,7 +191,7 @@ Cosas externas al código que tienen que estar resueltas para que v0 pueda darse
 | **OSM extract de Colonia urbano** | `colonia.osm.pbf` recortado de Geofabrik UY por bbox. Se commitea en `data/` o se baja en build (decisión spec-level). | @manufarfaro | Cerrable sin terceros |
 | **Google Maps API key** | Project en GCP con Maps JavaScript API + Places API habilitadas, restricción por HTTP referrer. | @manufarfaro | Cerrable sin terceros |
 | **Hosting v0** | VPS chico o Mac mini con Docker compose; subdominio acotado (`demo.algo.com` o similar). | @manufarfaro | Cerrable sin terceros |
-| **Disponibilidad del AVL de Sol Antigua** | El endpoint `solantigua.ddns.net:2780/pub/avl.xml` sigue accesible y respondiendo. Sin acuerdo formal todavía. | Operador externo | Estable de hecho (5 días observados) |
+| **Disponibilidad del AVL del operador** | El endpoint del AVL upstream (URL no committeada al repo; se inyecta vía la env var `ORIGIN_AVL` — ver [`bridge-gtfs-rt` R-03](../../openspec/specs/bridge-gtfs-rt/spec.md)) sigue accesible y respondiendo. El contrato de acceso lo gestiona @manufarfaro fuera de este repo. | Operador externo | Estable de hecho |
 
 **D10 del relevamiento (permisos legales del AVL) no es bloqueante de v0** porque el trigger es demo cerrado, no público. Pasa a ser bloqueante en v0.1 si se decide hacer URL pública (ver §10).
 

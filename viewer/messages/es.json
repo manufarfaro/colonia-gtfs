@@ -87,8 +87,7 @@
       },
       "legend": {
         "header": "Línea {shortName}",
-        "outbound": "Ida · {headsign}",
-        "inbound": "Vuelta · {headsign}"
+        "direction": "{headsign}"
       }
     }
   }

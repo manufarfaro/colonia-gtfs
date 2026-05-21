@@ -6,15 +6,16 @@ import type { RestLineResponse } from '@/lib/otp/translate-line';
 
 interface Props {
   data: RestLineResponse;
+  activeDirectionId: number;
 }
 
-export function LineLegend({ data }: Props): React.ReactElement | null {
+export function LineLegend({ data, activeDirectionId }: Props): React.ReactElement | null {
   const t = useTranslations('od.lineSchedule.legend');
   const line = data.line;
   if (!line) return null;
   const color = getLineColor(line.shortName);
-  const outbound = data.directions.find((d) => d.directionId === 0);
-  const inbound = data.directions.find((d) => d.directionId === 1);
+  const active = data.directions.find((d) => d.directionId === activeDirectionId);
+  if (!active) return null;
 
   return (
     <div
@@ -24,34 +25,16 @@ export function LineLegend({ data }: Props): React.ReactElement | null {
       <div className="mb-1 font-semibold tracking-tight">
         {t('header', { shortName: line.shortName })}
       </div>
-      {outbound && (
-        <div data-testid="line-legend-outbound" className="flex items-center gap-2 py-0.5">
-          <span
-            aria-hidden="true"
-            className="inline-block h-1 w-8 rounded"
-            style={{ backgroundColor: color }}
-          />
-          <span className="text-muted-foreground">
-            {t('outbound', { headsign: outbound.headsign })}
-          </span>
-        </div>
-      )}
-      {inbound && (
-        <div data-testid="line-legend-inbound" className="flex items-center gap-2 py-0.5">
-          <span
-            aria-hidden="true"
-            className="inline-flex h-1 w-8 items-center justify-between"
-          >
-            <span className="block h-1 w-1.5 rounded-sm" style={{ backgroundColor: color }} />
-            <span className="block h-1 w-1.5 rounded-sm" style={{ backgroundColor: color }} />
-            <span className="block h-1 w-1.5 rounded-sm" style={{ backgroundColor: color }} />
-            <span className="block h-1 w-1.5 rounded-sm" style={{ backgroundColor: color }} />
-          </span>
-          <span className="text-muted-foreground">
-            {t('inbound', { headsign: inbound.headsign })}
-          </span>
-        </div>
-      )}
+      <div data-testid="line-legend-active" className="flex items-center gap-2 py-0.5">
+        <span
+          aria-hidden="true"
+          className="inline-block h-1 w-8 rounded"
+          style={{ backgroundColor: color }}
+        />
+        <span className="text-muted-foreground">
+          {t('direction', { headsign: active.headsign })}
+        </span>
+      </div>
     </div>
   );
 }

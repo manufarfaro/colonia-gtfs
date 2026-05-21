@@ -28,10 +28,10 @@ function withData(overrides: Partial<RestLineResponse> = {}): RestLineResponse {
   };
 }
 
-function renderLegend(data: RestLineResponse): void {
+function renderLegend(data: RestLineResponse, activeDirectionId = 0): void {
   render(
     <NextIntlClientProvider locale="es" messages={esMessages}>
-      <LineLegend data={data} />
+      <LineLegend data={data} activeDirectionId={activeDirectionId} />
     </NextIntlClientProvider>,
   );
 }
@@ -40,51 +40,36 @@ describe('LineLegend', () => {
   it('renders nothing when line is null', () => {
     const { container } = render(
       <NextIntlClientProvider locale="es" messages={esMessages}>
-        <LineLegend data={withData({ line: null })} />
+        <LineLegend data={withData({ line: null })} activeDirectionId={0} />
+      </NextIntlClientProvider>,
+    );
+    expect(container.firstChild).toBeNull();
+  });
+
+  it('renders nothing when the active direction is not in the data', () => {
+    const { container } = render(
+      <NextIntlClientProvider locale="es" messages={esMessages}>
+        <LineLegend data={withData()} activeDirectionId={99} />
       </NextIntlClientProvider>,
     );
     expect(container.firstChild).toBeNull();
   });
 
   it('renders the line short name in the header', () => {
-    renderLegend(withData());
+    renderLegend(withData(), 0);
     expect(screen.getByTestId('line-legend')).toBeInTheDocument();
     expect(screen.getByText(/Línea 4/)).toBeInTheDocument();
   });
 
-  it('renders the outbound row with the direction 0 headsign', () => {
-    renderLegend(withData());
-    const row = screen.getByTestId('line-legend-outbound');
-    expect(row.textContent).toContain('Ida');
+  it('renders the active direction 0 headsign when direction 0 is active', () => {
+    renderLegend(withData(), 0);
+    const row = screen.getByTestId('line-legend-active');
     expect(row.textContent).toContain('El General');
   });
 
-  it('renders the inbound row with the direction 1 headsign', () => {
-    renderLegend(withData());
-    const row = screen.getByTestId('line-legend-inbound');
-    expect(row.textContent).toContain('Vuelta');
+  it('renders the active direction 1 headsign when direction 1 is active', () => {
+    renderLegend(withData(), 1);
+    const row = screen.getByTestId('line-legend-active');
     expect(row.textContent).toContain('Centro');
-  });
-
-  it('omits the outbound row when there is no direction 0', () => {
-    const onlyInbound = withData({
-      directions: [
-        { directionId: 1, headsign: 'Centro', stops: [], scheduledDepartures: [] },
-      ],
-    });
-    renderLegend(onlyInbound);
-    expect(screen.queryByTestId('line-legend-outbound')).toBeNull();
-    expect(screen.getByTestId('line-legend-inbound')).toBeInTheDocument();
-  });
-
-  it('omits the inbound row when there is no direction 1', () => {
-    const onlyOutbound = withData({
-      directions: [
-        { directionId: 0, headsign: 'El General', stops: [], scheduledDepartures: [] },
-      ],
-    });
-    renderLegend(onlyOutbound);
-    expect(screen.getByTestId('line-legend-outbound')).toBeInTheDocument();
-    expect(screen.queryByTestId('line-legend-inbound')).toBeNull();
   });
 });

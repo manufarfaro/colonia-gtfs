@@ -192,6 +192,7 @@ describe('MapCanvas', () => {
         meta: { date: '2026-05-20' },
       },
       vehicles: [{ id: 'v-1', label: 'L4', routeId: '4', directionId: 0, lat: 0, lon: 0, bearing: null, timestamp: null }],
+      activeDirectionId: 0,
     };
     render(<MapCanvas itinerary={busItinerary()} lineLayer={lineLayer} />);
     // Line layer rendered, OD polylines NOT rendered.
@@ -208,6 +209,7 @@ describe('MapCanvas', () => {
         meta: { date: '2026-05-20' },
       },
       vehicles: [],
+      activeDirectionId: 0,
     };
     render(<MapCanvas itinerary={null} lineLayer={lineLayer} />);
     const bounds = screen.getByTestId('map').getAttribute('data-bounds');
@@ -223,6 +225,7 @@ describe('MapCanvas', () => {
         meta: { date: '2026-05-20' },
       },
       vehicles: [],
+      activeDirectionId: 0,
     };
     render(<MapCanvas itinerary={null} lineLayer={lineLayer} />);
     const map = screen.getByTestId('map');

@@ -68,7 +68,9 @@ export function MapCanvas({
 
   return (
     <div className="relative h-full w-full">
-      {lineLayer && <LineLegend data={lineLayer.data} />}
+      {lineLayer && (
+        <LineLegend data={lineLayer.data} activeDirectionId={lineLayer.activeDirectionId} />
+      )}
       <Map
         defaultCenter={COLONIA_CENTER}
         defaultZoom={DEFAULT_ZOOM}

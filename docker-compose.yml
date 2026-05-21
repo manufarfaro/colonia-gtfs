@@ -69,7 +69,14 @@ services:
     restart: unless-stopped
 
   viewer:
-    build: ./viewer
+    build:
+      context: ./viewer
+      # NEXT_PUBLIC_* values must be available at BUILD time — Next.js
+      # inlines them into the client bundle. Compose substitutes from
+      # the shell env or `.env` at the project root.
+      args:
+        NEXT_PUBLIC_GOOGLE_MAPS_API_KEY: "${NEXT_PUBLIC_GOOGLE_MAPS_API_KEY:-}"
+        NEXT_PUBLIC_VIEWER_DEFAULT_CENTER: "${NEXT_PUBLIC_VIEWER_DEFAULT_CENTER:-}"
     env_file:
       - path: .env
         required: false

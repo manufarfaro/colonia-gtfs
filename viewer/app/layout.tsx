@@ -74,7 +74,7 @@ export default async function RootLayout({
           <QueryProvider>
             <NextIntlClientProvider locale={locale} messages={messages}>
               <Header />
-              <main className="flex-1">{children}</main>
+              <main className="flex-1 relative min-h-0">{children}</main>
               <DisclaimerBanner />
             </NextIntlClientProvider>
           </QueryProvider>

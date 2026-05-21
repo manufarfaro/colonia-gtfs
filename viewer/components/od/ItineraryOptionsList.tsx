@@ -16,12 +16,18 @@ interface Props {
   itineraries: RestItinerary[];
   selectedIndex: number;
   onSelect: (index: number) => void;
+  /** Optional render-prop: when supplied, the result is rendered as a
+   *  panel directly below the SELECTED itinerary row — keeps the
+   *  expanded detail visually anchored to its summary card instead of
+   *  floating at the end of the list. */
+  renderDetail?: (itinerary: RestItinerary, index: number) => React.ReactNode;
 }
 
 export function ItineraryOptionsList({
   itineraries,
   selectedIndex,
   onSelect,
+  renderDetail,
 }: Props): React.ReactElement {
   const t = useTranslations('od.card');
 
@@ -32,17 +38,18 @@ export function ItineraryOptionsList({
         const busLegs = it.legs.filter((leg) => leg.mode === 'BUS');
         const walkMeters = Math.round(it.walkDistanceMeters);
         return (
-          <li key={i}>
+          <li key={i} className="flex flex-col">
             <button
               type="button"
               data-testid={`itinerary-option-${i}`}
               data-selected={isSelected}
               onClick={() => onSelect(i)}
+              aria-expanded={isSelected}
               className={[
-                'w-full rounded-md border p-3 text-left transition-colors focus-visible:outline-2 focus-visible:outline-ring',
+                'w-full border p-3 text-left transition-colors focus-visible:outline-2 focus-visible:outline-ring',
                 isSelected
-                  ? 'border-primary bg-accent ring-1 ring-primary/30'
-                  : 'border-border bg-card hover:bg-muted',
+                  ? 'rounded-t-md border-b-0 border-primary bg-accent'
+                  : 'rounded-md border-border bg-card hover:bg-muted',
               ].join(' ')}
             >
               <div className="flex items-baseline justify-between gap-2">
@@ -83,6 +90,14 @@ export function ItineraryOptionsList({
                 </span>
               </div>
             </button>
+            {isSelected && renderDetail && (
+              <div
+                data-testid={`itinerary-detail-${i}`}
+                className="rounded-b-md border border-t-0 border-primary bg-card p-3"
+              >
+                {renderDetail(it, i)}
+              </div>
+            )}
           </li>
         );
       })}

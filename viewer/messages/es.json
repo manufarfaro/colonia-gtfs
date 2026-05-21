@@ -20,7 +20,8 @@
         "label": "Destino",
         "placeholder": "Ej: Plaza de Toros Real de San Carlos"
       },
-      "clear": "Borrar"
+      "clear": "Borrar",
+      "swap": "Intercambiar origen y destino"
     },
     "card": {
       "duration": "{minutes} min",

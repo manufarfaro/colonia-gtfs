@@ -121,14 +121,12 @@ export function OdModeShell({ apiKey }: { apiKey: string | undefined }): React.R
                     : t('state.errorEmpty')}
               </div>
             ) : (
-              <div className="flex flex-col gap-3">
-                <ItineraryOptionsList
-                  itineraries={plan.data.itineraries}
-                  selectedIndex={selectedIdx}
-                  onSelect={setSelectedIdx}
-                />
-                {selectedItinerary && <ItineraryCard itinerary={selectedItinerary} />}
-              </div>
+              <ItineraryOptionsList
+                itineraries={plan.data.itineraries}
+                selectedIndex={selectedIdx}
+                onSelect={setSelectedIdx}
+                renderDetail={(itinerary) => <ItineraryCard itinerary={itinerary} />}
+              />
             )
           )}
           {mode.type === 'line-schedule' && (

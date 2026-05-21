@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { useMapsLibrary } from '@vis.gl/react-google-maps';
 
 type Coord = { lat: number; lon: number };
@@ -12,6 +12,10 @@ export interface OdAutocompleteInputProps {
   placeholder: string;
   bounds: Bounds;
   componentRestrictions: { country: string };
+  /** Controlled input value (e.g., "Terminal Buquebus"). The parent
+   *  owns the string so it can swap origin↔destination on demand. */
+  value: string;
+  onValueChange: (next: string) => void;
   onPlaceSelected: (place: Coord | null) => void;
 }
 
@@ -20,6 +24,9 @@ export interface OdAutocompleteInputProps {
  * via @vis.gl/react-google-maps' `useMapsLibrary`, attaches a Google
  * Autocomplete to the input element, and forwards the picked place's
  * lat/lon (or `null` when the user clears the field) to the parent.
+ * The input is CONTROLLED — the parent owns both the typed string and
+ * the resolved coordinate, which lets a sibling "swap" button reassign
+ * both halves of the OD pair in a single render.
  *
  * The runtime wiring depends on `window.google.maps.places` — there's no
  * meaningful way to exercise that under vitest without a browser. Tests
@@ -34,11 +41,12 @@ export function OdAutocompleteInput({
   placeholder,
   bounds,
   componentRestrictions,
+  value,
+  onValueChange,
   onPlaceSelected,
 }: OdAutocompleteInputProps): React.ReactElement {
   const placesLib = useMapsLibrary('places');
   const inputRef = useRef<HTMLInputElement>(null);
-  const [value, setValue] = useState('');
 
   useEffect(() => {
     if (!placesLib || !inputRef.current) return;
@@ -50,12 +58,16 @@ export function OdAutocompleteInput({
         east: bounds.ne.lng,
       },
       componentRestrictions,
-      fields: ['geometry'],
+      fields: ['geometry', 'formatted_address', 'name'],
       strictBounds: false,
     });
     const listener = autocomplete.addListener('place_changed', () => {
       const place = autocomplete.getPlace();
       const loc = place.geometry?.location;
+      // Google writes the picked label into the input directly — sync it
+      // back into the controlled value so the parent can swap inputs.
+      const label = place.name ?? place.formatted_address ?? inputRef.current?.value ?? '';
+      onValueChange(label);
       if (!loc) {
         onPlaceSelected(null);
         return;
@@ -65,12 +77,12 @@ export function OdAutocompleteInput({
     return () => {
       listener.remove();
     };
-  }, [placesLib, bounds, componentRestrictions, onPlaceSelected]);
+  }, [placesLib, bounds, componentRestrictions, onPlaceSelected, onValueChange]);
 
   const handleClear = useCallback((): void => {
-    setValue('');
+    onValueChange('');
     onPlaceSelected(null);
-  }, [onPlaceSelected]);
+  }, [onPlaceSelected, onValueChange]);
 
   return (
     <div className="flex items-center gap-2">
@@ -82,7 +94,7 @@ export function OdAutocompleteInput({
         id={id}
         type="text"
         value={value}
-        onChange={(e) => setValue(e.target.value)}
+        onChange={(e) => onValueChange(e.target.value)}
         placeholder={placeholder}
         className="flex-1 rounded-md border border-border bg-background px-3 py-2 text-sm"
       />

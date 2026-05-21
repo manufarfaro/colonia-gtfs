@@ -2,10 +2,13 @@
 
 import { useCallback, useEffect, useRef } from 'react';
 import { useMapsLibrary } from '@vis.gl/react-google-maps';
+import { Circle, MapPin, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 type Coord = { lat: number; lon: number };
 type Bounds = { sw: { lat: number; lng: number }; ne: { lat: number; lng: number } };
+
+export type OdInputKind = 'origin' | 'destination';
 
 export interface OdAutocompleteInputProps {
   id: string;
@@ -13,6 +16,9 @@ export interface OdAutocompleteInputProps {
   placeholder: string;
   bounds: Bounds;
   componentRestrictions: { country: string };
+  /** Which end of the trip this input represents — drives the leading
+   *  icon (filled circle for origin, MapPin for destination). */
+  kind: OdInputKind;
   /** Controlled input value (e.g., "Terminal Buquebus"). The parent
    *  owns the string so it can swap origin↔destination on demand. */
   value: string;
@@ -42,6 +48,7 @@ export function OdAutocompleteInput({
   placeholder,
   bounds,
   componentRestrictions,
+  kind,
   value,
   onValueChange,
   onPlaceSelected,
@@ -85,11 +92,19 @@ export function OdAutocompleteInput({
     onPlaceSelected(null);
   }, [onPlaceSelected, onValueChange]);
 
+  const StartIcon = kind === 'origin' ? Circle : MapPin;
+  const hasValue = value.trim().length > 0;
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex w-full items-center gap-2 rounded-md border border-border bg-background px-2 py-1.5 transition-colors focus-within:border-ring focus-within:ring-2 focus-within:ring-ring/50">
       <label htmlFor={id} className="sr-only">
         {label}
       </label>
+      <StartIcon
+        aria-hidden="true"
+        className="h-4 w-4 shrink-0 text-muted-foreground"
+        strokeWidth={kind === 'origin' ? 2.5 : 2}
+        fill={kind === 'origin' ? 'currentColor' : 'none'}
+      />
       <input
         ref={inputRef}
         id={id}
@@ -97,18 +112,20 @@ export function OdAutocompleteInput({
         value={value}
         onChange={(e) => onValueChange(e.target.value)}
         placeholder={placeholder}
-        className="flex-1 rounded-md border border-border bg-background px-3 py-2 text-sm"
+        className="min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
       />
-      <Button
-        type="button"
-        variant="outline"
-        size="icon-sm"
-        onClick={handleClear}
-        aria-label={`clear-${id}`}
-        className="text-muted-foreground"
-      >
-        ×
-      </Button>
+      {hasValue && (
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon-xs"
+          onClick={handleClear}
+          aria-label={`clear-${id}`}
+          className="shrink-0 text-muted-foreground"
+        >
+          <X aria-hidden="true" />
+        </Button>
+      )}
     </div>
   );
 }

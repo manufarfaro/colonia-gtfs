@@ -61,6 +61,7 @@ export function OriginDestinationInputs({
     <div className="flex flex-col gap-2">
       <OdAutocompleteInput
         id="origin"
+        kind="origin"
         label={t('origin.label')}
         placeholder={t('origin.placeholder')}
         bounds={COLONIA_BBOX}
@@ -91,6 +92,7 @@ export function OriginDestinationInputs({
       </div>
       <OdAutocompleteInput
         id="destination"
+        kind="destination"
         label={t('destination.label')}
         placeholder={t('destination.placeholder')}
         bounds={COLONIA_BBOX}

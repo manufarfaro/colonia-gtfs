@@ -59,6 +59,26 @@ vi.mock('@/components/stop-info/StopInfoCard', () => ({
 vi.mock('./ItineraryCard', () => ({
   ItineraryCard: () => <div data-testid="stub-card" />,
 }));
+vi.mock('@/components/line-schedule/LineSelector', () => ({
+  LineSelector: ({ onPickLine }: { onPickLine: (s: string) => void }) => (
+    <button data-testid="stub-line-pick-4" onClick={() => onPickLine('4')}>pick</button>
+  ),
+}));
+vi.mock('@/components/line-schedule/LineScheduleCard', () => ({
+  LineScheduleCard: ({
+    data,
+    onStopClick,
+  }: {
+    data: { line: { shortName: string } | null };
+    onStopClick: (id: string) => void;
+  }) => (
+    <div data-testid="stub-line-card" data-shortname={data.line?.shortName ?? ''}>
+      <button data-testid="stub-line-stop-click" onClick={() => onStopClick('sol-antigua:line-stop')}>
+        click line stop
+      </button>
+    </div>
+  ),
+}));
 
 import { OdModeShell } from './OdModeShell';
 
@@ -187,6 +207,155 @@ describe('OdModeShell', () => {
     });
     await waitFor(() => expect(screen.queryByTestId('stub-stop-info-card')).toBeNull());
     expect(window.location.hash).toBe('');
+  });
+
+  it('R-01 OD mode shows the "Líneas" entry button + clicking it activates line-schedule', async () => {
+    fetchMock.mockResolvedValueOnce(jsonResponse({
+      line: { id: '1:3', shortName: '3', longName: 'L3' },
+      shape: [],
+      directions: [],
+      meta: { date: '2026-05-20' },
+    }));
+    fetchMock.mockResolvedValue(jsonResponse({ lineId: '3', vehicles: [], meta: { realtime_available: false, feed_timestamp: null } }));
+    renderShell('test-key');
+    expect(screen.getByTestId('open-line-selector')).toBeInTheDocument();
+    act(() => {
+      fireEvent.click(screen.getByTestId('open-line-selector'));
+    });
+    await waitFor(() => expect(screen.queryByTestId('stub-line-card')).not.toBeNull());
+    expect(window.location.hash).toBe('#line=3');
+  });
+
+  it('R-01 LineSelector onPickLine in line-schedule mode switches lines', async () => {
+    fetchMock.mockResolvedValue(jsonResponse({
+      line: { id: '1:5', shortName: '5', longName: 'L5' },
+      shape: [],
+      directions: [],
+      meta: { date: '2026-05-20' },
+    }));
+    window.history.replaceState(null, '', '#line=5');
+    render(
+      <NextIntlClientProvider locale="es" messages={esMessages}>
+        <OdModeShell apiKey="test-key" />
+      </NextIntlClientProvider>,
+    );
+    await waitFor(() => expect(screen.queryByTestId('stub-line-pick-4')).not.toBeNull());
+    act(() => {
+      fireEvent.click(screen.getByTestId('stub-line-pick-4'));
+    });
+    // The mocked selector picks line 4; the hook updates the hash.
+    await waitFor(() => expect(window.location.hash).toBe('#line=4'));
+  });
+
+  it('R-02 line-schedule mode hides OD inputs and shows the selector', async () => {
+    fetchMock.mockResolvedValue(jsonResponse({
+      line: { id: '1:4', shortName: '4', longName: 'L4' },
+      shape: [],
+      directions: [],
+      meta: { date: '2026-05-20' },
+    }));
+    window.history.replaceState(null, '', '#line=4');
+    render(
+      <NextIntlClientProvider locale="es" messages={esMessages}>
+        <OdModeShell apiKey="test-key" />
+      </NextIntlClientProvider>,
+    );
+    await waitFor(() => expect(screen.queryByTestId('stub-line-pick-4')).not.toBeNull());
+    expect(screen.queryByTestId('stub-select-both')).toBeNull();
+  });
+
+  it('R-04 tap-on-stop inside line-schedule pushes stop-info + close returns to line-schedule', async () => {
+    fetchMock.mockResolvedValue(jsonResponse({
+      line: { id: '1:4', shortName: '4', longName: 'L4' },
+      shape: [],
+      directions: [],
+      meta: { date: '2026-05-20' },
+    }));
+    window.history.replaceState(null, '', '#line=4');
+    render(
+      <NextIntlClientProvider locale="es" messages={esMessages}>
+        <OdModeShell apiKey="test-key" />
+      </NextIntlClientProvider>,
+    );
+    await waitFor(() => expect(screen.queryByTestId('stub-line-card')).not.toBeNull());
+    act(() => {
+      fireEvent.click(screen.getByTestId('stub-line-stop-click'));
+    });
+    await waitFor(() => expect(screen.queryByTestId('stub-stop-info-card')).not.toBeNull());
+    expect(window.location.hash).toBe('#stop=sol-antigua%3Aline-stop');
+    act(() => {
+      fireEvent.click(screen.getByTestId('bottom-sheet-backdrop'));
+    });
+    await waitFor(() => expect(window.location.hash).toBe('#line=4'));
+  });
+
+  it('R-02 line-schedule loading state surfaces the localised copy', async () => {
+    fetchMock.mockImplementationOnce(() => new Promise(() => {}));
+    window.history.replaceState(null, '', '#line=4');
+    render(
+      <NextIntlClientProvider locale="es" messages={esMessages}>
+        <OdModeShell apiKey="test-key" />
+      </NextIntlClientProvider>,
+    );
+    await waitFor(() => expect(screen.queryByTestId('line-state-loading')).not.toBeNull());
+  });
+
+  it('R-02 line-schedule error.not_found surfaces the localised copy', async () => {
+    fetchMock.mockResolvedValueOnce(jsonResponse({ error: 'line_not_found' }, 404));
+    window.history.replaceState(null, '', '#line=missing');
+    render(
+      <NextIntlClientProvider locale="es" messages={esMessages}>
+        <OdModeShell apiKey="test-key" />
+      </NextIntlClientProvider>,
+    );
+    await waitFor(() => expect(screen.queryByTestId('line-state-error-not_found')).not.toBeNull());
+  });
+
+  it('R-02 line-schedule error.otp surfaces the localised copy', async () => {
+    fetchMock.mockResolvedValueOnce(jsonResponse({ error: 'otp_unavailable' }, 502));
+    window.history.replaceState(null, '', '#line=4');
+    render(
+      <NextIntlClientProvider locale="es" messages={esMessages}>
+        <OdModeShell apiKey="test-key" />
+      </NextIntlClientProvider>,
+    );
+    await waitFor(() => expect(screen.queryByTestId('line-state-error-otp_unavailable')).not.toBeNull());
+  });
+
+  it('R-02 exit-line-selector returns to OD', async () => {
+    fetchMock.mockResolvedValue(jsonResponse({
+      line: { id: '1:4', shortName: '4', longName: 'L4' },
+      shape: [],
+      directions: [],
+      meta: { date: '2026-05-20' },
+    }));
+    window.history.replaceState(null, '', '#line=4');
+    render(
+      <NextIntlClientProvider locale="es" messages={esMessages}>
+        <OdModeShell apiKey="test-key" />
+      </NextIntlClientProvider>,
+    );
+    await waitFor(() => expect(screen.queryByTestId('exit-line-selector')).not.toBeNull());
+    act(() => {
+      fireEvent.click(screen.getByTestId('exit-line-selector'));
+    });
+    await waitFor(() => expect(window.location.hash).toBe(''));
+  });
+
+  it('R-02 line:null in success body surfaces not_found message', async () => {
+    fetchMock.mockResolvedValueOnce(jsonResponse({
+      line: null,
+      shape: [],
+      directions: [],
+      meta: { date: '2026-05-20' },
+    }));
+    window.history.replaceState(null, '', '#line=8');
+    render(
+      <NextIntlClientProvider locale="es" messages={esMessages}>
+        <OdModeShell apiKey="test-key" />
+      </NextIntlClientProvider>,
+    );
+    await waitFor(() => expect(screen.queryByTestId('line-state-error-not_found')).not.toBeNull());
   });
 
   it('R-02 backdrop click closes the stop-info sheet + returns to OD', async () => {

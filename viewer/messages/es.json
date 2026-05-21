@@ -59,6 +59,27 @@
         "errorNotFoundReturn": "Volver al inicio",
         "errorNetwork": "No pudimos conectarnos al servicio. Reintentar en un minuto."
       }
+    },
+    "lineSchedule": {
+      "selector": {
+        "label": "Líneas",
+        "lineLabel": "Línea {shortName}",
+        "openLabel": "Líneas",
+        "exit": "Salir"
+      },
+      "card": {
+        "directionLabel": "Sentido",
+        "scheduledDeparturesLabel": "Horarios del día"
+      },
+      "state": {
+        "loading": "Cargando información de la línea…",
+        "errorOtp": "El servicio de líneas no está disponible. Reintentar en un minuto.",
+        "errorNotFound": "Esta línea no existe en el feed actual.",
+        "errorNotFoundReturn": "Volver al inicio"
+      },
+      "vehicles": {
+        "noLive": "Sin posiciones en vivo"
+      }
     }
   }
 }

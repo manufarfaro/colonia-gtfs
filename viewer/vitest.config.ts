@@ -24,14 +24,18 @@ export default defineConfig({
       // Cover all first-party app code under these dirs + the root middleware.
       include: ['app/**/*.{ts,tsx}', 'components/**/*.{ts,tsx}', 'lib/**/*.{ts,tsx}', 'middleware.ts'],
       // Exclusions:
-      //   - components/ui/**                        → shadcn upstream primitives
-      //   - components/od/OdAutocompleteInput.tsx   → calls the live Google Maps Places API; tests stub it
-      //   - components/od/LegPolyline.tsx           → calls google.maps.Polyline / Marker directly; tests stub it
-      //   - **/*.test.{ts,tsx}                      → the tests themselves
+      //   - components/ui/**                              → shadcn upstream primitives
+      //   - components/od/OdAutocompleteInput.tsx         → calls the live Google Maps Places API; tests stub it
+      //   - components/od/LegPolyline.tsx                 → calls google.maps.Polyline / Marker directly; tests stub it
+      //   - components/line-schedule/VehicleMarker.tsx    → calls google.maps.Marker directly; tests stub it
+      //   - components/line-schedule/LineRouteLayer.tsx   → orchestrates google.maps.Polyline + Marker primitives
+      //   - **/*.test.{ts,tsx}                            → the tests themselves
       exclude: [
         'components/ui/**',
         'components/od/OdAutocompleteInput.tsx',
         'components/od/LegPolyline.tsx',
+        'components/line-schedule/VehicleMarker.tsx',
+        'components/line-schedule/LineRouteLayer.tsx',
         '**/*.{test,spec}.{ts,tsx}',
       ],
       thresholds: {

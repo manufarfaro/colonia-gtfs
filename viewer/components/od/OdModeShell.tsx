@@ -56,10 +56,6 @@ export function OdModeShell({ apiKey }: { apiKey: string | undefined }): React.R
     [setMode],
   );
   const handleLineClose = useCallback(() => setMode({ type: 'od' }), [setMode]);
-  const handleStopInOtherMode = useCallback(
-    (id: string) => setMode({ type: 'stop-info', stopId: id }, { push: true }),
-    [setMode],
-  );
   const handleOpenLineSelector = useCallback(
     () => setMode({ type: 'line-schedule', shortName: V0_LINES[0] }),
     [setMode],
@@ -146,10 +142,9 @@ export function OdModeShell({ apiKey }: { apiKey: string | undefined }): React.R
               </div>
             ) : lineData.data.line ? (
               <LineScheduleCard
-              data={lineData.data}
-              onStopClick={handleStopInOtherMode}
-              onActiveDirectionChange={setActiveLineDir}
-            />
+                data={lineData.data}
+                onActiveDirectionChange={setActiveLineDir}
+              />
             ) : (
               <div role="alert" className="text-center text-sm text-muted-foreground">
                 {t('lineSchedule.state.errorNotFound')}
@@ -251,10 +246,9 @@ export function OdModeShell({ apiKey }: { apiKey: string | undefined }): React.R
             ) : lineData.data.line ? (
               <div className="border-t border-border bg-background p-4">
                 <LineScheduleCard
-              data={lineData.data}
-              onStopClick={handleStopInOtherMode}
-              onActiveDirectionChange={setActiveLineDir}
-            />
+                data={lineData.data}
+                onActiveDirectionChange={setActiveLineDir}
+              />
               </div>
             ) : (
               <div

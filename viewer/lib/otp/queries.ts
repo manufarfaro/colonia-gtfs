@@ -45,7 +45,7 @@ export const LINE_QUERY = `
         patternGeometry { points }
         trips {
           gtfsId
-          stoptimes { scheduledDeparture }
+          stoptimes { scheduledArrival scheduledDeparture }
         }
       }
     }

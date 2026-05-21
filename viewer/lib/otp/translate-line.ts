@@ -7,7 +7,7 @@ export interface OtpStop {
 
 export interface OtpTrip {
   gtfsId: string;
-  stoptimes: { scheduledDeparture: number }[];
+  stoptimes: { scheduledArrival: number; scheduledDeparture: number }[];
 }
 
 export interface OtpPattern {
@@ -39,6 +39,13 @@ export interface RestStop {
   name: string;
   lat: number;
   lon: number;
+  /**
+   * Seconds from the trip's first-stop departure to the bus reaching
+   * THIS stop. Derived from the canonical pattern's first trip's
+   * `scheduledArrival` deltas. The frontend uses it to render a
+   * per-stop arrival time relative to any scheduled departure.
+   */
+  arrivalOffsetSeconds: number;
 }
 
 export interface RestDirection {
@@ -61,6 +68,18 @@ export interface RestLineResponse {
 }
 
 import { CANONICAL_SHAPES } from '@/lib/shapes/canonical-shapes';
+
+function arrivalOffset(
+  sampleTrip: OtpTrip | undefined,
+  stopIdx: number,
+  baseDeparture: number,
+): number {
+  if (!sampleTrip) return 0;
+  const arr = sampleTrip.stoptimes[stopIdx]?.scheduledArrival;
+  /* v8 ignore next — sampleTrip filter guarantees stoptimes[stopIdx] exists */
+  if (arr === undefined) return 0;
+  return Math.max(0, arr - baseDeparture);
+}
 
 function secondsToHHMM(secs: number): string {
   const safe = ((secs % 86400) + 86400) % 86400;
@@ -98,10 +117,25 @@ export function translateLineResponse(
         .flatMap((p) => p.trips)
         .flatMap((t) => t.stoptimes.map((st) => st.scheduledDeparture))
         .sort((a, b) => a - b);
+      // Per-stop arrival offset derived from the canonical pattern's
+      // first trip with a fully-populated stoptimes list. Each offset
+      // is `scheduledArrival[i] - scheduledDeparture[0]`, i.e. seconds
+      // from the trip's first-stop departure to reaching stop i.
+      const sampleTrip = canonical.trips.find(
+        (t) => t.stoptimes.length === canonical.stops.length,
+      );
+      const baseDeparture = sampleTrip?.stoptimes[0]?.scheduledDeparture ?? 0;
+      const stops: RestStop[] = canonical.stops.map((s, i) => ({
+        id: s.gtfsId,
+        name: s.name,
+        lat: s.lat,
+        lon: s.lon,
+        arrivalOffsetSeconds: arrivalOffset(sampleTrip, i, baseDeparture),
+      }));
       return {
         directionId,
         headsign: canonical.headsign,
-        stops: canonical.stops.map((s) => ({ id: s.gtfsId, name: s.name, lat: s.lat, lon: s.lon })),
+        stops,
         scheduledDepartures: allDepartures.map(secondsToHHMM),
       };
     })

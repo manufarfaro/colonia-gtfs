@@ -125,6 +125,75 @@ describe('translateLineResponse', () => {
     expect(result.shape[0].points).not.toBe('broken-otp-output');
   });
 
+  it('R-06 computes per-stop arrivalOffsetSeconds from the canonical pattern first trip', () => {
+    const withTimes = {
+      data: {
+        routes: [
+          {
+            gtfsId: '1:99',
+            shortName: '99',
+            longName: 'L99',
+            patterns: [
+              {
+                directionId: 0,
+                headsign: 'Centro',
+                stops: [
+                  { gtfsId: 'A', name: 'A', lat: 0, lon: 0 },
+                  { gtfsId: 'B', name: 'B', lat: 0, lon: 0 },
+                  { gtfsId: 'C', name: 'C', lat: 0, lon: 0 },
+                ],
+                patternGeometry: null,
+                trips: [
+                  {
+                    gtfsId: 't1',
+                    stoptimes: [
+                      { scheduledArrival: 28800, scheduledDeparture: 28800 }, // 08:00
+                      { scheduledArrival: 29160, scheduledDeparture: 29160 }, // 08:06
+                      { scheduledArrival: 29760, scheduledDeparture: 29760 }, // 08:16
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+    };
+    const result = translateLineResponse(withTimes, '99', '2026-05-19');
+    expect(result.directions[0].stops[0].arrivalOffsetSeconds).toBe(0);
+    expect(result.directions[0].stops[1].arrivalOffsetSeconds).toBe(360);
+    expect(result.directions[0].stops[2].arrivalOffsetSeconds).toBe(960);
+  });
+
+  it('R-06 falls back to arrivalOffsetSeconds=0 when no trip has full stoptimes', () => {
+    const noTrips = {
+      data: {
+        routes: [
+          {
+            gtfsId: '1:99',
+            shortName: '99',
+            longName: 'L99',
+            patterns: [
+              {
+                directionId: 0,
+                headsign: 'X',
+                stops: [
+                  { gtfsId: 'A', name: 'A', lat: 0, lon: 0 },
+                  { gtfsId: 'B', name: 'B', lat: 0, lon: 0 },
+                ],
+                patternGeometry: null,
+                trips: [],
+              },
+            ],
+          },
+        ],
+      },
+    };
+    const result = translateLineResponse(noTrips, '99', '2026-05-19');
+    expect(result.directions[0].stops[0].arrivalOffsetSeconds).toBe(0);
+    expect(result.directions[0].stops[1].arrivalOffsetSeconds).toBe(0);
+  });
+
   it('R-06 skips patterns without patternGeometry when building shape', () => {
     const noGeom = {
       data: {

@@ -73,16 +73,10 @@ vi.mock('@/components/line-schedule/LineSelector', () => ({
 vi.mock('@/components/line-schedule/LineScheduleCard', () => ({
   LineScheduleCard: ({
     data,
-    onStopClick,
   }: {
     data: { line: { shortName: string } | null };
-    onStopClick: (id: string) => void;
   }) => (
-    <div data-testid="stub-line-card" data-shortname={data.line?.shortName ?? ''}>
-      <button data-testid="stub-line-stop-click" onClick={() => onStopClick('sol-antigua:line-stop')}>
-        click line stop
-      </button>
-    </div>
+    <div data-testid="stub-line-card" data-shortname={data.line?.shortName ?? ''} />
   ),
 }));
 
@@ -280,34 +274,6 @@ describe('OdModeShell', () => {
     );
     await waitFor(() => expect(screen.queryAllByTestId('stub-line-pick-4')[0]).not.toBeNull());
     expect(screen.queryAllByTestId('stub-select-both')).toHaveLength(0);
-  });
-
-  it('R-04 tap-on-stop inside line-schedule pushes stop-info + close returns to line-schedule', async () => {
-    fetchMock.mockResolvedValue(jsonResponse({
-      line: { id: '1:4', shortName: '4', longName: 'L4' },
-      shape: [],
-      directions: [],
-      meta: { date: '2026-05-20' },
-    }));
-    window.history.replaceState(null, '', '#line=4');
-    const { Wrapper: __QW } = makeQueryWrapper();
-    render(
-      <__QW>
-        <NextIntlClientProvider locale="es" messages={esMessages}>
-          <OdModeShell apiKey="test-key" />
-        </NextIntlClientProvider>
-      </__QW>,
-    );
-    await waitFor(() => expect(screen.queryAllByTestId('stub-line-card').length).toBeGreaterThan(0));
-    act(() => {
-      fireEvent.click(screen.getAllByTestId('stub-line-stop-click')[0]);
-    });
-    await waitFor(() => expect(screen.queryByTestId('stub-stop-info-card')).not.toBeNull());
-    expect(window.location.hash).toBe('#stop=sol-antigua%3Aline-stop');
-    act(() => {
-      fireEvent.click(screen.getByTestId('bottom-sheet-backdrop'));
-    });
-    await waitFor(() => expect(window.location.hash).toBe('#line=4'));
   });
 
   it('R-02 line-schedule loading state surfaces the localised copy', async () => {

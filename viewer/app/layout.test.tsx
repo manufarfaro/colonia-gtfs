@@ -36,7 +36,7 @@ import RootLayout, { metadata } from './layout';
 
 describe('app/layout.tsx', () => {
   it('R-01 exposes static metadata (title + description)', () => {
-    expect(metadata.title).toBe('colonia-gtfs');
+    expect(metadata.title).toBe('Colonia Maps · No oficial');
     expect(metadata.description).toMatch(/Colonia/);
   });
 

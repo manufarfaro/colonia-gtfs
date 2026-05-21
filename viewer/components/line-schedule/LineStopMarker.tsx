@@ -3,6 +3,7 @@
 import { useEffect } from 'react';
 import { useMap } from '@vis.gl/react-google-maps';
 import { getLineColor } from '@/lib/colors/lines';
+import { stopMarkerIconUrl } from '@/lib/icons/marker-icons';
 
 /**
  * Stop dot for the line-schedule layer. Smaller than the OD endpoint
@@ -35,12 +36,9 @@ export function LineStopMarker({
       map,
       title: name,
       icon: {
-        path: google.maps.SymbolPath.CIRCLE,
-        scale: 4,
-        fillColor: '#ffffff',
-        fillOpacity: 1,
-        strokeColor: getLineColor(shortName),
-        strokeWeight: 2,
+        url: stopMarkerIconUrl(getLineColor(shortName)),
+        scaledSize: new google.maps.Size(14, 14),
+        anchor: new google.maps.Point(7, 7),
       },
       zIndex: 1,
     });

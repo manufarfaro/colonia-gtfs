@@ -74,7 +74,10 @@
         "directionLabel": "Sentido",
         "scheduledDeparturesLabel": "Horarios del día",
         "stopsHeader": "Paradas del recorrido ({count})",
-        "departuresHeader": "Salidas programadas ({count})"
+        "departuresHeader": "Salidas programadas ({count})",
+        "stopCoords": "Coords",
+        "stopOffset": "Desde inicio",
+        "stopNextArrival": "Próxima llegada"
       },
       "state": {
         "loading": "Cargando información de la línea…",
@@ -88,7 +91,8 @@
       "legend": {
         "header": "Línea {shortName}",
         "outbound": "Ida · {headsign}",
-        "inbound": "Vuelta · {headsign}"
+        "inbound": "Vuelta · {headsign}",
+        "switchTo": "Cambiar a {headsign}"
       }
     }
   }

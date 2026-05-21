@@ -35,15 +35,52 @@ const fontMono = IBM_Plex_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'colonia-gtfs',
-  description: 'Viajes en bus en Colonia del Sacramento',
+  title: 'Colonia Maps · No oficial',
+  description:
+    'Planificador de viajes en bus para Colonia del Sacramento — basado en datos preliminares, no oficial.',
+  applicationName: 'Colonia Maps',
+  authors: [{ name: 'Manuel Farfaro' }],
+  keywords: ['Colonia', 'Sacramento', 'Uruguay', 'bus', 'transporte', 'GTFS', 'Sol Antigua'],
+  icons: {
+    icon: [
+      { url: '/icons/favicon/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
+      { url: '/icons/favicon/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
+      { url: '/icons/favicon/favicon-96x96.png', sizes: '96x96', type: 'image/png' },
+      { url: '/icons/favicon/android-icon-192x192.png', sizes: '192x192', type: 'image/png' },
+    ],
+    apple: [
+      { url: '/icons/favicon/apple-icon-57x57.png', sizes: '57x57' },
+      { url: '/icons/favicon/apple-icon-60x60.png', sizes: '60x60' },
+      { url: '/icons/favicon/apple-icon-72x72.png', sizes: '72x72' },
+      { url: '/icons/favicon/apple-icon-76x76.png', sizes: '76x76' },
+      { url: '/icons/favicon/apple-icon-114x114.png', sizes: '114x114' },
+      { url: '/icons/favicon/apple-icon-120x120.png', sizes: '120x120' },
+      { url: '/icons/favicon/apple-icon-144x144.png', sizes: '144x144' },
+      { url: '/icons/favicon/apple-icon-152x152.png', sizes: '152x152' },
+      { url: '/icons/favicon/apple-icon-180x180.png', sizes: '180x180' },
+    ],
+  },
+  appleWebApp: {
+    title: 'Colonia Maps',
+    capable: true,
+    statusBarStyle: 'black-translucent',
+  },
+  openGraph: {
+    title: 'Colonia Maps · No oficial',
+    description: 'Planificador de viajes en bus para Colonia del Sacramento.',
+    type: 'website',
+    locale: 'es_UY',
+  },
 };
 
-/* Static `theme-color` = light-mode primary cobalt. Tints the iOS
-   Safari / Android Chrome status bar to the brand from the first
-   frame. A future change can flip this dynamically by mode. */
+/* Static `theme-color` = the Intendencia cobalt that the chrome
+   header also paints. Tints the iOS Safari / Android Chrome status
+   bar to the brand from the first frame. */
 export const viewport: Viewport = {
-  themeColor: '#0077b5',
+  themeColor: '#0084fc',
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5,
 };
 
 export default async function RootLayout({

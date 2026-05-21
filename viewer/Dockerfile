@@ -14,6 +14,16 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 ENV NEXT_TELEMETRY_DISABLED=1
+# Next.js inlines NEXT_PUBLIC_* env vars into the client bundle at BUILD
+# time, not runtime. The viewer reads `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY`
+# in `app/page.tsx` to decide between the map canvas and the "API key
+# missing" banner; without the value at build the server-rendered HTML
+# permanently shows the banner even when the value is set at runtime.
+# `NEXT_PUBLIC_VIEWER_DEFAULT_CENTER` is the same story.
+ARG NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
+ARG NEXT_PUBLIC_VIEWER_DEFAULT_CENTER
+ENV NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=${NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}
+ENV NEXT_PUBLIC_VIEWER_DEFAULT_CENTER=${NEXT_PUBLIC_VIEWER_DEFAULT_CENTER}
 RUN npm run build
 
 FROM ${NODE_IMAGE} AS runtime

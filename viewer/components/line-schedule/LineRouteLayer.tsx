@@ -6,7 +6,7 @@ import { decodePolyline } from '@/lib/google-maps/polyline';
 import { getLineColor } from '@/lib/colors/lines';
 import type { RestLineResponse } from '@/lib/otp/translate-line';
 import type { VehiclesResponse } from './useVehiclesQuery';
-import { StopMarker } from '@/components/od/LegPolyline';
+import { LineStopMarker } from './LineStopMarker';
 import { VehicleMarker } from './VehicleMarker';
 
 /**
@@ -61,12 +61,12 @@ export function LineRouteLayer({
   // own runtime exclusion).
   const uniqueStops = useMemo(() => {
     const seen = new Set<string>();
-    const out: Array<{ id: string; lat: number; lng: number }> = [];
+    const out: Array<{ id: string; name: string; lat: number; lng: number }> = [];
     for (const dir of data.directions) {
       for (const stop of dir.stops) {
         if (seen.has(stop.id)) continue;
         seen.add(stop.id);
-        out.push({ id: stop.id, lat: stop.lat, lng: stop.lon });
+        out.push({ id: stop.id, name: stop.name, lat: stop.lat, lng: stop.lon });
       }
     }
     return out;
@@ -75,7 +75,15 @@ export function LineRouteLayer({
   return (
     <>
       {uniqueStops.map((stop) => (
-        <StopMarker key={stop.id} stopId={stop.id} lat={stop.lat} lng={stop.lng} onClick={onStopClick} />
+        <LineStopMarker
+          key={stop.id}
+          stopId={stop.id}
+          name={stop.name}
+          shortName={shortName}
+          lat={stop.lat}
+          lng={stop.lng}
+          onClick={onStopClick}
+        />
       ))}
       {vehicles.map((v) => (
         <VehicleMarker

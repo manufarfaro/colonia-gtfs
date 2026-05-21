@@ -49,6 +49,47 @@ describe('translateLineResponse', () => {
     expect(result.line).toBeNull();
   });
 
+  it('R-06 collapses multiple OTP patterns per direction (keeps the most-stops + longest-geometry one + unions departures)', () => {
+    const multi = {
+      data: {
+        routes: [
+          {
+            gtfsId: '1:4',
+            shortName: '4',
+            longName: 'L4',
+            patterns: [
+              {
+                directionId: 0,
+                headsign: 'Short turn',
+                stops: [{ gtfsId: '1:A', name: 'A', lat: 0, lon: 0 }],
+                patternGeometry: { points: 'short' },
+                trips: [{ gtfsId: 't1', stoptimes: [{ scheduledDeparture: 28800 }] }],
+              },
+              {
+                directionId: 0,
+                headsign: 'Full out',
+                stops: [
+                  { gtfsId: '1:A', name: 'A', lat: 0, lon: 0 },
+                  { gtfsId: '1:B', name: 'B', lat: 0, lon: 0 },
+                  { gtfsId: '1:C', name: 'C', lat: 0, lon: 0 },
+                ],
+                patternGeometry: { points: 'longer-geometry-string' },
+                trips: [{ gtfsId: 't2', stoptimes: [{ scheduledDeparture: 32400 }] }],
+              },
+            ],
+          },
+        ],
+      },
+    };
+    const result = translateLineResponse(multi, '4', '2026-05-19');
+    expect(result.directions).toHaveLength(1);
+    expect(result.directions[0].headsign).toBe('Full out');
+    expect(result.directions[0].stops).toHaveLength(3);
+    expect(result.directions[0].scheduledDepartures).toEqual(['08:00', '09:00']);
+    expect(result.shape).toHaveLength(1);
+    expect(result.shape[0].points).toBe('longer-geometry-string');
+  });
+
   it('R-06 skips patterns without patternGeometry when building shape', () => {
     const noGeom = {
       data: {

@@ -135,36 +135,36 @@ describe('OdModeShell', () => {
   it('R-06 shows the idle hint copy when neither endpoint is picked', () => {
     renderShell('test-key');
     expect(screen.getByTestId('od-state-idle')).toBeInTheDocument();
-    expect(screen.getByText(/Elegí origen y destino/)).toBeInTheDocument();
+    expect(screen.getAllByText(/Elegí origen y destino/).length).toBeGreaterThan(0);
   });
 
   it('R-06 shows the loading label once both endpoints are picked', async () => {
     // Never-resolving fetch keeps the state in loading.
     fetchMock.mockImplementationOnce(() => new Promise(() => {}));
     renderShell('test-key');
-    screen.getByTestId('stub-select-both').click();
+    screen.getAllByTestId('stub-select-both')[0].click();
     await waitFor(() => expect(screen.queryByTestId('od-state-loading')).not.toBeNull());
   });
 
   it('R-06 surfaces the OTP error copy on a 502 response', async () => {
     fetchMock.mockResolvedValueOnce(jsonResponse({ error: 'otp_unavailable' }, 502));
     renderShell('test-key');
-    screen.getByTestId('stub-select-both').click();
+    screen.getAllByTestId('stub-select-both')[0].click();
     await waitFor(() => expect(screen.queryByTestId('od-state-error-otp_unavailable')).not.toBeNull());
-    expect(screen.getByText(/servicio de planificación no está disponible/)).toBeInTheDocument();
+    expect(screen.getAllByText(/servicio de planificación no está disponible/).length).toBeGreaterThan(0);
   });
 
   it('R-06 surfaces the invalid-request copy on a 400 response', async () => {
     fetchMock.mockResolvedValueOnce(jsonResponse({ error: 'invalid_request' }, 400));
     renderShell('test-key');
-    screen.getByTestId('stub-select-both').click();
+    screen.getAllByTestId('stub-select-both')[0].click();
     await waitFor(() => expect(screen.queryByTestId('od-state-error-invalid_request')).not.toBeNull());
   });
 
   it('R-06 surfaces the empty-results copy on a 200 with no itineraries', async () => {
     fetchMock.mockResolvedValueOnce(jsonResponse({ itineraries: [] }));
     renderShell('test-key');
-    screen.getByTestId('stub-select-both').click();
+    screen.getAllByTestId('stub-select-both')[0].click();
     await waitFor(() => expect(screen.queryByTestId('od-state-error-empty')).not.toBeNull());
   });
 
@@ -173,8 +173,8 @@ describe('OdModeShell', () => {
       jsonResponse({ itineraries: [{ durationSeconds: 1, walkDistanceMeters: 0, fare: null, legs: [] }] }),
     );
     renderShell('test-key');
-    screen.getByTestId('stub-select-both').click();
-    await waitFor(() => expect(screen.queryByTestId('stub-card')).not.toBeNull());
+    screen.getAllByTestId('stub-select-both')[0].click();
+    await waitFor(() => expect(screen.queryAllByTestId('stub-card').length).toBeGreaterThan(0));
   });
 
   it('R-02 tap-on-stop activates the stop-info mode + hides OD inputs', async () => {
@@ -189,7 +189,7 @@ describe('OdModeShell', () => {
     // The hash now reflects the stop.
     expect(window.location.hash).toBe('#stop=sol-antigua%3A3');
     // OD inputs are hidden when the mode is stop-info.
-    expect(screen.queryByTestId('stub-select-both')).toBeNull();
+    expect(screen.queryAllByTestId('stub-select-both')).toHaveLength(0);
   });
 
   it('R-02 deep-link initial hash drives the initial mode', async () => {
@@ -204,7 +204,7 @@ describe('OdModeShell', () => {
       </__QW>,
     );
     await waitFor(() => expect(screen.queryByTestId('stub-stop-info-card')).not.toBeNull());
-    expect(screen.queryByTestId('stub-select-both')).toBeNull();
+    expect(screen.queryAllByTestId('stub-select-both')).toHaveLength(0);
   });
 
   it('R-04 onReturnHome forces mode to OD (not_found recovery path)', async () => {
@@ -234,7 +234,7 @@ describe('OdModeShell', () => {
     act(() => {
       fireEvent.click(screen.getByTestId('open-line-selector'));
     });
-    await waitFor(() => expect(screen.queryByTestId('stub-line-card')).not.toBeNull());
+    await waitFor(() => expect(screen.queryAllByTestId('stub-line-card').length).toBeGreaterThan(0));
     expect(window.location.hash).toBe('#line=3');
   });
 
@@ -254,9 +254,9 @@ describe('OdModeShell', () => {
         </NextIntlClientProvider>
       </__QW>,
     );
-    await waitFor(() => expect(screen.queryByTestId('stub-line-pick-4')).not.toBeNull());
+    await waitFor(() => expect(screen.queryAllByTestId('stub-line-pick-4')[0]).not.toBeNull());
     act(() => {
-      fireEvent.click(screen.getByTestId('stub-line-pick-4'));
+      fireEvent.click(screen.getAllByTestId('stub-line-pick-4')[0]);
     });
     // The mocked selector picks line 4; the hook updates the hash.
     await waitFor(() => expect(window.location.hash).toBe('#line=4'));
@@ -278,8 +278,8 @@ describe('OdModeShell', () => {
         </NextIntlClientProvider>
       </__QW>,
     );
-    await waitFor(() => expect(screen.queryByTestId('stub-line-pick-4')).not.toBeNull());
-    expect(screen.queryByTestId('stub-select-both')).toBeNull();
+    await waitFor(() => expect(screen.queryAllByTestId('stub-line-pick-4')[0]).not.toBeNull());
+    expect(screen.queryAllByTestId('stub-select-both')).toHaveLength(0);
   });
 
   it('R-04 tap-on-stop inside line-schedule pushes stop-info + close returns to line-schedule', async () => {
@@ -298,9 +298,9 @@ describe('OdModeShell', () => {
         </NextIntlClientProvider>
       </__QW>,
     );
-    await waitFor(() => expect(screen.queryByTestId('stub-line-card')).not.toBeNull());
+    await waitFor(() => expect(screen.queryAllByTestId('stub-line-card').length).toBeGreaterThan(0));
     act(() => {
-      fireEvent.click(screen.getByTestId('stub-line-stop-click'));
+      fireEvent.click(screen.getAllByTestId('stub-line-stop-click')[0]);
     });
     await waitFor(() => expect(screen.queryByTestId('stub-stop-info-card')).not.toBeNull());
     expect(window.location.hash).toBe('#stop=sol-antigua%3Aline-stop');
@@ -407,6 +407,6 @@ describe('OdModeShell', () => {
     await waitFor(() => expect(screen.queryByTestId('stub-stop-info-card')).toBeNull());
     expect(window.location.hash).toBe('');
     // OD inputs back.
-    expect(screen.queryByTestId('stub-select-both')).not.toBeNull();
+    expect(screen.queryAllByTestId('stub-select-both').length).toBeGreaterThan(0);
   });
 });

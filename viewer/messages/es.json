@@ -29,7 +29,9 @@
       "legBus": "Línea {shortName} · {minutes} min hasta {to}",
       "fare": "Tarifa",
       "fareValue": "UYU ${amount}",
-      "fareUnconfirmed": "Consultar al chofer"
+      "fareUnconfirmed": "Consultar al chofer",
+      "walkOnly": "Solo a pie",
+      "lineChip": "Línea {shortName}"
     },
     "state": {
       "idleHint": "Elegí origen y destino para ver opciones de viaje.",

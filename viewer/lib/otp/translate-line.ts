@@ -79,21 +79,48 @@ export function translateLineResponse(
   if (route === null) {
     return { line: null, shape: [], directions: [], meta: { date } };
   }
-  const directions: RestDirection[] = route.patterns.map((p) => ({
-    directionId: p.directionId,
-    headsign: p.headsign,
-    stops: p.stops.map((s) => ({ id: s.gtfsId, name: s.name, lat: s.lat, lon: s.lon })),
-    scheduledDepartures: p.trips
-      .flatMap((t) => t.stoptimes.map((st) => st.scheduledDeparture))
-      .sort((a, b) => a - b)
-      .map(secondsToHHMM),
-  }));
-  const shape: RestShape[] = route.patterns
-    .filter((p): p is OtpPattern & { patternGeometry: { points: string } } => p.patternGeometry !== null)
-    .map((p) => ({
-      directionId: p.directionId,
-      points: p.patternGeometry.points,
-    }));
+  const patternsByDir = new Map<number, OtpPattern[]>();
+  for (const p of route.patterns) {
+    const arr = patternsByDir.get(p.directionId) ?? [];
+    arr.push(p);
+    patternsByDir.set(p.directionId, arr);
+  }
+
+  const directions: RestDirection[] = Array.from(patternsByDir.entries())
+    .map(([directionId, patterns]) => {
+      const canonical = patterns.reduce(
+        (longest, p) => (p.stops.length > longest.stops.length ? p : longest),
+        patterns[0],
+      );
+      const allDepartures = patterns
+        .flatMap((p) => p.trips)
+        .flatMap((t) => t.stoptimes.map((st) => st.scheduledDeparture))
+        .sort((a, b) => a - b);
+      return {
+        directionId,
+        headsign: canonical.headsign,
+        stops: canonical.stops.map((s) => ({ id: s.gtfsId, name: s.name, lat: s.lat, lon: s.lon })),
+        scheduledDepartures: allDepartures.map(secondsToHHMM),
+      };
+    })
+    .sort((a, b) => a.directionId - b.directionId);
+
+  const shape: RestShape[] = Array.from(patternsByDir.entries())
+    .map(([directionId, patterns]) => {
+      const withGeom = patterns.filter(
+        (p): p is OtpPattern & { patternGeometry: { points: string } } =>
+          p.patternGeometry !== null,
+      );
+      if (withGeom.length === 0) return null;
+      const canonical = withGeom.reduce(
+        (longest, p) =>
+          p.patternGeometry.points.length > longest.patternGeometry.points.length ? p : longest,
+        withGeom[0],
+      );
+      return { directionId, points: canonical.patternGeometry.points };
+    })
+    .filter((s): s is RestShape => s !== null)
+    .sort((a, b) => a.directionId - b.directionId);
   return {
     line: { id: route.gtfsId, shortName: route.shortName, longName: route.longName },
     shape,

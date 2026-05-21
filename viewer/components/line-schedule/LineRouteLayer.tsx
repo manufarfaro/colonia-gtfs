@@ -32,25 +32,14 @@ export function LineRouteLayer({
 }): React.ReactElement {
   const map = useMap();
   const shortName = data.line?.shortName ?? '';
-  // OTP returns one shape per route pattern (62+ for a single line on a
-  // line with many trip variations) — drawing them all stacks polylines
-  // into a spiderweb. Keep the LONGEST pattern per directionId so the
-  // canonical out-and-back is visible. This is a viewer-side aggregation;
-  // the proper fix lives in the API contract (collapse patterns in
-  // translate-line.ts) and is tracked as a follow-up.
-  const polylines = useMemo(() => {
-    const byDir = new Map<number, { directionId: number; points: string }>();
-    for (const s of data.shape) {
-      const current = byDir.get(s.directionId);
-      if (!current || s.points.length > current.points.length) {
-        byDir.set(s.directionId, s);
-      }
-    }
-    return Array.from(byDir.values()).map((s) => ({
-      directionId: s.directionId,
-      path: decodePolyline(s.points).map((p) => new google.maps.LatLng(p.lat, p.lng)),
-    }));
-  }, [data.shape]);
+  const polylines = useMemo(
+    () =>
+      data.shape.map((s) => ({
+        directionId: s.directionId,
+        path: decodePolyline(s.points).map((p) => new google.maps.LatLng(p.lat, p.lng)),
+      })),
+    [data.shape],
+  );
 
   useEffect(() => {
     if (!map) return;

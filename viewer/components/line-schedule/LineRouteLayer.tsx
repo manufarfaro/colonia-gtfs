@@ -25,11 +25,13 @@ export function LineRouteLayer({
   data,
   vehicles,
   activeDirectionId,
+  selectedStopId,
   onStopClick,
 }: {
   data: RestLineResponse;
   vehicles: VehiclesResponse['vehicles'];
   activeDirectionId: number;
+  selectedStopId?: string | null;
   onStopClick?: (stopId: string) => void;
 }): React.ReactElement {
   const map = useMap();
@@ -97,6 +99,7 @@ export function LineRouteLayer({
           shortName={shortName}
           lat={stop.lat}
           lng={stop.lng}
+          selected={stop.id === selectedStopId}
           onClick={onStopClick}
         />
       ))}

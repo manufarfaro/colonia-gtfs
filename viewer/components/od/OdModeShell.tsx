@@ -82,6 +82,7 @@ export function OdModeShell({ apiKey }: { apiKey: string | undefined }): React.R
           /* v8 ignore next — tests fix vehicles.state===success when line-layer is built */
           vehicles: vehicles.state === 'success' ? vehicles.data.vehicles : [],
           activeDirectionId: activeLineDir,
+          selectedStopId: selectedLineStopId,
           onActiveDirectionChange: setActiveLineDir,
         }
       : undefined;

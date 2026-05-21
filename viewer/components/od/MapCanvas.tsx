@@ -58,6 +58,7 @@ export interface LineLayerProps {
   data: RestLineResponse;
   vehicles: VehiclesResponse['vehicles'];
   activeDirectionId: number;
+  selectedStopId?: string | null;
   onActiveDirectionChange?: (directionId: number) => void;
 }
 
@@ -103,6 +104,7 @@ export function MapCanvas({
           data={lineLayer.data}
           vehicles={lineLayer.vehicles}
           activeDirectionId={lineLayer.activeDirectionId}
+          selectedStopId={lineLayer.selectedStopId ?? null}
           onStopClick={onStopClick}
         />
       ) : (

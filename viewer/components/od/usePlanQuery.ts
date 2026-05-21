@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { nowInMontevideoPlusOneMinute } from '@/lib/time/montevideo';
 import type { RestPlanResponse } from '@/lib/otp/translate-plan';
 
@@ -17,73 +17,46 @@ export type PlanState =
   | { state: 'success'; data: RestPlanResponse; error: null }
   | { state: 'error'; data: null; error: PlanError };
 
+class PlanQueryError extends Error {
+  constructor(public readonly tag: PlanError) {
+    super(tag);
+    this.name = 'PlanQueryError';
+  }
+}
+
 export function usePlanQuery(
   from: PlanInput['from'] | null,
   to: PlanInput['to'] | null,
 ): PlanState {
-  const [snapshot, setSnapshot] = useState<PlanState>({ state: 'idle', data: null, error: null });
-  const abortRef = useRef<AbortController | null>(null);
-
-  useEffect(() => {
-    // If either endpoint is missing, reset to idle (and cancel anything in flight).
-    if (from === null || to === null) {
-      abortRef.current?.abort();
-      abortRef.current = null;
-      setSnapshot({ state: 'idle', data: null, error: null });
-      return;
-    }
-
-    // New request — cancel any previous and start fresh.
-    abortRef.current?.abort();
-    const controller = new AbortController();
-    abortRef.current = controller;
-
-    setSnapshot({ state: 'loading', data: null, error: null });
-
-    const { date, time } = nowInMontevideoPlusOneMinute();
-
-    void (async (): Promise<void> => {
+  const enabled = from !== null && to !== null;
+  const query = useQuery<RestPlanResponse, PlanQueryError>({
+    queryKey: ['plan', from, to],
+    enabled,
+    queryFn: async ({ signal }) => {
+      const { date, time } = nowInMontevideoPlusOneMinute();
+      let res: Response;
       try {
-        const res = await fetch('/api/plan', {
+        res = await fetch('/api/plan', {
           method: 'POST',
           headers: { 'content-type': 'application/json' },
           body: JSON.stringify({ from, to, date, time }),
-          signal: controller.signal,
+          signal,
         });
-        // Race guard: abort fired after fetch resolved but before we set
-        // state. The catch already handles in-flight aborts; this check
-        // covers the "fetch returned faster than the abort propagated"
-        // window — practically unreachable in synchronous tests, hence
-        // marked as ignored for coverage.
-        /* v8 ignore next */
-        if (controller.signal.aborted) return;
-
-        if (res.status === 502) {
-          setSnapshot({ state: 'error', data: null, error: 'otp_unavailable' });
-          return;
-        }
-        if (res.status === 400) {
-          setSnapshot({ state: 'error', data: null, error: 'invalid_request' });
-          return;
-        }
-        const body = (await res.json()) as RestPlanResponse;
-        /* v8 ignore next */
-        if (controller.signal.aborted) return;
-        if (!body.itineraries || body.itineraries.length === 0) {
-          setSnapshot({ state: 'error', data: null, error: 'empty' });
-          return;
-        }
-        setSnapshot({ state: 'success', data: body, error: null });
-      } catch (err) {
-        if ((err as { name?: string })?.name === 'AbortError') return;
-        setSnapshot({ state: 'error', data: null, error: 'network' });
+      } catch {
+        throw new PlanQueryError('network');
       }
-    })();
+      if (res.status === 502) throw new PlanQueryError('otp_unavailable');
+      if (res.status === 400) throw new PlanQueryError('invalid_request');
+      const body = (await res.json()) as RestPlanResponse;
+      if (!body.itineraries || body.itineraries.length === 0) {
+        throw new PlanQueryError('empty');
+      }
+      return body;
+    },
+  });
 
-    return () => {
-      controller.abort();
-    };
-  }, [from?.lat, from?.lon, to?.lat, to?.lon]);
-
-  return snapshot;
+  if (!enabled) return { state: 'idle', data: null, error: null };
+  if (query.isPending) return { state: 'loading', data: null, error: null };
+  if (query.isError) return { state: 'error', data: null, error: query.error.tag };
+  return { state: 'success', data: query.data!, error: null };
 }

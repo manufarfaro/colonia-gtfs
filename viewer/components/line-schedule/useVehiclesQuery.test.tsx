@@ -1,5 +1,6 @@
 import { renderHook, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { makeQueryWrapper } from '@/test/query-test-wrapper';
 import { useVehiclesQuery } from './useVehiclesQuery';
 
 const fetchMock = vi.fn();
@@ -26,24 +27,27 @@ afterEach(() => {
 
 describe('useVehiclesQuery', () => {
   it('R-07 stays idle when shortName is null', () => {
-    const { result } = renderHook(() => useVehiclesQuery(null));
+    const { Wrapper } = makeQueryWrapper();
+    const { result } = renderHook(() => useVehiclesQuery(null), { wrapper: Wrapper });
     expect(result.current.state).toBe('idle');
     expect(fetchMock).not.toHaveBeenCalled();
   });
 
   it('R-07 idle → loading → success', async () => {
     fetchMock.mockResolvedValueOnce(jsonResponse(okBody));
-    const { result } = renderHook(() => useVehiclesQuery('4'));
+    const { Wrapper } = makeQueryWrapper();
+    const { result } = renderHook(() => useVehiclesQuery('4'), { wrapper: Wrapper });
     expect(result.current.state).toBe('loading');
     await waitFor(() => expect(result.current.state).toBe('success'));
     expect(result.current.data?.vehicles).toHaveLength(1);
   });
 
-  it('R-07 success with empty vehicles array (bridge down per spec R-07)', async () => {
+  it('R-07 success with empty vehicles array (bridge down per viewer-shell-and-api R-07)', async () => {
     fetchMock.mockResolvedValueOnce(
       jsonResponse({ lineId: '4', vehicles: [], meta: { realtime_available: false, feed_timestamp: null } }),
     );
-    const { result } = renderHook(() => useVehiclesQuery('4'));
+    const { Wrapper } = makeQueryWrapper();
+    const { result } = renderHook(() => useVehiclesQuery('4'), { wrapper: Wrapper });
     await waitFor(() => expect(result.current.state).toBe('success'));
     expect(result.current.data?.vehicles).toHaveLength(0);
     expect(result.current.data?.meta.realtime_available).toBe(false);
@@ -51,61 +55,35 @@ describe('useVehiclesQuery', () => {
 
   it('R-07 error.network on fetch reject', async () => {
     fetchMock.mockRejectedValueOnce(new Error('boom'));
-    const { result } = renderHook(() => useVehiclesQuery('4'));
+    const { Wrapper } = makeQueryWrapper();
+    const { result } = renderHook(() => useVehiclesQuery('4'), { wrapper: Wrapper });
     await waitFor(() => expect(result.current.state).toBe('error'));
     expect(result.current.error).toBe('network');
   });
 
-  it('R-07 polls at 15s cadence via setInterval', async () => {
-    const setIntervalSpy = vi.spyOn(window, 'setInterval');
+  it('R-07 switching shortName triggers a fresh fetch with the new id', async () => {
     fetchMock.mockResolvedValueOnce(jsonResponse(okBody));
-    const { unmount } = renderHook(() => useVehiclesQuery('4'));
-    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
-    expect(setIntervalSpy).toHaveBeenCalledWith(expect.any(Function), 15_000);
-    // Manually trigger the interval callback to simulate a tick.
-    fetchMock.mockResolvedValueOnce(jsonResponse(okBody));
-    const cb = setIntervalSpy.mock.calls[0][0] as () => void;
-    cb();
-    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2));
-    unmount();
-    setIntervalSpy.mockRestore();
-  });
-
-  it('R-07 switching shortName aborts previous + restarts poll', async () => {
-    let receivedAbort = false;
-    fetchMock.mockImplementationOnce((_url, init?: RequestInit) => {
-      return new Promise((_resolve, reject) => {
-        init?.signal?.addEventListener('abort', () => {
-          receivedAbort = true;
-          reject(new DOMException('aborted', 'AbortError'));
-        });
-      });
-    });
     fetchMock.mockResolvedValueOnce(jsonResponse({ ...okBody, lineId: '5' }));
+    const { Wrapper } = makeQueryWrapper();
     const { result, rerender } = renderHook(
       ({ s }: { s: string | null }) => useVehiclesQuery(s),
-      { initialProps: { s: '4' as string | null } },
+      { initialProps: { s: '4' as string | null }, wrapper: Wrapper },
     );
-    expect(result.current.state).toBe('loading');
+    await waitFor(() => expect(result.current.state).toBe('success'));
     rerender({ s: '5' });
-    await waitFor(() => {
-      expect(receivedAbort).toBe(true);
-      expect(result.current.state).toBe('success');
-    });
-    expect(result.current.data?.lineId).toBe('5');
+    await waitFor(() => expect(result.current.data?.lineId).toBe('5'));
+    expect(fetchMock.mock.calls[1][0]).toContain('/api/lines/5/vehicles');
   });
 
-  it('R-07 unmount aborts + clears interval', async () => {
-    const clearIntervalSpy = vi.spyOn(window, 'clearInterval');
-    fetchMock.mockResolvedValueOnce(jsonResponse(okBody));
-    const { unmount } = renderHook(() => useVehiclesQuery('4'));
-    await waitFor(() => expect(result(fetchMock)).toBeGreaterThan(0));
-    unmount();
-    expect(clearIntervalSpy).toHaveBeenCalled();
-    clearIntervalSpy.mockRestore();
+  it('R-07 stopping (shortName=null) resets the hook back to idle', async () => {
+    fetchMock.mockResolvedValue(jsonResponse(okBody));
+    const { Wrapper } = makeQueryWrapper();
+    const { result, rerender } = renderHook(
+      ({ s }: { s: string | null }) => useVehiclesQuery(s),
+      { initialProps: { s: '4' as string | null }, wrapper: Wrapper },
+    );
+    await waitFor(() => expect(result.current.state).toBe('success'));
+    rerender({ s: null });
+    expect(result.current.state).toBe('idle');
   });
 });
-
-function result(fn: ReturnType<typeof vi.fn>): number {
-  return fn.mock.calls.length;
-}

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 
 const POLL_INTERVAL_MS = 15_000;
 
@@ -27,52 +27,36 @@ export type VehiclesState =
   | { state: 'success'; data: VehiclesResponse; error: null }
   | { state: 'error'; data: null; error: VehiclesError };
 
+class VehiclesQueryError extends Error {
+  constructor(public readonly tag: VehiclesError) {
+    super(tag);
+    this.name = 'VehiclesQueryError';
+  }
+}
+
 export function useVehiclesQuery(shortName: string | null): VehiclesState {
-  const [snapshot, setSnapshot] = useState<VehiclesState>({ state: 'idle', data: null, error: null });
-  const abortRef = useRef<AbortController | null>(null);
-
-  useEffect(() => {
-    if (shortName === null) {
-      abortRef.current?.abort();
-      abortRef.current = null;
-      setSnapshot({ state: 'idle', data: null, error: null });
-      return;
-    }
-
-    let cancelled = false;
-
-    async function poll(): Promise<void> {
-      abortRef.current?.abort();
-      const controller = new AbortController();
-      abortRef.current = controller;
+  const enabled = shortName !== null;
+  const query = useQuery<VehiclesResponse, VehiclesQueryError>({
+    queryKey: ['vehicles', shortName],
+    enabled,
+    refetchInterval: POLL_INTERVAL_MS,
+    // Endpoint always returns 200 (per viewer-shell-and-api R-07, bridge
+    // down sends `{vehicles:[], meta:{realtime_available:false}}`), so
+    // `staleTime: 0` keeps each poll fresh without dedup.
+    staleTime: 0,
+    queryFn: async ({ signal }) => {
+      let res: Response;
       try {
-        const res = await fetch(`/api/lines/${encodeURIComponent(shortName!)}/vehicles`, {
-          signal: controller.signal,
-        });
-        /* v8 ignore next */
-        if (cancelled || controller.signal.aborted) return;
-        const body = (await res.json()) as VehiclesResponse;
-        /* v8 ignore next */
-        if (cancelled || controller.signal.aborted) return;
-        setSnapshot({ state: 'success', data: body, error: null });
-      } catch (err) {
-        if ((err as { name?: string })?.name === 'AbortError') return;
-        /* v8 ignore next */
-        if (cancelled) return;
-        setSnapshot({ state: 'error', data: null, error: 'network' });
+        res = await fetch(`/api/lines/${encodeURIComponent(shortName!)}/vehicles`, { signal });
+      } catch {
+        throw new VehiclesQueryError('network');
       }
-    }
+      return (await res.json()) as VehiclesResponse;
+    },
+  });
 
-    setSnapshot({ state: 'loading', data: null, error: null });
-    void poll();
-    const interval = setInterval(() => void poll(), POLL_INTERVAL_MS);
-
-    return () => {
-      cancelled = true;
-      clearInterval(interval);
-      abortRef.current?.abort();
-    };
-  }, [shortName]);
-
-  return snapshot;
+  if (!enabled) return { state: 'idle', data: null, error: null };
+  if (query.isPending) return { state: 'loading', data: null, error: null };
+  if (query.isError) return { state: 'error', data: null, error: query.error.tag };
+  return { state: 'success', data: query.data!, error: null };
 }

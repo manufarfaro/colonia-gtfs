@@ -2,6 +2,7 @@ import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { NextIntlClientProvider } from 'next-intl';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import esMessages from '@/messages/es.json';
+import { makeQueryWrapper } from '@/test/query-test-wrapper';
 
 // Stub the child components so this suite focuses on composition + the
 // state-driven bottom sheet branches.
@@ -99,10 +100,13 @@ function jsonResponse(body: unknown, status = 200): Response {
 function renderShell(apiKey: string | undefined): void {
   // Reset hash before each render so tests start in OD mode.
   window.history.replaceState(null, '', '/');
+  const { Wrapper: QueryWrapper } = makeQueryWrapper();
   render(
-    <NextIntlClientProvider locale="es" messages={esMessages}>
-      <OdModeShell apiKey={apiKey} />
-    </NextIntlClientProvider>,
+    <QueryWrapper>
+      <NextIntlClientProvider locale="es" messages={esMessages}>
+        <OdModeShell apiKey={apiKey} />
+      </NextIntlClientProvider>
+    </QueryWrapper>,
   );
 }
 
@@ -186,10 +190,13 @@ describe('OdModeShell', () => {
   it('R-02 deep-link initial hash drives the initial mode', async () => {
     fetchMock.mockResolvedValue(jsonResponse({ stop: { id: 'sol-antigua:3', name: 'X', lat: 0, lon: 0 }, arrivals: [], meta: { queriedAt: '2026-05-20T14:30:00Z', realtime_available: false } }));
     window.history.replaceState(null, '', '#stop=sol-antigua:3');
+    const { Wrapper: __QW } = makeQueryWrapper();
     render(
-      <NextIntlClientProvider locale="es" messages={esMessages}>
-        <OdModeShell apiKey="test-key" />
-      </NextIntlClientProvider>,
+      <__QW>
+        <NextIntlClientProvider locale="es" messages={esMessages}>
+          <OdModeShell apiKey="test-key" />
+        </NextIntlClientProvider>
+      </__QW>,
     );
     await waitFor(() => expect(screen.queryByTestId('stub-stop-info-card')).not.toBeNull());
     expect(screen.queryByTestId('stub-select-both')).toBeNull();
@@ -234,10 +241,13 @@ describe('OdModeShell', () => {
       meta: { date: '2026-05-20' },
     }));
     window.history.replaceState(null, '', '#line=5');
+    const { Wrapper: __QW } = makeQueryWrapper();
     render(
-      <NextIntlClientProvider locale="es" messages={esMessages}>
-        <OdModeShell apiKey="test-key" />
-      </NextIntlClientProvider>,
+      <__QW>
+        <NextIntlClientProvider locale="es" messages={esMessages}>
+          <OdModeShell apiKey="test-key" />
+        </NextIntlClientProvider>
+      </__QW>,
     );
     await waitFor(() => expect(screen.queryByTestId('stub-line-pick-4')).not.toBeNull());
     act(() => {
@@ -255,10 +265,13 @@ describe('OdModeShell', () => {
       meta: { date: '2026-05-20' },
     }));
     window.history.replaceState(null, '', '#line=4');
+    const { Wrapper: __QW } = makeQueryWrapper();
     render(
-      <NextIntlClientProvider locale="es" messages={esMessages}>
-        <OdModeShell apiKey="test-key" />
-      </NextIntlClientProvider>,
+      <__QW>
+        <NextIntlClientProvider locale="es" messages={esMessages}>
+          <OdModeShell apiKey="test-key" />
+        </NextIntlClientProvider>
+      </__QW>,
     );
     await waitFor(() => expect(screen.queryByTestId('stub-line-pick-4')).not.toBeNull());
     expect(screen.queryByTestId('stub-select-both')).toBeNull();
@@ -272,10 +285,13 @@ describe('OdModeShell', () => {
       meta: { date: '2026-05-20' },
     }));
     window.history.replaceState(null, '', '#line=4');
+    const { Wrapper: __QW } = makeQueryWrapper();
     render(
-      <NextIntlClientProvider locale="es" messages={esMessages}>
-        <OdModeShell apiKey="test-key" />
-      </NextIntlClientProvider>,
+      <__QW>
+        <NextIntlClientProvider locale="es" messages={esMessages}>
+          <OdModeShell apiKey="test-key" />
+        </NextIntlClientProvider>
+      </__QW>,
     );
     await waitFor(() => expect(screen.queryByTestId('stub-line-card')).not.toBeNull());
     act(() => {
@@ -292,10 +308,13 @@ describe('OdModeShell', () => {
   it('R-02 line-schedule loading state surfaces the localised copy', async () => {
     fetchMock.mockImplementationOnce(() => new Promise(() => {}));
     window.history.replaceState(null, '', '#line=4');
+    const { Wrapper: __QW } = makeQueryWrapper();
     render(
-      <NextIntlClientProvider locale="es" messages={esMessages}>
-        <OdModeShell apiKey="test-key" />
-      </NextIntlClientProvider>,
+      <__QW>
+        <NextIntlClientProvider locale="es" messages={esMessages}>
+          <OdModeShell apiKey="test-key" />
+        </NextIntlClientProvider>
+      </__QW>,
     );
     await waitFor(() => expect(screen.queryByTestId('line-state-loading')).not.toBeNull());
   });
@@ -303,10 +322,13 @@ describe('OdModeShell', () => {
   it('R-02 line-schedule error.not_found surfaces the localised copy', async () => {
     fetchMock.mockResolvedValueOnce(jsonResponse({ error: 'line_not_found' }, 404));
     window.history.replaceState(null, '', '#line=missing');
+    const { Wrapper: __QW } = makeQueryWrapper();
     render(
-      <NextIntlClientProvider locale="es" messages={esMessages}>
-        <OdModeShell apiKey="test-key" />
-      </NextIntlClientProvider>,
+      <__QW>
+        <NextIntlClientProvider locale="es" messages={esMessages}>
+          <OdModeShell apiKey="test-key" />
+        </NextIntlClientProvider>
+      </__QW>,
     );
     await waitFor(() => expect(screen.queryByTestId('line-state-error-not_found')).not.toBeNull());
   });
@@ -314,10 +336,13 @@ describe('OdModeShell', () => {
   it('R-02 line-schedule error.otp surfaces the localised copy', async () => {
     fetchMock.mockResolvedValueOnce(jsonResponse({ error: 'otp_unavailable' }, 502));
     window.history.replaceState(null, '', '#line=4');
+    const { Wrapper: __QW } = makeQueryWrapper();
     render(
-      <NextIntlClientProvider locale="es" messages={esMessages}>
-        <OdModeShell apiKey="test-key" />
-      </NextIntlClientProvider>,
+      <__QW>
+        <NextIntlClientProvider locale="es" messages={esMessages}>
+          <OdModeShell apiKey="test-key" />
+        </NextIntlClientProvider>
+      </__QW>,
     );
     await waitFor(() => expect(screen.queryByTestId('line-state-error-otp_unavailable')).not.toBeNull());
   });
@@ -330,10 +355,13 @@ describe('OdModeShell', () => {
       meta: { date: '2026-05-20' },
     }));
     window.history.replaceState(null, '', '#line=4');
+    const { Wrapper: __QW } = makeQueryWrapper();
     render(
-      <NextIntlClientProvider locale="es" messages={esMessages}>
-        <OdModeShell apiKey="test-key" />
-      </NextIntlClientProvider>,
+      <__QW>
+        <NextIntlClientProvider locale="es" messages={esMessages}>
+          <OdModeShell apiKey="test-key" />
+        </NextIntlClientProvider>
+      </__QW>,
     );
     await waitFor(() => expect(screen.queryByTestId('exit-line-selector')).not.toBeNull());
     act(() => {
@@ -350,10 +378,13 @@ describe('OdModeShell', () => {
       meta: { date: '2026-05-20' },
     }));
     window.history.replaceState(null, '', '#line=8');
+    const { Wrapper: __QW } = makeQueryWrapper();
     render(
-      <NextIntlClientProvider locale="es" messages={esMessages}>
-        <OdModeShell apiKey="test-key" />
-      </NextIntlClientProvider>,
+      <__QW>
+        <NextIntlClientProvider locale="es" messages={esMessages}>
+          <OdModeShell apiKey="test-key" />
+        </NextIntlClientProvider>
+      </__QW>,
     );
     await waitFor(() => expect(screen.queryByTestId('line-state-error-not_found')).not.toBeNull());
   });

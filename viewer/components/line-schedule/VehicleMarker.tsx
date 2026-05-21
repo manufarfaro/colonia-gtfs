@@ -76,11 +76,18 @@ function escapeHtml(s: string): string {
     .replace(/'/g, '&#39;');
 }
 
+const TRANSITION_MS = 700;
+
+function easeInOutQuad(t: number): number {
+  return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+}
+
 export function VehicleMarker(props: Props): React.ReactElement | null {
   const { shortName, label, lat, lng, bearing } = props;
   const map = useMap();
   const markerRef = useRef<google.maps.Marker | null>(null);
   const infoWindowRef = useRef<google.maps.InfoWindow | null>(null);
+  const animationRef = useRef<number | null>(null);
   const propsRef = useRef(props);
   propsRef.current = props;
 
@@ -105,6 +112,8 @@ export function VehicleMarker(props: Props): React.ReactElement | null {
     markerRef.current = marker;
     infoWindowRef.current = infoWindow;
     return () => {
+      if (animationRef.current !== null) cancelAnimationFrame(animationRef.current);
+      animationRef.current = null;
       listener.remove();
       infoWindow.close();
       marker.setMap(null);
@@ -116,8 +125,31 @@ export function VehicleMarker(props: Props): React.ReactElement | null {
   useEffect(() => {
     const marker = markerRef.current;
     if (!marker) return;
-    marker.setPosition({ lat, lng });
     marker.setTitle(bearing !== null ? `${label ?? shortName} · ${bearing}°` : (label ?? shortName));
+    const current = marker.getPosition();
+    const from = current
+      ? { lat: current.lat(), lng: current.lng() }
+      : { lat, lng };
+    if (from.lat === lat && from.lng === lng) {
+      marker.setPosition({ lat, lng });
+      return;
+    }
+    if (animationRef.current !== null) cancelAnimationFrame(animationRef.current);
+    const start = performance.now();
+    const step = (now: number): void => {
+      const t = Math.min(1, (now - start) / TRANSITION_MS);
+      const eased = easeInOutQuad(t);
+      marker.setPosition({
+        lat: from.lat + (lat - from.lat) * eased,
+        lng: from.lng + (lng - from.lng) * eased,
+      });
+      if (t < 1) {
+        animationRef.current = requestAnimationFrame(step);
+      } else {
+        animationRef.current = null;
+      }
+    };
+    animationRef.current = requestAnimationFrame(step);
   }, [lat, lng, label, bearing, shortName]);
 
   return null;

@@ -100,21 +100,23 @@ export function LineRouteLayer({
           onClick={onStopClick}
         />
       ))}
-      {vehicles.map((v) => {
-        const direction = data.directions.find((d) => d.directionId === v.directionId);
-        return (
-          <VehicleMarker
-            key={v.id}
-            shortName={shortName}
-            label={v.label}
-            headsign={direction?.headsign ?? null}
-            lat={v.lat}
-            lng={v.lon}
-            bearing={v.bearing}
-            timestamp={v.timestamp}
-          />
-        );
-      })}
+      {vehicles
+        .filter((v) => v.directionId === activeDirectionId)
+        .map((v) => {
+          const direction = data.directions.find((d) => d.directionId === v.directionId);
+          return (
+            <VehicleMarker
+              key={v.id}
+              shortName={shortName}
+              label={v.label}
+              headsign={direction?.headsign ?? null}
+              lat={v.lat}
+              lng={v.lon}
+              bearing={v.bearing}
+              timestamp={v.timestamp}
+            />
+          );
+        })}
     </>
   );
 }

@@ -4,6 +4,7 @@ import { useCallback, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { COLONIA_BBOX, PLACES_COMPONENT_RESTRICTIONS } from '@/lib/google-maps/places-options';
 import { OdAutocompleteInput } from './OdAutocompleteInput';
+import { Button } from '@/components/ui/button';
 import type { PlanInput } from './usePlanQuery';
 
 type Coord = { lat: number; lon: number };
@@ -69,33 +70,24 @@ export function OriginDestinationInputs({
         onPlaceSelected={handleOrigin}
       />
       <div className="flex justify-end">
-        <button
+        <Button
           type="button"
+          variant="outline"
+          size="icon-xs"
           data-testid="od-swap"
           aria-label={t('swap')}
           title={t('swap')}
           onClick={handleSwap}
           disabled={!canSwap}
-          className="-my-1 inline-flex h-7 w-7 items-center justify-center rounded-full border border-border bg-card text-muted-foreground transition-colors hover:bg-muted disabled:cursor-not-allowed disabled:opacity-40"
+          className="-my-1 rounded-full text-muted-foreground"
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="14"
-            height="14"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            aria-hidden="true"
-          >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
             <path d="m17 3 4 4-4 4" />
             <path d="M21 7H9" />
             <path d="m7 21-4-4 4-4" />
             <path d="M3 17h12" />
           </svg>
-        </button>
+        </Button>
       </div>
       <OdAutocompleteInput
         id="destination"

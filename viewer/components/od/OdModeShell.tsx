@@ -16,6 +16,7 @@ import { LineSelector } from '@/components/line-schedule/LineSelector';
 import { LineScheduleCard } from '@/components/line-schedule/LineScheduleCard';
 import { useLineQuery } from '@/components/line-schedule/useLineQuery';
 import { useVehiclesQuery } from '@/components/line-schedule/useVehiclesQuery';
+import { Button } from '@/components/ui/button';
 
 const V0_LINES = ['3', '4', '5', '8'] as const;
 
@@ -95,27 +96,31 @@ export function OdModeShell({ apiKey }: { apiKey: string | undefined }): React.R
           {mode.type === 'od' && (
             <div className="flex flex-col gap-2">
               <OriginDestinationInputs onChange={handleChange} />
-              <button
+              <Button
                 type="button"
+                variant="outline"
+                size="xs"
                 data-testid="open-line-selector-desktop"
                 onClick={handleOpenLineSelector}
-                className="self-start rounded-md border border-border px-2 py-1 text-xs text-muted-foreground hover:bg-muted"
+                className="self-start"
               >
                 {t('lineSchedule.selector.openLabel')}
-              </button>
+              </Button>
             </div>
           )}
           {mode.type === 'line-schedule' && (
             <div className="flex flex-col gap-2">
               <LineSelector lines={V0_LINES} onPickLine={handlePickLine} />
-              <button
+              <Button
                 type="button"
+                variant="outline"
+                size="xs"
                 data-testid="exit-line-selector-desktop"
                 onClick={handleLineClose}
-                className="self-start rounded-md border border-border px-2 py-1 text-xs text-muted-foreground hover:bg-muted"
+                className="self-start"
               >
                 {t('lineSchedule.selector.exit')}
-              </button>
+              </Button>
             </div>
           )}
         </div>
@@ -176,27 +181,29 @@ export function OdModeShell({ apiKey }: { apiKey: string | undefined }): React.R
           {mode.type === 'od' && (
             <div className="flex items-center justify-between gap-2">
               <OriginDestinationInputs onChange={handleChange} />
-              <button
+              <Button
                 type="button"
+                variant="outline"
+                size="xs"
                 data-testid="open-line-selector"
                 onClick={handleOpenLineSelector}
-                className="rounded-md border border-border px-2 py-1 text-xs text-muted-foreground"
               >
                 {t('lineSchedule.selector.openLabel')}
-              </button>
+              </Button>
             </div>
           )}
           {mode.type === 'line-schedule' && (
             <div className="flex items-center justify-between gap-2">
               <LineSelector lines={V0_LINES} onPickLine={handlePickLine} />
-              <button
+              <Button
                 type="button"
+                variant="outline"
+                size="xs"
                 data-testid="exit-line-selector"
                 onClick={handleLineClose}
-                className="rounded-md border border-border px-2 py-1 text-xs text-muted-foreground"
               >
                 {t('lineSchedule.selector.exit')}
-              </button>
+              </Button>
             </div>
           )}
         </div>

@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef } from 'react';
 import { useMapsLibrary } from '@vis.gl/react-google-maps';
+import { Button } from '@/components/ui/button';
 
 type Coord = { lat: number; lon: number };
 type Bounds = { sw: { lat: number; lng: number }; ne: { lat: number; lng: number } };
@@ -98,14 +99,16 @@ export function OdAutocompleteInput({
         placeholder={placeholder}
         className="flex-1 rounded-md border border-border bg-background px-3 py-2 text-sm"
       />
-      <button
+      <Button
         type="button"
+        variant="outline"
+        size="icon-sm"
         onClick={handleClear}
         aria-label={`clear-${id}`}
-        className="rounded-md border border-border px-2 py-2 text-muted-foreground"
+        className="text-muted-foreground"
       >
         ×
-      </button>
+      </Button>
     </div>
   );
 }

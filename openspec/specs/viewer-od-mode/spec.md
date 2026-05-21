@@ -6,15 +6,21 @@ OD (origin → destination) planning mode for the v0 viewer: replaces the root l
 
 ### Requirement: The viewer SHALL replace the root page (`/`) with an OD planning mode
 
-The viewer's root route (`app/page.tsx`) SHALL render the OD planning experience as the default landing — replacing the v0 placeholder shipped with [`viewer-shell-and-api`](../viewer-shell-and-api/spec.md) R-02. The chrome persistente (header + disclaimer banner) SHALL remain wrapped around the mode via the existing `app/layout.tsx`. No additional `/plan` or `/results` route SHALL be added in v0; the search state and the resulting itinerary SHALL live as client state within the same route.
+The viewer's root route (`app/page.tsx`) SHALL render the OD planning experience as the default landing — replacing the v0 placeholder shipped with [`viewer-shell-and-api`](../viewer-shell-and-api/spec.md) R-02 — but its concrete content is now selected via the `useViewerMode` hook introduced in this delta. The chrome persistente (header + disclaimer banner) SHALL remain wrapped around the mode via the existing `app/layout.tsx`. The page SHALL render:
 
-#### Scenario: Root renders the OD mode shell
-- **WHEN** a client requests `GET /` against a freshly booted viewer
-- **THEN** the response is `200`, the HTML contains the chrome persistente, and the body region of `<main>` mounts the OD client shell (search bar + map placeholder) rather than the v0 placeholder copy
+- The **OD search inputs** in the sticky-top search slot **when** the active mode is `od`.
+- The **stop-info bottom sheet** when the active mode is `stop-info` (per [`viewer-stop-info-mode`](../viewer-stop-info-mode/spec.md)).
+- The line-schedule selector and sheet when the active mode is `line-schedule` (reserved).
 
-#### Scenario: Chrome persistente survives the swap
-- **WHEN** the rendered HTML of `GET /` is inspected
-- **THEN** the branded header and the disclaimer banner SHALL still be present (i.e., the disclaimer copy `"tarifas a confirmar"` appears in the HTML), and the OD shell does not displace either
+No additional Next.js route SHALL be added in v0; mode switching is purely client state plus URL hash, server-rendered by `app/page.tsx` reading no per-mode props.
+
+#### Scenario: Root renders the OD mode by default
+- **WHEN** a client requests `GET /` against a freshly booted viewer with no URL hash
+- **THEN** the HTML response carries the chrome persistente + the OD search inputs in the search slot + the OD idle hint copy in the bottom sheet
+
+#### Scenario: Deep-link to a non-OD mode still renders the chrome
+- **WHEN** the client opens `GET /#stop=sol-antigua:3`
+- **THEN** the chrome persistente still appears in the HTML, and the client-side hydration mounts the stop-info mode in place of the OD UI
 
 ### Requirement: The viewer SHALL load Google Maps JS API as a canvas, never as a routing engine
 
@@ -58,7 +64,7 @@ When `/api/plan` returns a successful response with at least one itinerary, the 
 - Each `leg` in the itinerary SHALL be drawn as a Google Maps `Polyline` decoded from `leg.legGeometry.points` via `google.maps.geometry.encoding.decodePath()`. Legs without `legGeometry` (null) SHALL be skipped silently — no polyline for that leg.
 - Walking legs SHALL render as a gray dashed polyline (`#6b7280`, opacity `0.6`).
 - Bus legs SHALL render in the color assigned to the line's `shortName` via the palette in the design (D-07). Lines without a palette entry SHALL fall back to indigo (`#6366f1`).
-- The bus leg's `from.stopId` and `to.stopId` SHALL render as small markers on the map (one marker per boarding/alighting stop).
+- The bus leg's `from.stopId` and `to.stopId` SHALL render as small markers on the map (one marker per boarding/alighting stop). Each `StopMarker` SHALL be clickable. When tapped, the marker SHALL dispatch the click to a parent-provided handler (`onStopClick(stopId: string)`). The OD shell, when wiring `<MapCanvas>`, SHALL connect this handler to the `setMode({type: 'stop-info', stopId})` of the mode hook.
 
 The map viewport SHALL fit the bounding box of the first itinerary's geometries after render so the whole route is visible. The viewport SHALL center on the Colonia urbano default (`-34.467, -57.840`) at zoom `15` when no itinerary is yet selected.
 
@@ -73,6 +79,10 @@ The map viewport SHALL fit the bounding box of the first itinerary's geometries 
 #### Scenario: Map viewport fits the itinerary bbox after render
 - **WHEN** an itinerary is rendered to the map
 - **THEN** the map's `bounds` SHALL be the union of all rendered polylines' bounding boxes, with a small padding so the polylines aren't flush against the viewport edges
+
+#### Scenario: Tap on an itinerary stop marker dispatches the mode change
+- **WHEN** the user taps a marker for a leg's boarding/alighting stop
+- **THEN** the URL hash updates to `#stop=<id>` and the stop-info mode activates while the itinerary remains visible on the map
 
 ### Requirement: The OD itinerary card SHALL show duration, legs, and tarifa
 
@@ -162,3 +172,67 @@ Components that cannot be reasonably tested without a real browser (e.g., the ru
 #### Scenario: `npm test` passes with 100% coverage
 - **WHEN** `npm test --coverage` runs in `viewer/`
 - **THEN** the run is green and all four coverage metrics report 100%
+
+### Requirement: The viewer SHALL expose a client-side mode state via URL hash routing
+
+The viewer SHALL introduce a single mode-state hook (`useViewerMode` or equivalent) that reads and writes a URL hash to represent the currently active viewer mode. The hook SHALL recognise three mode markers in v0:
+- empty / no hash → OD mode (the default)
+- `#stop=<gtfsId>` → stop-info mode (see [`viewer-stop-info-mode`](../viewer-stop-info-mode/spec.md))
+- `#line=<shortName>` → line-schedule mode (reserved for the next capability)
+
+The hook SHALL listen for `popstate` events so that the browser's back/forward buttons navigate between mode entries transparently. The hook SHALL provide a `setMode(next)` function that performs `history.pushState` and dispatches a synthetic `hashchange` so React updates re-render the shell.
+
+#### Scenario: Default mode is OD when no hash is present
+- **WHEN** the page loads at `https://demo/`
+- **THEN** the hook returns `{type: 'od', ...}` and the shell renders the OD inputs in the search slot
+
+#### Scenario: Hash on initial load drives the initial mode
+- **WHEN** the page loads at `https://demo/#stop=sol-antigua:3`
+- **THEN** the hook returns `{type: 'stop-info', stopId: 'sol-antigua:3'}` from the very first render — before any user interaction
+
+#### Scenario: Browser back navigates between modes
+- **WHEN** the user picks an OD itinerary, then taps a stop marker (mode becomes stop-info), then hits the browser back button
+- **THEN** the viewer returns to the OD mode and the stop-info sheet closes
+
+### Requirement: The bottom sheet SHALL be extracted as a reusable primitive
+
+The bottom-sheet markup currently inlined inside `OdModeShell.tsx` SHALL move to a standalone primitive component (`components/od/sheet/BottomSheet.tsx` or equivalent). The primitive SHALL expose:
+- `open: boolean` — whether the sheet is currently shown.
+- `onClose: () => void` — invoked when the user dismisses the sheet (close button, swipe, ESC).
+- `children: React.ReactNode` — the content rendered inside the sheet.
+- An accessible `role="dialog"` + `aria-modal="true"` when open.
+
+The primitive SHALL be used by every mode that renders a bottom sheet (stop-info, line-schedule, and OD's itinerary card). Inline duplication of the sheet markup SHALL NOT remain in any mode component.
+
+#### Scenario: The OD itinerary card renders inside the shared primitive
+- **WHEN** the OD mode is active with a successful plan response
+- **THEN** the bottom of the viewport renders the `<BottomSheet open>...<ItineraryCard ... /></BottomSheet>` composition, not an inline sheet div
+
+#### Scenario: Swipe-down dismisses the sheet via the primitive
+- **WHEN** the sheet is open and a touchstart at y=N is followed by a touchend at y=N+THRESHOLD
+- **THEN** the primitive invokes its `onClose` callback (the host mode then decides what to do with the dismissal — typically `setMode` back to a previous state)
+
+### Requirement: The viewer SHALL expose a line selector entry point to the line-schedule mode
+
+When the active viewer mode is **OD**, the viewer SHALL render a compact line-selector entry point (e.g. a small icon button in the search bar or the header chrome). When this entry point is tapped, the viewer SHALL show the four v0 line chips (3, 4, 5, 8) as the search-slot content (replacing the O→D inputs while the selector is open). Tapping a chip SHALL transition the viewer to the line-schedule mode for that line via `setMode({type:'line-schedule', shortName: '<n>'})`.
+
+When the active mode becomes `line-schedule` (whether via the selector, the chip, or a `#line=<short>` deep link), the OD inputs SHALL NOT appear in the search slot. They reappear when the user returns to the OD mode.
+
+#### Scenario: Selector entry point is visible in OD mode
+- **WHEN** the viewer is in the OD mode (default `#` hash)
+- **THEN** the search slot shows the O→D inputs plus a small "Líneas" entry point (icon button) on its right side
+
+#### Scenario: Tapping a chip activates line-schedule
+- **WHEN** the selector is open and the user taps the chip for `4`
+- **THEN** the URL hash becomes `#line=4` and the search slot replaces its content with the line-schedule-mode chrome (the selector itself stays available so the user can switch lines without going back to OD)
+
+### Requirement: The mode hook SHALL track the previously active mode for stop-info push behaviour
+
+The `useViewerMode` hook introduced by [`viewer-stop-info-mode`](../viewer-stop-info-mode/spec.md) SHALL gain a previous-mode field. When `setMode(next, {push: true})` is called, the hook SHALL stash the current mode as previous; on the next `setMode(closeStopInfo)` (typically triggered by closing the stop-info sheet), the hook SHALL restore the stashed mode instead of defaulting to OD.
+
+Only one level of stash is required in v0 — pushing a second stop-info on top of an existing stop-info simply replaces the stash.
+
+#### Scenario: Stop-info pushed on top of line-schedule returns to line-schedule
+- **WHEN** the active mode is `line-schedule` for `4` and the user taps a stop, dispatching `setMode({type:'stop-info', stopId: ...}, {push: true})`
+- **AND** the user later closes the stop-info sheet (typically `setMode(previous)`)
+- **THEN** the mode returns to `{type:'line-schedule', shortName: '4'}` — not to OD

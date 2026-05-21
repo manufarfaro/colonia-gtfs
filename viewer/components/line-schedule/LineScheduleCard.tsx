@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import type { RestLineResponse } from '@/lib/otp/translate-line';
 
@@ -13,9 +13,11 @@ import type { RestLineResponse } from '@/lib/otp/translate-line';
 export function LineScheduleCard({
   data,
   onStopClick,
+  onActiveDirectionChange,
 }: {
   data: RestLineResponse;
   onStopClick: (stopId: string) => void;
+  onActiveDirectionChange?: (directionId: number) => void;
 }): React.ReactElement {
   const t = useTranslations('od.lineSchedule.card');
   /* v8 ignore next */
@@ -24,6 +26,10 @@ export function LineScheduleCard({
   /* v8 ignore next */
   const active = data.directions.find((d) => d.directionId === activeDir) ?? data.directions[0];
   const line = data.line!;
+
+  useEffect(() => {
+    onActiveDirectionChange?.(activeDir);
+  }, [activeDir, onActiveDirectionChange]);
 
   const uniqueDepartures = useMemo(
     () => Array.from(new Set(active.scheduledDepartures)),

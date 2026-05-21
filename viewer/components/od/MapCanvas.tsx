@@ -42,6 +42,7 @@ function fitBoundsFromLine(line: RestLineResponse): MapBounds | undefined {
 export interface LineLayerProps {
   data: RestLineResponse;
   vehicles: VehiclesResponse['vehicles'];
+  activeDirectionId: number;
 }
 
 export function MapCanvas({
@@ -76,7 +77,12 @@ export function MapCanvas({
         disableDefaultUI={false}
       >
       {lineLayer ? (
-        <LineRouteLayer data={lineLayer.data} vehicles={lineLayer.vehicles} onStopClick={onStopClick} />
+        <LineRouteLayer
+          data={lineLayer.data}
+          vehicles={lineLayer.vehicles}
+          activeDirectionId={lineLayer.activeDirectionId}
+          onStopClick={onStopClick}
+        />
       ) : (
         <>
           {itinerary?.legs.map((leg, i) => (

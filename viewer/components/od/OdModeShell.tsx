@@ -41,6 +41,10 @@ export function OdModeShell({ apiKey }: { apiKey: string | undefined }): React.R
   const lineShort = mode.type === 'line-schedule' ? mode.shortName : null;
   const lineData = useLineQuery(lineShort);
   const vehicles = useVehiclesQuery(lineShort);
+  const [activeLineDir, setActiveLineDir] = useState<number>(0);
+  useEffect(() => {
+    setActiveLineDir(0);
+  }, [lineShort]);
 
   const handleStopClick = useCallback(
     (id: string) => setMode({ type: 'stop-info', stopId: id }, { push: true }),
@@ -63,7 +67,11 @@ export function OdModeShell({ apiKey }: { apiKey: string | undefined }): React.R
 
   const lineLayer =
     mode.type === 'line-schedule' && lineData.state === 'success' && lineData.data.line
-      ? { data: lineData.data, vehicles: vehicles.state === 'success' ? vehicles.data.vehicles : [] }
+      ? {
+          data: lineData.data,
+          vehicles: vehicles.state === 'success' ? vehicles.data.vehicles : [],
+          activeDirectionId: activeLineDir,
+        }
       : undefined;
 
   const shell = (
@@ -136,7 +144,11 @@ export function OdModeShell({ apiKey }: { apiKey: string | undefined }): React.R
                   : t('lineSchedule.state.errorOtp')}
               </div>
             ) : lineData.data.line ? (
-              <LineScheduleCard data={lineData.data} onStopClick={handleStopInOtherMode} />
+              <LineScheduleCard
+              data={lineData.data}
+              onStopClick={handleStopInOtherMode}
+              onActiveDirectionChange={setActiveLineDir}
+            />
             ) : (
               <div role="alert" className="text-center text-sm text-muted-foreground">
                 {t('lineSchedule.state.errorNotFound')}
@@ -237,7 +249,11 @@ export function OdModeShell({ apiKey }: { apiKey: string | undefined }): React.R
               </div>
             ) : lineData.data.line ? (
               <div className="border-t border-border bg-background p-4">
-                <LineScheduleCard data={lineData.data} onStopClick={handleStopInOtherMode} />
+                <LineScheduleCard
+              data={lineData.data}
+              onStopClick={handleStopInOtherMode}
+              onActiveDirectionChange={setActiveLineDir}
+            />
               </div>
             ) : (
               <div

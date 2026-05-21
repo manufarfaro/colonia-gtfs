@@ -24,10 +24,12 @@ import { VehicleMarker } from './VehicleMarker';
 export function LineRouteLayer({
   data,
   vehicles,
+  activeDirectionId,
   onStopClick,
 }: {
   data: RestLineResponse;
   vehicles: VehiclesResponse['vehicles'];
+  activeDirectionId: number;
   onStopClick?: (stopId: string) => void;
 }): React.ReactElement {
   const map = useMap();
@@ -79,22 +81,15 @@ export function LineRouteLayer({
 
   // Stops + vehicles are React-composable primitives (already cover their
   // own runtime exclusion).
-  const uniqueStops = useMemo(() => {
-    const seen = new Set<string>();
-    const out: Array<{ id: string; name: string; lat: number; lng: number }> = [];
-    for (const dir of data.directions) {
-      for (const stop of dir.stops) {
-        if (seen.has(stop.id)) continue;
-        seen.add(stop.id);
-        out.push({ id: stop.id, name: stop.name, lat: stop.lat, lng: stop.lon });
-      }
-    }
-    return out;
-  }, [data.directions]);
+  const activeStops = useMemo(() => {
+    const dir = data.directions.find((d) => d.directionId === activeDirectionId);
+    if (!dir) return [];
+    return dir.stops.map((s) => ({ id: s.id, name: s.name, lat: s.lat, lng: s.lon }));
+  }, [data.directions, activeDirectionId]);
 
   return (
     <>
-      {uniqueStops.map((stop) => (
+      {activeStops.map((stop) => (
         <LineStopMarker
           key={stop.id}
           stopId={stop.id}

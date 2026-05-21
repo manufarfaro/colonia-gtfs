@@ -81,7 +81,7 @@ export function OdModeShell({ apiKey }: { apiKey: string | undefined }): React.R
       : undefined;
 
   return (
-    <div data-testid="od-shell" className="relative h-full w-full">
+    <div data-testid="od-shell" className="absolute inset-0">
       <div
         data-testid="od-search-slot"
         className="sticky top-14 z-30 border-b border-border bg-background/95 backdrop-blur px-4 py-3 animate-fade-in-up [animation-delay:0ms]"

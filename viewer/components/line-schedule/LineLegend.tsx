@@ -7,9 +7,14 @@ import type { RestLineResponse } from '@/lib/otp/translate-line';
 interface Props {
   data: RestLineResponse;
   activeDirectionId: number;
+  onActiveDirectionChange?: (directionId: number) => void;
 }
 
-export function LineLegend({ data, activeDirectionId }: Props): React.ReactElement | null {
+export function LineLegend({
+  data,
+  activeDirectionId,
+  onActiveDirectionChange,
+}: Props): React.ReactElement | null {
   const t = useTranslations('od.lineSchedule.legend');
   const line = data.line;
   if (!line) return null;
@@ -26,7 +31,7 @@ export function LineLegend({ data, activeDirectionId }: Props): React.ReactEleme
       <div className="mb-1 font-semibold tracking-tight">
         {t('header', { shortName: line.shortName })}
       </div>
-      <div data-testid="line-legend-active" className="flex items-center gap-2 py-0.5">
+      <div data-testid="line-legend-active" className="flex items-center gap-2 py-1">
         <span
           aria-hidden="true"
           className="inline-block h-1 w-8 rounded"
@@ -37,7 +42,13 @@ export function LineLegend({ data, activeDirectionId }: Props): React.ReactEleme
         </span>
       </div>
       {other && (
-        <div data-testid="line-legend-other" className="flex items-center gap-2 py-0.5">
+        <button
+          type="button"
+          data-testid="line-legend-other"
+          onClick={() => onActiveDirectionChange?.(other.directionId)}
+          aria-label={t('switchTo', { headsign: other.headsign })}
+          className="flex w-full items-center gap-2 py-1 text-left transition-colors hover:bg-muted/60 rounded -mx-1 px-1"
+        >
           <span
             aria-hidden="true"
             className="inline-flex h-1 w-8 items-center justify-between"
@@ -47,10 +58,11 @@ export function LineLegend({ data, activeDirectionId }: Props): React.ReactEleme
             <span className="block h-1 w-1.5 rounded-sm" style={{ backgroundColor: color }} />
             <span className="block h-1 w-1.5 rounded-sm" style={{ backgroundColor: color }} />
           </span>
-          <span className="text-muted-foreground">
-            {t('inbound', { headsign: other.headsign })}
+          <span className="flex flex-1 items-center justify-between gap-2 text-muted-foreground">
+            <span>{t('inbound', { headsign: other.headsign })}</span>
+            <span aria-hidden="true" className="text-[10px] opacity-60">↻</span>
           </span>
-        </div>
+        </button>
       )}
     </div>
   );

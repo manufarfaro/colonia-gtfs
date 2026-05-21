@@ -1,6 +1,6 @@
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { NextIntlClientProvider } from 'next-intl';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import esMessages from '@/messages/es.json';
 import type { RestLineResponse } from '@/lib/otp/translate-line';
 import { LineLegend } from './LineLegend';
@@ -77,6 +77,26 @@ describe('LineLegend', () => {
     expect(active.textContent).toContain('Centro');
     const other = screen.getByTestId('line-legend-other');
     expect(other.textContent).toContain('El General');
+  });
+
+  it('clicking the other row fires onActiveDirectionChange with the other direction id', () => {
+    const onChange = vi.fn();
+    render(
+      <NextIntlClientProvider locale="es" messages={esMessages}>
+        <LineLegend data={withData()} activeDirectionId={0} onActiveDirectionChange={onChange} />
+      </NextIntlClientProvider>,
+    );
+    fireEvent.click(screen.getByTestId('line-legend-other'));
+    expect(onChange).toHaveBeenCalledWith(1);
+  });
+
+  it('clicking the other row without an onActiveDirectionChange handler is a no-op', () => {
+    render(
+      <NextIntlClientProvider locale="es" messages={esMessages}>
+        <LineLegend data={withData()} activeDirectionId={0} />
+      </NextIntlClientProvider>,
+    );
+    fireEvent.click(screen.getByTestId('line-legend-other'));
   });
 
   it('omits the other row when only one direction exists', () => {

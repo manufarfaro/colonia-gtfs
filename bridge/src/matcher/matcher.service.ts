@@ -120,16 +120,24 @@ export class MatcherService {
   constructor(private readonly gtfs: GtfsStaticService) {}
 
   match(marker: AvlMarker, now: Date): MatchResult {
-    // 1. SRV fast-path: marker.srv literally equals a known trip_id.
-    if (marker.srv && this.gtfs.getTrip(marker.srv)) {
-      return { kind: 'matched', tripId: marker.srv, via: 'srv' };
-    }
-
-    // 2. Resolve service_id for `now` in operator-local TZ.
+    // Resolve service_id for `now` in operator-local TZ (used by both
+    // fast-path and slow-path).
     const parts = montevideoParts(now);
     const activeServices = this.resolveActiveServices(parts.yyyymmdd, parts.dayOfWeek);
     if (activeServices.size === 0) {
       return { kind: 'unmatched', reason: 'no-active-service' };
+    }
+
+    // 1. SRV fast-path: the operator's `srv` is the value stored as
+    // `original_trip_id` in trips.txt. The lookup may return multiple
+    // candidates (same srv across service_ids); pick the one whose
+    // service is active today.
+    if (marker.srv) {
+      const tripCandidates = this.gtfs.getTripsByOriginalId(marker.srv);
+      const activeTrip = tripCandidates.find((t) => activeServices.has(t.serviceId));
+      if (activeTrip) {
+        return { kind: 'matched', tripId: activeTrip.tripId, via: 'srv' };
+      }
     }
 
     // 3. Candidates: trips matching (route_short_name == marker.lin,

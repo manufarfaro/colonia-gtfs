@@ -18,9 +18,9 @@ async function buildMatcher(): Promise<MatcherService> {
 describe('MatcherService', () => {
   it('R-06 fast-path: marker.srv that equals a trip_id resolves directly', async () => {
     const matcher = await buildMatcher();
-    // The fast-path is forward-compatibility: srv literally equals a
-    // synthetic trip_id (will rarely fire with today's data but the design
-    // pins it).
+    // Fast-path: the operator's srv (= our `original_trip_id`) maps to
+    // a synthetic trip_id. The gtfs-mini fixture has trip
+    // `4-weekday-0-0800` with original_trip_id `T-WK-1234`.
     const marker: AvlMarker = {
       id: 'BUS-42',
       lin: '4',
@@ -30,7 +30,7 @@ describe('MatcherService', () => {
       time: new Date(`${WEEKDAY_DATE}T08:00:00-03:00`),
       speed: 0,
       head: 0,
-      srv: '4-weekday-0-0800',
+      srv: 'T-WK-1234',
     };
     const result = matcher.match(marker, new Date(`${WEEKDAY_DATE}T08:00:00-03:00`));
     expect(result.kind).toBe('matched');

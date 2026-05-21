@@ -30,15 +30,19 @@ export function VehicleMarker({
     const marker = new google.maps.Marker({
       position: { lat, lng },
       map,
-      title: bearing !== null ? `${label ?? shortName} · ${bearing}°` : label ?? shortName,
+      title: bearing !== null ? `${label ?? shortName} · ${bearing}°` : (label ?? shortName),
       icon: {
-        path: google.maps.SymbolPath.CIRCLE,
-        scale: 8,
+        // Stylized bus silhouette: rectangular body with two wheel
+        // bumps on the bottom edge. Tinted to the line color.
+        path: 'M -10,-7 L 10,-7 L 10,4 L 7,4 L 7,7 L 4,7 L 4,4 L -4,4 L -4,7 L -7,7 L -7,4 L -10,4 Z',
+        scale: 1.4,
         fillColor: getLineColor(shortName),
         fillOpacity: 1,
         strokeColor: '#ffffff',
-        strokeWeight: 2,
+        strokeWeight: 1.5,
+        anchor: new google.maps.Point(0, 0),
       },
+      zIndex: 10,
     });
     return () => {
       marker.setMap(null);

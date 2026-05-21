@@ -71,6 +71,7 @@ export function OdModeShell({ apiKey }: { apiKey: string | undefined }): React.R
           data: lineData.data,
           vehicles: vehicles.state === 'success' ? vehicles.data.vehicles : [],
           activeDirectionId: activeLineDir,
+          onActiveDirectionChange: setActiveLineDir,
         }
       : undefined;
 

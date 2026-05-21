@@ -43,6 +43,7 @@ export interface LineLayerProps {
   data: RestLineResponse;
   vehicles: VehiclesResponse['vehicles'];
   activeDirectionId: number;
+  onActiveDirectionChange?: (directionId: number) => void;
 }
 
 export function MapCanvas({
@@ -69,7 +70,11 @@ export function MapCanvas({
   return (
     <div className="relative h-full w-full">
       {lineLayer && (
-        <LineLegend data={lineLayer.data} activeDirectionId={lineLayer.activeDirectionId} />
+        <LineLegend
+          data={lineLayer.data}
+          activeDirectionId={lineLayer.activeDirectionId}
+          onActiveDirectionChange={lineLayer.onActiveDirectionChange}
+        />
       )}
       <Map
         defaultCenter={COLONIA_CENTER}

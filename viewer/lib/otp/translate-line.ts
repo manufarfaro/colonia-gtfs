@@ -113,9 +113,14 @@ export function translateLineResponse(
         (longest, p) => (p.stops.length > longest.stops.length ? p : longest),
         patterns[0],
       );
+      // `scheduledDepartures` is the LINE's schedule — when each trip
+      // begins at its first stop. Flattening every stoptime would mix in
+      // intermediate-stop departure times, ballooning the list into
+      // minute-by-minute entries that aren't actual trip starts.
       const allDepartures = patterns
         .flatMap((p) => p.trips)
-        .flatMap((t) => t.stoptimes.map((st) => st.scheduledDeparture))
+        .map((t) => t.stoptimes[0]?.scheduledDeparture)
+        .filter((s): s is number => typeof s === 'number')
         .sort((a, b) => a - b);
       // Per-stop arrival offset derived from the canonical pattern's
       // first trip with a fully-populated stoptimes list. Each offset

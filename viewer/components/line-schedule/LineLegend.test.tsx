@@ -61,15 +61,32 @@ describe('LineLegend', () => {
     expect(screen.getByText(/Línea 4/)).toBeInTheDocument();
   });
 
-  it('renders the active direction 0 headsign when direction 0 is active', () => {
+  it('renders the active direction 0 as the solid (ida) row when direction 0 is active', () => {
     renderLegend(withData(), 0);
-    const row = screen.getByTestId('line-legend-active');
-    expect(row.textContent).toContain('El General');
+    const active = screen.getByTestId('line-legend-active');
+    expect(active.textContent).toContain('Ida');
+    expect(active.textContent).toContain('El General');
+    const other = screen.getByTestId('line-legend-other');
+    expect(other.textContent).toContain('Vuelta');
+    expect(other.textContent).toContain('Centro');
   });
 
-  it('renders the active direction 1 headsign when direction 1 is active', () => {
+  it('swaps active + other rows when direction 1 is active', () => {
     renderLegend(withData(), 1);
-    const row = screen.getByTestId('line-legend-active');
-    expect(row.textContent).toContain('Centro');
+    const active = screen.getByTestId('line-legend-active');
+    expect(active.textContent).toContain('Centro');
+    const other = screen.getByTestId('line-legend-other');
+    expect(other.textContent).toContain('El General');
+  });
+
+  it('omits the other row when only one direction exists', () => {
+    const oneDir = withData({
+      directions: [
+        { directionId: 0, headsign: 'Solo', stops: [], scheduledDepartures: [] },
+      ],
+    });
+    renderLegend(oneDir, 0);
+    expect(screen.getByTestId('line-legend-active')).toBeInTheDocument();
+    expect(screen.queryByTestId('line-legend-other')).toBeNull();
   });
 });

@@ -36,33 +36,48 @@ export function LineRouteLayer({
   const shortName = data.line?.shortName ?? '';
   const polylines = useMemo(
     () =>
-      data.shape
-        .filter((s) => s.directionId === activeDirectionId)
-        .map((s) => ({
-          directionId: s.directionId,
-          path: decodePolyline(s.points).map((p) => new google.maps.LatLng(p.lat, p.lng)),
-        })),
-    [data.shape, activeDirectionId],
+      data.shape.map((s) => ({
+        directionId: s.directionId,
+        path: decodePolyline(s.points).map((p) => new google.maps.LatLng(p.lat, p.lng)),
+      })),
+    [data.shape],
   );
 
   useEffect(() => {
     if (!map) return;
     const color = getLineColor(shortName);
-    const instances = polylines.map(
-      (p) =>
-        new google.maps.Polyline({
+    const instances = polylines.map((p) => {
+      const isActive = p.directionId === activeDirectionId;
+      if (isActive) {
+        return new google.maps.Polyline({
           path: p.path,
           strokeColor: color,
           strokeOpacity: 0.95,
           strokeWeight: 5,
           map,
           zIndex: 3,
-        }),
-    );
+        });
+      }
+      return new google.maps.Polyline({
+        path: p.path,
+        strokeColor: color,
+        strokeOpacity: 0,
+        strokeWeight: 5,
+        icons: [
+          {
+            icon: { path: 'M 0,-1 0,1', strokeOpacity: 0.7, scale: 3 },
+            offset: '0',
+            repeat: '14px',
+          },
+        ],
+        map,
+        zIndex: 2,
+      });
+    });
     return () => {
       instances.forEach((pl) => pl.setMap(null));
     };
-  }, [map, polylines, shortName]);
+  }, [map, polylines, shortName, activeDirectionId]);
 
   // Stops + vehicles are React-composable primitives (already cover their
   // own runtime exclusion).

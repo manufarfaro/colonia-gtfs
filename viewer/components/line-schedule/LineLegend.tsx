@@ -15,6 +15,7 @@ export function LineLegend({ data, activeDirectionId }: Props): React.ReactEleme
   if (!line) return null;
   const color = getLineColor(line.shortName);
   const active = data.directions.find((d) => d.directionId === activeDirectionId);
+  const other = data.directions.find((d) => d.directionId !== activeDirectionId);
   if (!active) return null;
 
   return (
@@ -31,10 +32,26 @@ export function LineLegend({ data, activeDirectionId }: Props): React.ReactEleme
           className="inline-block h-1 w-8 rounded"
           style={{ backgroundColor: color }}
         />
-        <span className="text-muted-foreground">
-          {t('direction', { headsign: active.headsign })}
+        <span className="font-medium text-foreground">
+          {t('outbound', { headsign: active.headsign })}
         </span>
       </div>
+      {other && (
+        <div data-testid="line-legend-other" className="flex items-center gap-2 py-0.5">
+          <span
+            aria-hidden="true"
+            className="inline-flex h-1 w-8 items-center justify-between"
+          >
+            <span className="block h-1 w-1.5 rounded-sm" style={{ backgroundColor: color }} />
+            <span className="block h-1 w-1.5 rounded-sm" style={{ backgroundColor: color }} />
+            <span className="block h-1 w-1.5 rounded-sm" style={{ backgroundColor: color }} />
+            <span className="block h-1 w-1.5 rounded-sm" style={{ backgroundColor: color }} />
+          </span>
+          <span className="text-muted-foreground">
+            {t('inbound', { headsign: other.headsign })}
+          </span>
+        </div>
+      )}
     </div>
   );
 }

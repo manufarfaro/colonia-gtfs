@@ -58,6 +58,10 @@ vi.mock('@/components/od/OdItineraryVehicles', () => ({
   ),
 }));
 
+vi.mock('@/components/od/TripEndpointMarkers', () => ({
+  TripEndpointMarkers: () => <div data-testid="stub-trip-endpoints" />,
+}));
+
 vi.mock('./LegPolyline', () => ({
   LegPolyline: ({ leg }: { leg: RestItinerary['legs'][number] }) => (
     <div

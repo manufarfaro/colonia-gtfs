@@ -7,6 +7,7 @@ import type { RestItinerary } from '@/lib/otp/translate-plan';
 import type { RestLineResponse } from '@/lib/otp/translate-line';
 import { LegPolyline, StopMarker } from './LegPolyline';
 import { OdItineraryVehicles } from './OdItineraryVehicles';
+import { TripEndpointMarkers } from './TripEndpointMarkers';
 import { VehicleMarker } from '@/components/line-schedule/VehicleMarker';
 import type { VehiclesResponse } from '@/components/line-schedule/useVehiclesQuery';
 import { LineRouteLayer } from '@/components/line-schedule/LineRouteLayer';
@@ -109,6 +110,7 @@ export function MapCanvas({
           {itinerary?.legs.map((leg, i) => (
             <LegPolyline key={`leg-${i}`} leg={leg} />
           ))}
+          {itinerary && <TripEndpointMarkers itinerary={itinerary} />}
           {itinerary?.legs
             .filter((leg) => leg.mode === 'BUS')
             .flatMap((leg) =>

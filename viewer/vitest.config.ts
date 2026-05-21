@@ -37,6 +37,7 @@ export default defineConfig({
         'components/od/OdAutocompleteInput.tsx',
         'components/od/LegPolyline.tsx',
         'components/od/OdItineraryVehicles.tsx',
+        'components/od/TripEndpointMarkers.tsx',
         'components/line-schedule/VehicleMarker.tsx',
         'components/line-schedule/LineStopMarker.tsx',
         'components/line-schedule/LineRouteLayer.tsx',

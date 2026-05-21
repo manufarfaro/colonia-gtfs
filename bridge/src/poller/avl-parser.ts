@@ -13,6 +13,12 @@ const xmlParser = new XMLParser({
   ignoreAttributes: false,
   attributeNamePrefix: '',
   isArray: (tagName) => tagName === 'marker',
+  // Operator routes (`lin`), trip ids (`srv`), and stop codes look
+  // like numbers but must stay as strings — they're identifiers, not
+  // quantities. Without this flag fast-xml-parser coerces them to
+  // JS numbers, which silently breaks `Map.get(stringKey)` lookups in
+  // the matcher.
+  parseTagValue: false,
 });
 
 /**

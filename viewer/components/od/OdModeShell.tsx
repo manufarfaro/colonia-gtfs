@@ -84,7 +84,7 @@ export function OdModeShell({ apiKey }: { apiKey: string | undefined }): React.R
     <div data-testid="od-shell" className="relative h-full w-full">
       <div
         data-testid="od-search-slot"
-        className="sticky top-14 z-30 border-b border-border bg-background/95 backdrop-blur px-4 py-3"
+        className="sticky top-14 z-30 border-b border-border bg-background/95 backdrop-blur px-4 py-3 animate-fade-in-up [animation-delay:0ms]"
       >
         {mode.type === 'od' && (
           <div className="flex items-center justify-between gap-2">
@@ -115,7 +115,10 @@ export function OdModeShell({ apiKey }: { apiKey: string | undefined }): React.R
       </div>
 
       {apiKey ? (
-        <div data-testid="od-map-slot" className="absolute inset-0 -z-0">
+        <div
+          data-testid="od-map-slot"
+          className="absolute inset-0 -z-0 animate-fade-in-up [animation-delay:60ms]"
+        >
           <MapCanvas
             apiKey={apiKey}
             itinerary={
@@ -192,7 +195,10 @@ export function OdModeShell({ apiKey }: { apiKey: string | undefined }): React.R
           BottomSheet for success only. Hidden whenever a different mode
           owns the bottom region. */}
       {mode.type === 'od' && (
-        <div data-testid="od-bottom-sheet" className="fixed inset-x-0 bottom-0 z-20">
+        <div
+          data-testid="od-bottom-sheet"
+          className="fixed inset-x-0 bottom-0 z-20 animate-fade-in-up [animation-delay:120ms]"
+        >
           {plan.state === 'idle' ? (
             <div
               data-testid="od-state-idle"

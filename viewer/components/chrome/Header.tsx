@@ -13,8 +13,13 @@ export function Header(): React.ReactElement {
   const t = useTranslations('chrome');
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-background/95 backdrop-blur">
-      <div className="mx-auto flex h-14 max-w-screen-md items-center justify-between px-4">
-        <span className="text-sm font-semibold tracking-tight">{t('title')}</span>
+      <div className="flex h-14 items-center justify-between px-4">
+        <span
+          data-testid="chrome-title"
+          className="font-display text-base font-semibold tracking-tight text-foreground"
+        >
+          {t('title')}
+        </span>
         <div className="flex items-center gap-1">
           <ThemeToggle />
           <LocaleSwitcher />

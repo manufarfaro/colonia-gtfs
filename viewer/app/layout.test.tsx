@@ -1,6 +1,22 @@
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it, vi } from 'vitest';
 
+// `next/font/google` is a build-time loader; outside `next build` it's
+// not a real module. Mock the three font loaders the layout imports so
+// the variable className strings are deterministic in tests.
+vi.mock('next/font/google', () => {
+  const stub = (variableName: string) => () => ({
+    className: `__className_${variableName}`,
+    variable: `__variable_${variableName}`,
+    style: { fontFamily: variableName },
+  });
+  return {
+    Fraunces: stub('fraunces'),
+    IBM_Plex_Sans: stub('plex-sans'),
+    IBM_Plex_Mono: stub('plex-mono'),
+  };
+});
+
 // next-intl/server is request-scoped and not available in vitest. Mock
 // getLocale + getMessages so the async server-component can resolve and
 // we can inspect the rendered tree.

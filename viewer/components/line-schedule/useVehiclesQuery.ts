@@ -11,9 +11,10 @@ const POLL_INTERVAL_MS = 15_000;
 // How long a non-empty vehicles response stays "fresh" — when the
 // next poll returns `vehicles: []` (a transient bridge/AVL miss), we
 // keep showing the previous positions for this many milliseconds
-// before accepting the empty state. Keeps the buses from blinking off
-// the map on every flaky upstream cycle.
-const STALE_HOLD_MS = 60_000;
+// before accepting the empty state. 5 minutes covers extended
+// upstream gaps (operator dropouts, matcher misses) without showing
+// indefinitely stale data.
+const STALE_HOLD_MS = 5 * 60_000;
 
 export interface VehiclesResponse {
   lineId: string;

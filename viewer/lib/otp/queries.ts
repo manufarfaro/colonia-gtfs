@@ -65,9 +65,26 @@ export const LINE_QUERY = `
 // FareProducts mapping is implemented in a follow-up, we don't request
 // the field from OTP (it would fail GraphQL validation and zero the
 // whole plan response).
+// Routing knobs tuned for Colonia urbano:
+//   - `walkReluctance: 1.2` — only a small penalty for walking vs riding,
+//     so OTP surfaces a bus leg whenever it shaves real minutes off a
+//     walk-only route. Default (2.0) treats walking too expensively and
+//     hides plausible 5-min transit options behind 50-min walks.
+//   - `maxPreTransitTime: 1800` — up to 30 minutes of walking to reach
+//     the first stop (and from the last to the destination). Default of
+//     15 minutes was rejecting plausible destinations whose closest stop
+//     sat ~1km away (e.g., Plaza de Toros from Buquebus).
+//   - `numItineraries: 5` — return up to 5 alternatives so the sidebar's
+//     ItineraryOptionsList has variety to compare.
 export const PLAN_QUERY = `
   query Plan($from: InputCoordinates!, $to: InputCoordinates!, $date: String!, $time: String!) {
-    plan(from: $from, to: $to, date: $date, time: $time, transportModes: [{mode: TRANSIT}, {mode: WALK}]) {
+    plan(
+      from: $from, to: $to, date: $date, time: $time,
+      transportModes: [{mode: TRANSIT}, {mode: WALK}],
+      walkReluctance: 1.2,
+      maxPreTransitTime: 1800,
+      numItineraries: 5
+    ) {
       itineraries {
         duration
         walkDistance

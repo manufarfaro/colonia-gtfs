@@ -5,6 +5,7 @@
         {
           "duration": 2735,
           "walkDistance": 3637.5,
+          "fare": null,
           "legs": [
             {
               "mode": "WALK",
@@ -15,6 +16,7 @@
               "realTime": false,
               "realtimeState": null,
               "route": null,
+              "legGeometry": { "points": "_p~iF~ps|U_ulLnnqC" },
               "from": {
                 "name": "Origin",
                 "lat": -34.4712,
@@ -33,6 +35,7 @@
         {
           "duration": 2211,
           "walkDistance": 2399.7,
+          "fare": { "regular": { "cents": 7500, "currency": "UYU" } },
           "legs": [
             {
               "mode": "WALK",
@@ -43,6 +46,7 @@
               "realTime": false,
               "realtimeState": null,
               "route": null,
+              "legGeometry": { "points": "abcde123" },
               "from": {
                 "name": "Origin",
                 "lat": -34.4712,
@@ -65,6 +69,7 @@
               "realTime": true,
               "realtimeState": "UPDATED",
               "route": { "shortName": "4", "longName": "Línea 4" },
+              "legGeometry": { "points": "busgeom01" },
               "from": {
                 "name": "ITUZAINGO",
                 "lat": -34.470615,
@@ -87,6 +92,7 @@
               "realTime": false,
               "realtimeState": null,
               "route": null,
+              "legGeometry": null,
               "from": {
                 "name": "AV JOSE P VARELA",
                 "lat": -34.448,

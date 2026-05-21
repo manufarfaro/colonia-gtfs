@@ -48,4 +48,18 @@ describe('translatePlanResponse', () => {
     const out = translatePlanResponse({ data: { plan: {} } });
     expect(out.itineraries).toEqual([]);
   });
+
+  it('R-04 surfaces legGeometry.points verbatim per leg (or null when OTP omits)', () => {
+    const out = translatePlanResponse(fixture);
+    const itin = out.itineraries[1];
+    expect(itin.legs[0].legGeometry).toEqual({ points: 'abcde123' });
+    expect(itin.legs[1].legGeometry).toEqual({ points: 'busgeom01' });
+    expect(itin.legs[2].legGeometry).toBeNull();
+  });
+
+  it('R-04 surfaces fare.regular when present and null when absent (no defaulting)', () => {
+    const out = translatePlanResponse(fixture);
+    expect(out.itineraries[0].fare).toBeNull();
+    expect(out.itineraries[1].fare).toEqual({ regular: { cents: 7500, currency: 'UYU' } });
+  });
 });

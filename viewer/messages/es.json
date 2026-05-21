@@ -7,5 +7,35 @@
   "landing": {
     "title": "Viajes en bus en Colonia",
     "subtitle": "Próximamente: planificá tu viaje en colectivo desde el celular."
+  },
+  "od": {
+    "apiKeyMissing": "Falta configurar la API key de Google Maps. La chrome y los endpoints siguen funcionando, pero el mapa no carga sin la key.",
+    "search": {
+      "origin": {
+        "label": "Origen",
+        "placeholder": "Ej: Terminal Buquebus Colonia"
+      },
+      "destination": {
+        "label": "Destino",
+        "placeholder": "Ej: Plaza de Toros Real de San Carlos"
+      },
+      "clear": "Borrar"
+    },
+    "card": {
+      "duration": "{minutes} min",
+      "walkDistance": "{meters} m a pie",
+      "legWalk": "Caminar {minutes} min hasta {to}",
+      "legBus": "Línea {shortName} · {minutes} min hasta {to}",
+      "fare": "Tarifa",
+      "fareValue": "UYU ${amount}",
+      "fareUnconfirmed": "Consultar al chofer"
+    },
+    "state": {
+      "idleHint": "Elegí origen y destino para ver opciones de viaje.",
+      "loadingLabel": "Buscando opciones de viaje…",
+      "errorOtp": "El servicio de planificación no está disponible. Reintentar en un minuto.",
+      "errorInvalid": "Origen y destino tienen que estar dentro de Colonia urbano.",
+      "errorEmpty": "No encontramos una opción de viaje para ese trayecto. Probá con un destino cercano."
+    }
   }
 }

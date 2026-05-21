@@ -58,6 +58,7 @@ export const PLAN_QUERY = `
       itineraries {
         duration
         walkDistance
+        fare { regular { cents currency } }
         legs {
           mode
           duration
@@ -67,6 +68,7 @@ export const PLAN_QUERY = `
           realTime
           realtimeState
           route { shortName longName }
+          legGeometry { points }
           from { name lat lon stop { gtfsId } }
           to { name lat lon stop { gtfsId } }
         }

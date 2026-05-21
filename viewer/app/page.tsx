@@ -1,11 +1,12 @@
-import { getTranslations } from 'next-intl/server';
+import { OdModeShell } from '@/components/od/OdModeShell';
 
-export default async function HomePage(): Promise<React.ReactElement> {
-  const t = await getTranslations('landing');
-  return (
-    <section className="flex flex-col items-center justify-center gap-4 px-6 py-24 text-center">
-      <h1 className="text-3xl font-semibold tracking-tight">{t('title')}</h1>
-      <p className="max-w-md text-muted-foreground">{t('subtitle')}</p>
-    </section>
-  );
+/**
+ * Server component for `/`. Reads the public Google Maps API key from
+ * the env at request time and forwards it to the OD client shell. If
+ * the key is missing the shell renders a static "API key missing"
+ * banner instead of the map — chrome + endpoints stay functional.
+ */
+export default function HomePage(): React.ReactElement {
+  const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || undefined;
+  return <OdModeShell apiKey={apiKey} />;
 }

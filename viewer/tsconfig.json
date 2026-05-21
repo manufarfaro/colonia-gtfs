@@ -16,6 +16,7 @@
     "esModuleInterop": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
+    "types": ["google.maps"],
     "incremental": true,
     "noEmit": true,
     "forceConsistentCasingInFileNames": true,

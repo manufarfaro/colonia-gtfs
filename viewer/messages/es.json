@@ -84,6 +84,11 @@
       },
       "vehicles": {
         "noLive": "Sin posiciones en vivo"
+      },
+      "legend": {
+        "header": "Línea {shortName}",
+        "outbound": "Ida · {headsign}",
+        "inbound": "Vuelta · {headsign}"
       }
     }
   }

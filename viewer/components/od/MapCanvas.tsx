@@ -9,6 +9,7 @@ import { LegPolyline, StopMarker } from './LegPolyline';
 import { VehicleMarker } from '@/components/line-schedule/VehicleMarker';
 import type { VehiclesResponse } from '@/components/line-schedule/useVehiclesQuery';
 import { LineRouteLayer } from '@/components/line-schedule/LineRouteLayer';
+import { LineLegend } from '@/components/line-schedule/LineLegend';
 
 const COLONIA_CENTER = { lat: -34.467, lng: -57.84 };
 const DEFAULT_ZOOM = 15;
@@ -65,13 +66,15 @@ export function MapCanvas({
       : undefined;
 
   return (
-    <Map
-      defaultCenter={COLONIA_CENTER}
-      defaultZoom={DEFAULT_ZOOM}
-      defaultBounds={bounds}
-      mapId="colonia-od"
-      disableDefaultUI={false}
-    >
+    <div className="relative h-full w-full">
+      {lineLayer && <LineLegend data={lineLayer.data} />}
+      <Map
+        defaultCenter={COLONIA_CENTER}
+        defaultZoom={DEFAULT_ZOOM}
+        defaultBounds={bounds}
+        mapId="colonia-od"
+        disableDefaultUI={false}
+      >
       {lineLayer ? (
         <LineRouteLayer data={lineLayer.data} vehicles={lineLayer.vehicles} onStopClick={onStopClick} />
       ) : (
@@ -96,7 +99,8 @@ export function MapCanvas({
             )}
         </>
       )}
-    </Map>
+      </Map>
+    </div>
   );
 }
 

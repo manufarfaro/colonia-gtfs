@@ -1,0 +1,57 @@
+'use client';
+
+import { useTranslations } from 'next-intl';
+import { getLineColor } from '@/lib/colors/lines';
+import type { RestLineResponse } from '@/lib/otp/translate-line';
+
+interface Props {
+  data: RestLineResponse;
+}
+
+export function LineLegend({ data }: Props): React.ReactElement | null {
+  const t = useTranslations('od.lineSchedule.legend');
+  const line = data.line;
+  if (!line) return null;
+  const color = getLineColor(line.shortName);
+  const outbound = data.directions.find((d) => d.directionId === 0);
+  const inbound = data.directions.find((d) => d.directionId === 1);
+
+  return (
+    <div
+      data-testid="line-legend"
+      className="absolute left-3 top-3 z-10 rounded-md border border-border bg-card/95 px-3 py-2 text-xs shadow-md backdrop-blur"
+    >
+      <div className="mb-1 font-semibold tracking-tight">
+        {t('header', { shortName: line.shortName })}
+      </div>
+      {outbound && (
+        <div data-testid="line-legend-outbound" className="flex items-center gap-2 py-0.5">
+          <span
+            aria-hidden="true"
+            className="inline-block h-1 w-8 rounded"
+            style={{ backgroundColor: color }}
+          />
+          <span className="text-muted-foreground">
+            {t('outbound', { headsign: outbound.headsign })}
+          </span>
+        </div>
+      )}
+      {inbound && (
+        <div data-testid="line-legend-inbound" className="flex items-center gap-2 py-0.5">
+          <span
+            aria-hidden="true"
+            className="inline-flex h-1 w-8 items-center justify-between"
+          >
+            <span className="block h-1 w-1.5 rounded-sm" style={{ backgroundColor: color }} />
+            <span className="block h-1 w-1.5 rounded-sm" style={{ backgroundColor: color }} />
+            <span className="block h-1 w-1.5 rounded-sm" style={{ backgroundColor: color }} />
+            <span className="block h-1 w-1.5 rounded-sm" style={{ backgroundColor: color }} />
+          </span>
+          <span className="text-muted-foreground">
+            {t('inbound', { headsign: inbound.headsign })}
+          </span>
+        </div>
+      )}
+    </div>
+  );
+}

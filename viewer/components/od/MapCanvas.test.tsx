@@ -28,6 +28,12 @@ vi.mock('@vis.gl/react-google-maps', () => ({
   ),
 }));
 
+vi.mock('@/components/line-schedule/LineLegend', () => ({
+  LineLegend: ({ data }: { data: { line: { shortName: string } | null } }) => (
+    <div data-testid="stub-line-legend" data-shortname={data.line?.shortName ?? ''} />
+  ),
+}));
+
 vi.mock('@/components/line-schedule/LineRouteLayer', () => ({
   LineRouteLayer: ({
     data,

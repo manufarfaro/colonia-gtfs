@@ -11,8 +11,7 @@ vi.mock('next/font/google', () => {
     style: { fontFamily: variableName },
   });
   return {
-    Fraunces: stub('fraunces'),
-    IBM_Plex_Sans: stub('plex-sans'),
+    Manrope: stub('manrope'),
     IBM_Plex_Mono: stub('plex-mono'),
   };
 });
@@ -24,7 +23,8 @@ vi.mock('next-intl/server', () => ({
   getLocale: vi.fn().mockResolvedValue('es'),
   getMessages: vi.fn().mockResolvedValue({
     chrome: {
-      title: 'colonia-gtfs',
+      title: 'Maps',
+      logoAlt: 'Intendencia de Colonia',
       disclaimer: 'Datos preliminares · operador no oficial · tarifas a confirmar',
       themeToggle: 'Cambiar tema',
     },
@@ -50,7 +50,7 @@ describe('app/layout.tsx', () => {
     expect(markup).toMatch(/<html[^>]*lang="es"/);
 
     // Chrome layer renders both the header title and the disclaimer copy.
-    expect(markup).toContain('colonia-gtfs');
+    expect(markup).toContain('Maps');
     expect(markup).toContain('tarifas a confirmar');
 
     // Children pass through to <main>.

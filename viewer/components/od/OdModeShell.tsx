@@ -2,6 +2,7 @@
 
 import { useCallback, useState } from 'react';
 import { useTranslations } from 'next-intl';
+import { APIProvider } from '@vis.gl/react-google-maps';
 import { ItineraryCard } from './ItineraryCard';
 import { MapCanvas } from './MapCanvas';
 import { OriginDestinationInputs, type OdInputsChange } from './OriginDestinationInputs';
@@ -80,7 +81,7 @@ export function OdModeShell({ apiKey }: { apiKey: string | undefined }): React.R
       ? { data: lineData.data, vehicles: vehicles.state === 'success' ? vehicles.data.vehicles : [] }
       : undefined;
 
-  return (
+  const shell = (
     <div data-testid="od-shell" className="absolute inset-0">
       <div
         data-testid="od-search-slot"
@@ -120,7 +121,6 @@ export function OdModeShell({ apiKey }: { apiKey: string | undefined }): React.R
           className="absolute inset-0 -z-0 animate-fade-in-up [animation-delay:60ms]"
         >
           <MapCanvas
-            apiKey={apiKey}
             itinerary={
               mode.type === 'od' && plan.state === 'success' ? plan.data.itineraries[0] : null
             }
@@ -231,5 +231,12 @@ export function OdModeShell({ apiKey }: { apiKey: string | undefined }): React.R
         </div>
       )}
     </div>
+  );
+
+  if (!apiKey) return shell;
+  return (
+    <APIProvider apiKey={apiKey} libraries={['places', 'geometry']}>
+      {shell}
+    </APIProvider>
   );
 }

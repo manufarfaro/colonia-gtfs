@@ -1,6 +1,6 @@
 'use client';
 
-import { APIProvider, Map } from '@vis.gl/react-google-maps';
+import { Map } from '@vis.gl/react-google-maps';
 import { boundsOfPaths } from '@/lib/geo/bbox';
 import { decodePolyline, type LatLng } from '@/lib/google-maps/polyline';
 import type { RestItinerary } from '@/lib/otp/translate-plan';
@@ -44,12 +44,10 @@ export interface LineLayerProps {
 }
 
 export function MapCanvas({
-  apiKey,
   itinerary,
   lineLayer,
   onStopClick,
 }: {
-  apiKey: string;
   itinerary: RestItinerary | null;
   /** When provided (line-schedule mode), the line layer wins over the OD itinerary. */
   lineLayer?: LineLayerProps;
@@ -67,40 +65,38 @@ export function MapCanvas({
       : undefined;
 
   return (
-    <APIProvider apiKey={apiKey} libraries={['places', 'geometry']}>
-      <Map
-        defaultCenter={COLONIA_CENTER}
-        defaultZoom={DEFAULT_ZOOM}
-        defaultBounds={bounds}
-        mapId="colonia-od"
-        disableDefaultUI={false}
-      >
-        {lineLayer ? (
-          <LineRouteLayer data={lineLayer.data} vehicles={lineLayer.vehicles} onStopClick={onStopClick} />
-        ) : (
-          <>
-            {itinerary?.legs.map((leg, i) => (
-              <LegPolyline key={`leg-${i}`} leg={leg} />
-            ))}
-            {itinerary?.legs
-              .filter((leg) => leg.mode === 'BUS')
-              .flatMap((leg) =>
-                [leg.from, leg.to]
-                  .filter((end) => end.stopId !== null)
-                  .map((end) => (
-                    <StopMarker
-                      key={`marker-${end.stopId}`}
-                      stopId={end.stopId!}
-                      lat={end.lat}
-                      lng={end.lon}
-                      onClick={onStopClick}
-                    />
-                  )),
-              )}
-          </>
-        )}
-      </Map>
-    </APIProvider>
+    <Map
+      defaultCenter={COLONIA_CENTER}
+      defaultZoom={DEFAULT_ZOOM}
+      defaultBounds={bounds}
+      mapId="colonia-od"
+      disableDefaultUI={false}
+    >
+      {lineLayer ? (
+        <LineRouteLayer data={lineLayer.data} vehicles={lineLayer.vehicles} onStopClick={onStopClick} />
+      ) : (
+        <>
+          {itinerary?.legs.map((leg, i) => (
+            <LegPolyline key={`leg-${i}`} leg={leg} />
+          ))}
+          {itinerary?.legs
+            .filter((leg) => leg.mode === 'BUS')
+            .flatMap((leg) =>
+              [leg.from, leg.to]
+                .filter((end) => end.stopId !== null)
+                .map((end) => (
+                  <StopMarker
+                    key={`marker-${end.stopId}`}
+                    stopId={end.stopId!}
+                    lat={end.lat}
+                    lng={end.lon}
+                    onClick={onStopClick}
+                  />
+                )),
+            )}
+        </>
+      )}
+    </Map>
   );
 }
 

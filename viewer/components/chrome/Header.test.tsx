@@ -5,10 +5,8 @@ import { Header } from './Header';
 
 const messages = {
   chrome: {
-    title: 'colonia-gtfs',
-    // Header now hosts ThemeToggle, which calls t('themeToggle') for its
-    // aria-label. The key must be present or next-intl throws under CI
-    // (production-mode next-intl is strict; dev only logs).
+    title: 'Maps',
+    logoAlt: 'Intendencia de Colonia',
     themeToggle: 'Cambiar tema',
   },
 };
@@ -25,14 +23,18 @@ describe('Header', () => {
   it('R-02 renders the branded title from the i18n catalog', () => {
     renderWithProvider();
     expect(screen.getByRole('banner')).toBeInTheDocument();
-    expect(screen.getByText('colonia-gtfs')).toBeInTheDocument();
+    expect(screen.getByText('Maps')).toBeInTheDocument();
+  });
+
+  it('R-02 renders the Intendencia logo with the localized alt text', () => {
+    renderWithProvider();
+    const logo = screen.getByRole('img', { name: 'Intendencia de Colonia' });
+    expect(logo).toBeInTheDocument();
+    expect(logo.getAttribute('src')).toContain('colonia-logo.png');
   });
 
   it('R-02 includes a LocaleSwitcher slot', () => {
     renderWithProvider();
-    // The slot is rendered as a placeholder when only one locale is available.
-    // We assert by data-testid so the slot's existence is verifiable even
-    // when it renders nothing visually.
     expect(screen.getByTestId('locale-switcher')).toBeInTheDocument();
   });
 
@@ -41,5 +43,12 @@ describe('Header', () => {
     const banner = screen.getByRole('banner');
     expect(banner.className).toContain('sticky');
     expect(banner.className).toContain('top-0');
+  });
+
+  it('R-02 title is rendered with the display font', () => {
+    renderWithProvider();
+    const title = screen.getByTestId('chrome-title');
+    expect(title.className).toContain('font-display');
+    expect(title.textContent).toBe('Maps');
   });
 });

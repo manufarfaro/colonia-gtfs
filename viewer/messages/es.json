@@ -1,8 +1,9 @@
 {
   "chrome": {
-    "title": "colonia-gtfs",
+    "title": "Maps",
     "disclaimer": "Datos preliminares · operador no oficial · tarifas a confirmar",
-    "themeToggle": "Cambiar tema"
+    "themeToggle": "Cambiar tema",
+    "logoAlt": "Intendencia de Colonia"
   },
   "landing": {
     "title": "Viajes en bus en Colonia",

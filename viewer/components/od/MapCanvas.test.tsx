@@ -2,14 +2,10 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import type { RestItinerary } from '@/lib/otp/translate-plan';
 
-// Stub the entire vis.gl wrapper — primitives render their props as data
-// attributes so the test can read them without a browser.
+// Stub the vis.gl Map primitive — renders props as data attributes so
+// the test can read them without a browser. APIProvider is hoisted to
+// OdModeShell now; MapCanvas only renders Map and its layer children.
 vi.mock('@vis.gl/react-google-maps', () => ({
-  APIProvider: ({ children, apiKey }: { children: React.ReactNode; apiKey: string }) => (
-    <div data-testid="api-provider" data-apikey={apiKey}>
-      {children}
-    </div>
-  ),
   Map: ({
     children,
     defaultCenter,
@@ -119,7 +115,7 @@ function busItinerary(): RestItinerary {
 
 describe('MapCanvas', () => {
   it('R-04 renders the Colonia default center + zoom 15 when no itinerary', () => {
-    render(<MapCanvas apiKey="test" itinerary={null} />);
+    render(<MapCanvas itinerary={null} />);
     const map = screen.getByTestId('map');
     expect(map.getAttribute('data-center')).toBe('-34.467,-57.84');
     expect(map.getAttribute('data-zoom')).toBe('15');
@@ -128,13 +124,8 @@ describe('MapCanvas', () => {
     expect(screen.queryAllByTestId('leg-polyline')).toHaveLength(0);
   });
 
-  it('R-04 forwards the API key to the APIProvider', () => {
-    render(<MapCanvas apiKey="my-key" itinerary={null} />);
-    expect(screen.getByTestId('api-provider').getAttribute('data-apikey')).toBe('my-key');
-  });
-
   it('R-04 renders one polyline per leg with geometry (walk dashed + bus colored)', () => {
-    render(<MapCanvas apiKey="test" itinerary={busItinerary()} />);
+    render(<MapCanvas itinerary={busItinerary()} />);
     const polys = screen.getAllByTestId('leg-polyline');
     // Three legs total but the third has null geometry — that's the
     // contract this requirement asserts at the LegPolyline boundary.
@@ -145,13 +136,13 @@ describe('MapCanvas', () => {
   });
 
   it('R-04 places markers at the bus leg endpoints (boarding + alighting stops)', () => {
-    render(<MapCanvas apiKey="test" itinerary={busItinerary()} />);
+    render(<MapCanvas itinerary={busItinerary()} />);
     expect(screen.getByTestId('marker-1:2')).toBeInTheDocument();
     expect(screen.getByTestId('marker-1:42')).toBeInTheDocument();
   });
 
   it('R-04 fits the map bounds to the union of leg geometries with padding', () => {
-    render(<MapCanvas apiKey="test" itinerary={busItinerary()} />);
+    render(<MapCanvas itinerary={busItinerary()} />);
     const map = screen.getByTestId('map');
     const bounds = map.getAttribute('data-bounds');
     expect(bounds).toBeTruthy();
@@ -164,7 +155,7 @@ describe('MapCanvas', () => {
   it('R-04 falls back to the default center when every leg lacks geometry', () => {
     const itin = busItinerary();
     itin.legs.forEach((l) => (l.legGeometry = null));
-    render(<MapCanvas apiKey="test" itinerary={itin} />);
+    render(<MapCanvas itinerary={itin} />);
     const map = screen.getByTestId('map');
     expect(map.getAttribute('data-bounds')).toBe('');
     expect(map.getAttribute('data-center')).toBe('-34.467,-57.84');
@@ -172,7 +163,7 @@ describe('MapCanvas', () => {
 
   it('R-07 forwards onStopClick to each rendered StopMarker', () => {
     const onStopClick = vi.fn();
-    render(<MapCanvas apiKey="test" itinerary={busItinerary()} onStopClick={onStopClick} />);
+    render(<MapCanvas itinerary={busItinerary()} onStopClick={onStopClick} />);
     fireEvent.click(screen.getByTestId('marker-1:2'));
     expect(onStopClick).toHaveBeenCalledWith('1:2');
     fireEvent.click(screen.getByTestId('marker-1:42'));
@@ -180,7 +171,7 @@ describe('MapCanvas', () => {
   });
 
   it('R-07 omits onStopClick gracefully (markers still render)', () => {
-    render(<MapCanvas apiKey="test" itinerary={busItinerary()} />);
+    render(<MapCanvas itinerary={busItinerary()} />);
     fireEvent.click(screen.getByTestId('marker-1:2'));
     // No error; nothing dispatches.
     expect(screen.getByTestId('marker-1:2')).toBeInTheDocument();
@@ -196,7 +187,7 @@ describe('MapCanvas', () => {
       },
       vehicles: [{ id: 'v-1', label: 'L4', routeId: '4', directionId: 0, lat: 0, lon: 0, bearing: null, timestamp: null }],
     };
-    render(<MapCanvas apiKey="test" itinerary={busItinerary()} lineLayer={lineLayer} />);
+    render(<MapCanvas itinerary={busItinerary()} lineLayer={lineLayer} />);
     // Line layer rendered, OD polylines NOT rendered.
     expect(screen.getByTestId('stub-line-layer').getAttribute('data-shortname')).toBe('4');
     expect(screen.queryAllByTestId('leg-polyline')).toHaveLength(0);
@@ -212,7 +203,7 @@ describe('MapCanvas', () => {
       },
       vehicles: [],
     };
-    render(<MapCanvas apiKey="test" itinerary={null} lineLayer={lineLayer} />);
+    render(<MapCanvas itinerary={null} lineLayer={lineLayer} />);
     const bounds = screen.getByTestId('map').getAttribute('data-bounds');
     expect(bounds).toBeTruthy();
   });
@@ -227,7 +218,7 @@ describe('MapCanvas', () => {
       },
       vehicles: [],
     };
-    render(<MapCanvas apiKey="test" itinerary={null} lineLayer={lineLayer} />);
+    render(<MapCanvas itinerary={null} lineLayer={lineLayer} />);
     const map = screen.getByTestId('map');
     expect(map.getAttribute('data-bounds')).toBe('');
     expect(map.getAttribute('data-center')).toBe('-34.467,-57.84');

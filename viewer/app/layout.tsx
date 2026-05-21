@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import { NextIntlClientProvider } from 'next-intl';
 import { getLocale, getMessages } from 'next-intl/server';
-import { Fraunces, IBM_Plex_Sans, IBM_Plex_Mono } from 'next/font/google';
+import { Manrope, IBM_Plex_Mono } from 'next/font/google';
 import { Header } from '@/components/chrome/Header';
 import { DisclaimerBanner } from '@/components/chrome/DisclaimerBanner';
 import { ThemeProvider } from '@/components/theme/ThemeProvider';
@@ -11,26 +11,20 @@ import './globals.css';
 /*
  * Colonia institutional typography.
  *
- * - Fraunces (variable serif): display font for chrome title + headlines.
- *   `opsz` (optical sizing) tuned to UI sizes; `SOFT` axis at default.
- * - IBM Plex Sans (variable sans): body default, multilingual (Latin
- *   Extended-A covers Spanish accents + Portuguese for future locales).
- * - IBM Plex Mono: line codes, stop IDs, scheduled departure times.
+ * The Intendencia's site (colonia.gub.uy) uses the commercial `Mont`
+ * family (Fontfabric). We substitute with `Manrope` — a variable
+ * geometric sans (OFL) that captures the same rounded-institutional
+ * vibe and is bundleable via next/font.
  *
- * All three are self-hosted by Next at build time — no runtime DNS to
- * `fonts.googleapis.com`. Subsets: `latin` + `latin-ext`.
+ * One font (Manrope) serves both display and body via weight axis.
+ * IBM Plex Mono carries line codes, stop IDs, scheduled times.
  *
- * Variable names match the bindings in `globals.css` `@theme inline`.
+ * Self-hosted at build — no runtime DNS to `fonts.googleapis.com`.
+ * Subsets: `latin` + `latin-ext` (Spanish accents + Portuguese future).
  */
-const fontDisplay = Fraunces({
+const fontManrope = Manrope({
   subsets: ['latin', 'latin-ext'],
-  variable: '--font-fraunces',
-  display: 'swap',
-});
-const fontBody = IBM_Plex_Sans({
-  subsets: ['latin', 'latin-ext'],
-  weight: ['400', '500', '600', '700'],
-  variable: '--font-plex-sans',
+  variable: '--font-manrope',
   display: 'swap',
 });
 const fontMono = IBM_Plex_Mono({
@@ -67,7 +61,7 @@ export default async function RootLayout({
     <html
       lang={locale}
       suppressHydrationWarning
-      className={`${fontDisplay.variable} ${fontBody.variable} ${fontMono.variable}`}
+      className={`${fontManrope.variable} ${fontMono.variable}`}
     >
       <body className="min-h-screen flex flex-col font-body antialiased">
         <ThemeProvider>

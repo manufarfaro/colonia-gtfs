@@ -26,19 +26,24 @@ vi.mock('./OriginDestinationInputs', () => ({
 }));
 vi.mock('./MapCanvas', () => ({
   MapCanvas: ({
-    apiKey,
     onStopClick,
   }: {
-    apiKey: string;
     onStopClick?: (id: string) => void;
   }) => (
-    <div data-testid="stub-map" data-apikey={apiKey}>
+    <div data-testid="stub-map">
       <button
         data-testid="stub-stop-click"
         onClick={() => onStopClick?.('sol-antigua:3')}
       >
         click stop
       </button>
+    </div>
+  ),
+}));
+vi.mock('@vis.gl/react-google-maps', () => ({
+  APIProvider: ({ apiKey, children }: { apiKey: string; children: React.ReactNode }) => (
+    <div data-testid="stub-api-provider" data-apikey={apiKey}>
+      {children}
     </div>
   ),
 }));
@@ -116,7 +121,7 @@ describe('OdModeShell', () => {
     expect(screen.getByTestId('od-shell')).toBeInTheDocument();
     expect(screen.getByTestId('od-search-slot')).toBeInTheDocument();
     expect(screen.getByTestId('od-map-slot')).toBeInTheDocument();
-    expect(screen.getByTestId('stub-map').getAttribute('data-apikey')).toBe('test-key');
+    expect(screen.getByTestId('stub-api-provider').getAttribute('data-apikey')).toBe('test-key');
     expect(screen.queryByTestId('od-api-key-missing')).not.toBeInTheDocument();
   });
 

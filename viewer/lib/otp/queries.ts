@@ -1,14 +1,19 @@
 // OTP 2.10 GraphQL queries. Pinned as string constants — grepable when
 // OTP bumps version (per design D-05).
 
+// OTP 2.10's `stoptimesForServiceDate` requires the `date` argument
+// (YYYY-MM-DD); it does NOT accept a `numberOfDepartures` cap (that
+// argument exists on `stoptimesForPatterns` instead). The route handler
+// caps server-side by slicing in the translator after picking the
+// upcoming `limit` arrivals.
 export const ARRIVALS_QUERY = `
-  query Arrivals($stopId: String!, $limit: Int!) {
+  query Arrivals($stopId: String!, $date: String!) {
     stop(id: $stopId) {
       gtfsId
       name
       lat
       lon
-      stoptimesForServiceDate(numberOfDepartures: $limit) {
+      stoptimesForServiceDate(date: $date) {
         pattern {
           route { shortName longName }
           headsign

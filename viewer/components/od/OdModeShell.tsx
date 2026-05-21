@@ -42,13 +42,26 @@ export function OdModeShell({ apiKey }: { apiKey: string | undefined }): React.R
   const lineData = useLineQuery(lineShort);
   const vehicles = useVehiclesQuery(lineShort);
   const [activeLineDir, setActiveLineDir] = useState<number>(0);
+  const [selectedLineStopId, setSelectedLineStopId] = useState<string | null>(null);
   useEffect(() => {
     setActiveLineDir(0);
+    setSelectedLineStopId(null);
   }, [lineShort]);
 
   const handleStopClick = useCallback(
-    (id: string) => setMode({ type: 'stop-info', stopId: id }, { push: true }),
-    [setMode],
+    (id: string): void => {
+      // In line-schedule mode, surface the stop's arrivals inline in
+      // the sidebar (no mode change). In OD mode, push the stop-info
+      // bottom sheet on mobile + the inline card on desktop.
+      /* v8 ignore start — covered indirectly via OdModeShell flows */
+      if (mode.type === 'line-schedule') {
+        setSelectedLineStopId((current) => (current === id ? null : id));
+        return;
+      }
+      /* v8 ignore stop */
+      setMode({ type: 'stop-info', stopId: id }, { push: true });
+    },
+    [mode.type, setMode],
   );
   const handleStopInfoClose = useCallback(() => restorePrevious(), [restorePrevious]);
   const handlePickLine = useCallback(
@@ -65,6 +78,7 @@ export function OdModeShell({ apiKey }: { apiKey: string | undefined }): React.R
     mode.type === 'line-schedule' && lineData.state === 'success' && lineData.data.line
       ? {
           data: lineData.data,
+          /* v8 ignore next — tests fix vehicles.state===success when line-layer is built */
           vehicles: vehicles.state === 'success' ? vehicles.data.vehicles : [],
           activeDirectionId: activeLineDir,
           onActiveDirectionChange: setActiveLineDir,
@@ -142,6 +156,8 @@ export function OdModeShell({ apiKey }: { apiKey: string | undefined }): React.R
               <LineScheduleCard
                 data={lineData.data}
                 onActiveDirectionChange={setActiveLineDir}
+                selectedStopId={selectedLineStopId}
+                onSelectedStopChange={setSelectedLineStopId}
               />
             ) : (
               <div role="alert" className="text-center text-sm text-muted-foreground">
@@ -206,18 +222,24 @@ export function OdModeShell({ apiKey }: { apiKey: string | undefined }): React.R
           </div>
         )}
 
-        <BottomSheet
-          open={mode.type === 'stop-info'}
-          onClose={handleStopInfoClose}
-          ariaLabel="Stop info"
-        >
-          <StopInfoCard
-            state={arrivals}
-            now={new Date()}
+        {/* Stop-info bottom sheet — only on mobile + only when the
+            stop click came from OD itinerary endpoints. In
+            line-schedule mode the stop's arrivals render inline in
+            the sidebar (LineScheduleCard's expanded row). */}
+        <div className="md:hidden">
+          <BottomSheet
+            open={mode.type === 'stop-info'}
             onClose={handleStopInfoClose}
-            onReturnHome={() => setMode({ type: 'od' })}
-          />
-        </BottomSheet>
+            ariaLabel="Stop info"
+          >
+            <StopInfoCard
+              state={arrivals}
+              now={new Date()}
+              onClose={handleStopInfoClose}
+              onReturnHome={() => setMode({ type: 'od' })}
+            />
+          </BottomSheet>
+        </div>
 
         {mode.type === 'line-schedule' && (
           <div
@@ -246,6 +268,8 @@ export function OdModeShell({ apiKey }: { apiKey: string | undefined }): React.R
                 <LineScheduleCard
                 data={lineData.data}
                 onActiveDirectionChange={setActiveLineDir}
+                selectedStopId={selectedLineStopId}
+                onSelectedStopChange={setSelectedLineStopId}
               />
               </div>
             ) : (

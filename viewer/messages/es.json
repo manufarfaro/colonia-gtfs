@@ -76,9 +76,9 @@
         "scheduledDeparturesLabel": "Horarios del día",
         "stopsHeader": "Paradas del recorrido ({count})",
         "departuresHeader": "Salidas programadas ({count})",
-        "stopCoords": "Coords",
-        "stopOffset": "Desde inicio",
-        "stopNextArrival": "Próxima llegada"
+        "arrivalPast": "Pasó hace {minutes} min",
+        "arrivalNext": "Próximo bus en {minutes} min",
+        "arrivalFuture": "En {minutes} min"
       },
       "state": {
         "loading": "Cargando información de la línea…",

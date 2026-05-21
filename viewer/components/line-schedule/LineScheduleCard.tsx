@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { getLineColor } from '@/lib/colors/lines';
 import {
@@ -8,19 +8,38 @@ import {
   minutesSinceMidnightMVD,
   nextArrivalAtStop,
 } from '@/lib/time/schedule';
+import { computeStopArrivals } from '@/lib/time/stop-arrivals';
 import type { RestLineResponse } from '@/lib/otp/translate-line';
 
 export function LineScheduleCard({
   data,
   onActiveDirectionChange,
+  selectedStopId,
+  onSelectedStopChange,
 }: {
   data: RestLineResponse;
   onActiveDirectionChange?: (directionId: number) => void;
+  /** Externally-driven selection (e.g., the user clicked a stop dot on
+   *  the map). When set, the matching row expands + scrolls into view
+   *  with line-color emphasis. */
+  selectedStopId?: string | null;
+  /** Called when the user toggles a row via the sidebar (so the parent
+   *  can keep the map's selection in sync). */
+  onSelectedStopChange?: (id: string | null) => void;
 }): React.ReactElement {
   const t = useTranslations('od.lineSchedule.card');
   /* v8 ignore next */
   const [activeDir, setActiveDir] = useState<number>(data.directions[0]?.directionId ?? 0);
-  const [expandedStopId, setExpandedStopId] = useState<string | null>(null);
+  const [internalExpanded, setInternalExpanded] = useState<string | null>(null);
+  const expandedStopId = selectedStopId !== undefined ? selectedStopId : internalExpanded;
+  const setExpandedStopId = useCallback(
+    (id: string | null): void => {
+      if (onSelectedStopChange) onSelectedStopChange(id);
+      else setInternalExpanded(id);
+    },
+    [onSelectedStopChange],
+  );
+  const rowRefs = useRef(new Map<string, HTMLLIElement | null>());
   const showTabs = data.directions.length > 1;
   /* v8 ignore next */
   const active = data.directions.find((d) => d.directionId === activeDir) ?? data.directions[0];
@@ -32,8 +51,19 @@ export function LineScheduleCard({
   }, [activeDir, onActiveDirectionChange]);
 
   useEffect(() => {
-    setExpandedStopId(null);
-  }, [activeDir]);
+    if (selectedStopId !== undefined) return;
+    setInternalExpanded(null);
+  }, [activeDir, selectedStopId]);
+
+  useEffect(() => {
+    if (!expandedStopId) return;
+    /* v8 ignore start */
+    const el = rowRefs.current.get(expandedStopId);
+    if (el && typeof el.scrollIntoView === 'function') {
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+    /* v8 ignore stop */
+  }, [expandedStopId]);
 
   const uniqueDepartures = useMemo(
     () => Array.from(new Set(active.scheduledDepartures)),
@@ -89,18 +119,38 @@ export function LineScheduleCard({
           {active.stops.map((stop, i) => {
             const nextArrival = nextArrivalAtStop(uniqueDepartures, stop.arrivalOffsetSeconds, nowMinutes);
             const isExpanded = expandedStopId === stop.id;
+            const arrivalsAtStop = isExpanded
+              ? computeStopArrivals(uniqueDepartures, stop.arrivalOffsetSeconds, nowMinutes)
+              : [];
             return (
-              <li key={stop.id} data-testid={`line-stop-row-${stop.id}`}>
+              <li
+                key={stop.id}
+                ref={(el) => {
+                  rowRefs.current.set(stop.id, el);
+                }}
+                data-testid={`line-stop-row-${stop.id}`}
+                data-selected={isExpanded}
+                className={isExpanded ? 'rounded-md border bg-card' : ''}
+                style={isExpanded ? { borderColor: color, backgroundColor: `${color}0d` } : undefined}
+              >
                 <button
                   type="button"
                   onClick={() => setExpandedStopId(isExpanded ? null : stop.id)}
                   aria-expanded={isExpanded}
-                  className="flex w-full items-center gap-2 rounded px-1 py-1 text-left transition-colors hover:bg-muted/50"
+                  className="flex w-full items-center gap-2 rounded px-2 py-1 text-left transition-colors hover:bg-muted/50"
                 >
-                  <span className="font-mono text-xs text-muted-foreground tabular-nums w-6">
+                  <span
+                    className="font-mono text-xs tabular-nums w-6"
+                    style={isExpanded ? { color } : undefined}
+                  >
                     {String(i + 1).padStart(2, '0')}
                   </span>
-                  <span className="flex-1 truncate text-foreground">{stop.name}</span>
+                  <span
+                    className="flex-1 truncate text-foreground"
+                    style={isExpanded ? { color, fontWeight: 600 } : undefined}
+                  >
+                    {stop.name}
+                  </span>
                   <span
                     data-testid={`line-stop-eta-${stop.id}`}
                     className="font-mono text-xs tabular-nums text-muted-foreground"
@@ -109,29 +159,41 @@ export function LineScheduleCard({
                   </span>
                 </button>
                 {isExpanded && (
-                  <dl
+                  <div
                     data-testid={`line-stop-detail-${stop.id}`}
-                    className="ml-8 mt-1 grid grid-cols-[auto_1fr] gap-x-3 gap-y-0.5 text-xs text-muted-foreground"
+                    className="px-3 pb-3 pt-1"
                   >
-                    <dt>ID</dt>
-                    <dd className="font-mono tabular-nums">{stop.id}</dd>
-                    <dt>{t('stopCoords')}</dt>
-                    <dd className="font-mono tabular-nums">
-                      {stop.lat.toFixed(5)}, {stop.lon.toFixed(5)}
-                    </dd>
-                    <dt>{t('stopOffset')}</dt>
-                    <dd className="font-mono tabular-nums">
-                      +{Math.round(stop.arrivalOffsetSeconds / 60)} min
-                    </dd>
-                    {nextArrival && (
-                      <>
-                        <dt>{t('stopNextArrival')}</dt>
-                        <dd className="font-mono font-semibold tabular-nums text-foreground">
-                          {nextArrival}
-                        </dd>
-                      </>
-                    )}
-                  </dl>
+                    <ol className="flex flex-col gap-0.5 text-xs">
+                      {arrivalsAtStop.map((a, idx) => (
+                        <li
+                          key={`${a.arrivalTime}-${idx}`}
+                          data-testid={`line-stop-arrival-${stop.id}-${a.status}`}
+                          className="flex items-baseline gap-2 tabular-nums"
+                        >
+                          <span
+                            className="font-mono w-12"
+                            style={{
+                              color: a.status === 'past' ? 'var(--color-muted-foreground)' : color,
+                              opacity: a.status === 'past' ? 0.55 : 1,
+                              fontWeight: a.status === 'next' ? 600 : 400,
+                            }}
+                          >
+                            {a.arrivalTime}
+                          </span>
+                          <span
+                            className="text-muted-foreground"
+                            style={a.status === 'past' ? { opacity: 0.55 } : undefined}
+                          >
+                            {a.status === 'past'
+                              ? t('arrivalPast', { minutes: Math.abs(a.diffMinutes) })
+                              : a.status === 'next'
+                                ? t('arrivalNext', { minutes: a.diffMinutes })
+                                : t('arrivalFuture', { minutes: a.diffMinutes })}
+                          </span>
+                        </li>
+                      ))}
+                    </ol>
+                  </div>
                 )}
               </li>
             );

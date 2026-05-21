@@ -91,14 +91,40 @@ describe('LineScheduleCard', () => {
     expect(screen.getByText('06:00')).toBeInTheDocument();
   });
 
-  it('R-03 tap on a stop expands an inline detail panel with id + coords + offset', () => {
+  it('R-03 tap on a stop expands an inline panel with past/next/future arrival rows', () => {
     render(withProvider(<LineScheduleCard data={twoDirections} />));
     expect(screen.queryByTestId('line-stop-detail-sol-antigua:1')).toBeNull();
     fireEvent.click(screen.getByText('Terminal'));
-    const detail = screen.getByTestId('line-stop-detail-sol-antigua:1');
-    expect(detail.textContent).toContain('sol-antigua:1');
-    expect(detail.textContent).toMatch(/-34\.4707/);
-    expect(detail.textContent).toMatch(/\+0 min/);
+    expect(screen.queryByTestId('line-stop-detail-sol-antigua:1')).not.toBeNull();
+    // now = 06:25 Montevideo; offset 0 → arrivals at 06:00 (past), 06:30 (next), 07:00 (future).
+    expect(screen.queryByTestId('line-stop-arrival-sol-antigua:1-past')).not.toBeNull();
+    expect(screen.queryByTestId('line-stop-arrival-sol-antigua:1-next')).not.toBeNull();
+    expect(screen.queryByTestId('line-stop-arrival-sol-antigua:1-future')).not.toBeNull();
+  });
+
+  it('R-03 externally-controlled selectedStopId expands the matching row', () => {
+    render(
+      withProvider(
+        <LineScheduleCard data={twoDirections} selectedStopId="sol-antigua:2" />,
+      ),
+    );
+    expect(screen.queryByTestId('line-stop-detail-sol-antigua:1')).toBeNull();
+    expect(screen.queryByTestId('line-stop-detail-sol-antigua:2')).not.toBeNull();
+  });
+
+  it('R-03 toggling a row fires onSelectedStopChange with the id', () => {
+    const onChange = vi.fn();
+    render(
+      withProvider(
+        <LineScheduleCard
+          data={twoDirections}
+          selectedStopId={null}
+          onSelectedStopChange={onChange}
+        />,
+      ),
+    );
+    fireEvent.click(screen.getByText('Plaza Mayor'));
+    expect(onChange).toHaveBeenCalledWith('sol-antigua:2');
   });
 
   it('R-03 tap on the same stop collapses the detail panel', () => {

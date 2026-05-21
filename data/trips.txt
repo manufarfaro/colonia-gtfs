@@ -1,120 +1,252 @@
 route_id,service_id,trip_id,trip_headsign,direction_id,shape_id,original_trip_id
-3,weekday,3-weekday-0-0730,Centro,0,3-in,610
-3,weekday,3-weekday-0-0830,Centro,0,3-in,630
-3,weekday,3-weekday-0-0930,Centro,0,3-in,650
-3,weekday,3-weekday-0-1030,Centro,0,3-in,670
-3,weekday,3-weekday-0-1130,Centro,0,3-in,690
-3,weekday,3-weekday-0-1230,Centro,0,3-in,710
-3,weekday,3-weekday-0-1330,Centro,0,3-in,730
-3,weekday,3-weekday-0-1430,Centro,0,3-in,750
-3,weekday,3-weekday-0-1530,Centro,0,3-in,770
-3,weekday,3-weekday-0-1630,Centro,0,3-in,790
-3,weekday,3-weekday-0-1730,Centro,0,3-in,810
-3,weekday,3-weekday-0-1830,Centro,0,3-in,830
-3,weekday,3-weekday-0-1930,Centro,0,3-in,850
-3,weekday,3-weekday-0-2030,Centro,0,3-in,870
-3,weekday,3-weekday-1-0700,R. de San Carlos (Pda.21),1,3-out,600
-3,weekday,3-weekday-1-0800,R. de San Carlos (Pda.21),1,3-out,620
-3,weekday,3-weekday-1-0900,R. de San Carlos (Pda.21),1,3-out,640
-3,weekday,3-weekday-1-1000,R. de San Carlos (Pda.21),1,3-out,660
-3,weekday,3-weekday-1-1100,R. de San Carlos (Pda.21),1,3-out,680
-3,weekday,3-weekday-1-1200,R. de San Carlos (Pda.21),1,3-out,700
-3,weekday,3-weekday-1-1300,R. de San Carlos (Pda.21),1,3-out,720
-3,weekday,3-weekday-1-1400,R. de San Carlos (Pda.21),1,3-out,740
-3,weekday,3-weekday-1-1500,R. de San Carlos (Pda.21),1,3-out,760
-3,weekday,3-weekday-1-1600,R. de San Carlos (Pda.21),1,3-out,780
-3,weekday,3-weekday-1-1700,R. de San Carlos (Pda.21),1,3-out,800
-3,weekday,3-weekday-1-1800,R. de San Carlos (Pda.21),1,3-out,820
-3,weekday,3-weekday-1-1900,R. de San Carlos (Pda.21),1,3-out,840
-3,weekday,3-weekday-1-2000,R. de San Carlos (Pda.21),1,3-out,860
-4,saturday,4-saturday-0-0930,Centro (x Los Nogales),0,4-in,990
-4,saturday,4-saturday-0-1130,Centro (x Los Nogales),0,4-in,1030
-4,saturday,4-saturday-0-1230,Centro (x Los Nogales),0,4-in,1050
-4,saturday,4-saturday-0-1330,Centro (x Los Nogales),0,4-in,1070
-4,saturday,4-saturday-0-1630,Centro (x Los Nogales),0,4-in,1130
-4,saturday,4-saturday-0-1730,Centro (x Los Nogales),0,4-in,1150
-4,saturday,4-saturday-0-1830,Centro (x Los Nogales),0,4-in,1170
-4,saturday,4-saturday-0-1930,Centro (x Los Nogales),0,4-in,1190
-4,saturday,4-saturday-1-1100,El General (x Los Nogales),1,4-out,1020
-4,saturday,4-saturday-1-1200,El General (x Los Nogales),1,4-out,1040
-4,saturday,4-saturday-1-1300,El General (x Los Nogales),1,4-out,1060
-4,saturday,4-saturday-1-1600,El General (x Los Nogales),1,4-out,1120
-4,saturday,4-saturday-1-1700,El General (x Los Nogales),1,4-out,1140
-4,saturday,4-saturday-1-1800,El General (x Los Nogales),1,4-out,1160
-4,saturday,4-saturday-1-1900,El General (x Los Nogales),1,4-out,1180
-4,saturday,4-saturday-1-2000,El General (x Los Nogales),1,4-out,1200
-4,sunday,4-sunday-0-1530,Centro (x Los Nogales),0,4-in,1110
-4,sunday,4-sunday-0-1630,Centro (x Los Nogales),0,4-in,1130
-4,sunday,4-sunday-0-1730,Centro (x Los Nogales),0,4-in,1150
-4,sunday,4-sunday-0-1830,Centro (x Los Nogales),0,4-in,1170
-4,sunday,4-sunday-0-1930,Centro (x Los Nogales),0,4-in,1190
-4,sunday,4-sunday-1-1500,El General (x Los Nogales),1,4-out,1100
-4,sunday,4-sunday-1-1600,El General (x Los Nogales),1,4-out,1120
-4,sunday,4-sunday-1-1700,El General (x Los Nogales),1,4-out,1140
-4,sunday,4-sunday-1-1800,El General (x Los Nogales),1,4-out,1160
-4,sunday,4-sunday-1-1900,El General (x Los Nogales),1,4-out,1180
-4,sunday,4-sunday-1-2000,El General (x Los Nogales),1,4-out,1200
-4,weekday,4-weekday-0-0525,Centro (x Los Nogales),0,4-in,910
-4,weekday,4-weekday-0-0630,Centro (x Los Nogales),0,4-in,930
-4,weekday,4-weekday-0-0730,Centro (x Los Nogales),0,4-in,950
-4,weekday,4-weekday-0-0830,Centro (x Los Nogales),0,4-in,970
-4,weekday,4-weekday-0-0930,Centro (x Los Nogales),0,4-in,990
-4,weekday,4-weekday-0-1030,Centro (x Los Nogales),0,4-in,1010
-4,weekday,4-weekday-0-1130,Centro (x Los Nogales),0,4-in,1030
-4,weekday,4-weekday-0-1230,Centro (x Los Nogales),0,4-in,1050
-4,weekday,4-weekday-0-1330,Centro (x Los Nogales),0,4-in,1070
-4,weekday,4-weekday-0-1430,Centro (x Los Nogales),0,4-in,1090
-4,weekday,4-weekday-0-1530,Centro (x Los Nogales),0,4-in,1110
-4,weekday,4-weekday-0-1630,Centro (x Los Nogales),0,4-in,1130
-4,weekday,4-weekday-0-1730,Centro (x Los Nogales),0,4-in,1150
-4,weekday,4-weekday-0-1830,Centro (x Los Nogales),0,4-in,1170
-4,weekday,4-weekday-0-1930,Centro (x Los Nogales),0,4-in,1190
-4,weekday,4-weekday-0-2030,Centro (x Los Nogales),0,4-in,1210
-4,weekday,4-weekday-0-2130,Centro (x Los Nogales),0,4-in,1230
-4,weekday,4-weekday-0-2230,Centro (x Los Nogales),0,4-in,1250
-4,weekday,4-weekday-1-0600,El General (x Los Nogales),1,4-out,920
-4,weekday,4-weekday-1-0700,El General (x Los Nogales),1,4-out,940
-4,weekday,4-weekday-1-0800,El General (x Los Nogales),1,4-out,960
-4,weekday,4-weekday-1-0900,El General (x Los Nogales),1,4-out,980
-4,weekday,4-weekday-1-1000,El General (x Los Nogales),1,4-out,1000
-4,weekday,4-weekday-1-1100,El General (x Los Nogales),1,4-out,1020
-4,weekday,4-weekday-1-1200,El General (x Los Nogales),1,4-out,1040
-4,weekday,4-weekday-1-1300,El General (x Los Nogales),1,4-out,1060
-4,weekday,4-weekday-1-1400,El General (x Los Nogales),1,4-out,1080
-4,weekday,4-weekday-1-1500,El General (x Los Nogales),1,4-out,1100
-4,weekday,4-weekday-1-1600,El General (x Los Nogales),1,4-out,1120
-4,weekday,4-weekday-1-1700,El General (x Los Nogales),1,4-out,1140
-4,weekday,4-weekday-1-1800,El General (x Los Nogales),1,4-out,1160
-4,weekday,4-weekday-1-1900,El General (x Los Nogales),1,4-out,1180
-4,weekday,4-weekday-1-2000,El General (x Los Nogales),1,4-out,1200
-4,weekday,4-weekday-1-2100,El General (x Los Nogales),1,4-out,1220
-4,weekday,4-weekday-1-2200,El General (x Los Nogales),1,4-out,1240
-4,weekday,4-weekday-1-2300,El General (x Los Nogales),1,4-out,1260
-5,weekday,5-weekday-0-0655,Centro,0,5-in-direct,1400
-5,weekday,5-weekday-0-0800,Centro (x Ruta 1),0,5-in-r1,1420
-5,weekday,5-weekday-1-0730,El General (x Ruta 1),1,5-out-r1,1410
-8,weekday,8-weekday-0-0830,Centro,0,8-in,2320
-8,weekday,8-weekday-0-0930,Centro,0,8-in,2330
-8,weekday,8-weekday-0-1030,Centro,0,8-in,2340
-8,weekday,8-weekday-0-1130,Centro,0,8-in,2350
-8,weekday,8-weekday-0-1230,Centro,0,8-in,2360
-8,weekday,8-weekday-0-1330,Centro,0,8-in,2370
-8,weekday,8-weekday-0-1430,Centro,0,8-in,2380
-8,weekday,8-weekday-0-1530,Centro,0,8-in,2390
-8,weekday,8-weekday-0-1630,Centro,0,8-in,2400
-8,weekday,8-weekday-0-1730,Centro,0,8-in,2410
-8,weekday,8-weekday-0-1830,Centro,0,8-in,2420
-8,weekday,8-weekday-0-1930,Centro,0,8-in,2430
-8,weekday,8-weekday-1-0800,El General (Algodones),1,8-out,2500
-8,weekday,8-weekday-1-0900,El General (Algodones),1,8-out,2510
-8,weekday,8-weekday-1-1000,El General (Algodones),1,8-out,2520
-8,weekday,8-weekday-1-1100,El General (Algodones),1,8-out,2530
-8,weekday,8-weekday-1-1200,El General (Algodones),1,8-out,2540
-8,weekday,8-weekday-1-1300,El General (Algodones),1,8-out,2550
-8,weekday,8-weekday-1-1400,El General (Algodones),1,8-out,2560
-8,weekday,8-weekday-1-1500,El General (Algodones),1,8-out,2570
-8,weekday,8-weekday-1-1600,El General (Algodones),1,8-out,2580
-8,weekday,8-weekday-1-1700,El General (Algodones),1,8-out,2590
-8,weekday,8-weekday-1-1800,El General (Algodones),1,8-out,2600
-8,weekday,8-weekday-1-1900,El General (Algodones),1,8-out,2610
-8,weekday,8-weekday-1-2000,El General (Algodones),1,8-out,2620
+3,weekday,3-weekday-0-0700,R. de San Carlos (Pda.21),0,3-out,600
+3,weekday,3-weekday-0-0800,R. de San Carlos (Pda.21),0,3-out,620
+3,weekday,3-weekday-0-0900,R. de San Carlos (Pda.21),0,3-out,640
+3,weekday,3-weekday-0-1000,R. de San Carlos (Pda.21),0,3-out,660
+3,weekday,3-weekday-0-1100,R. de San Carlos (Pda.21),0,3-out,680
+3,weekday,3-weekday-0-1200,R. de San Carlos (Pda.21),0,3-out,700
+3,weekday,3-weekday-0-1300,R. de San Carlos (Pda.21),0,3-out,720
+3,weekday,3-weekday-0-1400,R. de San Carlos (Pda.21),0,3-out,740
+3,weekday,3-weekday-0-1500,R. de San Carlos (Pda.21),0,3-out,760
+3,weekday,3-weekday-0-1600,R. de San Carlos (Pda.21),0,3-out,780
+3,weekday,3-weekday-0-1700,R. de San Carlos (Pda.21),0,3-out,800
+3,weekday,3-weekday-0-1800,R. de San Carlos (Pda.21),0,3-out,820
+3,weekday,3-weekday-0-1900,R. de San Carlos (Pda.21),0,3-out,840
+3,weekday,3-weekday-0-2000,R. de San Carlos (Pda.21),0,3-out,860
+3,weekday,3-weekday-1-0730,Centro,1,3-in,610
+3,weekday,3-weekday-1-0830,Centro,1,3-in,630
+3,weekday,3-weekday-1-0930,Centro,1,3-in,650
+3,weekday,3-weekday-1-1030,Centro,1,3-in,670
+3,weekday,3-weekday-1-1130,Centro,1,3-in,690
+3,weekday,3-weekday-1-1230,Centro,1,3-in,710
+3,weekday,3-weekday-1-1330,Centro,1,3-in,730
+3,weekday,3-weekday-1-1430,Centro,1,3-in,750
+3,weekday,3-weekday-1-1530,Centro,1,3-in,770
+3,weekday,3-weekday-1-1630,Centro,1,3-in,790
+3,weekday,3-weekday-1-1730,Centro,1,3-in,810
+3,weekday,3-weekday-1-1830,Centro,1,3-in,830
+3,weekday,3-weekday-1-1930,Centro,1,3-in,850
+3,weekday,3-weekday-1-2030,Centro,1,3-in,870
+4,weekday,4-weekday-0-0600,El General (x Los Nogales),0,4-out,920
+4,weekday,4-weekday-0-0700,El General (x Los Nogales),0,4-out,940
+4,weekday,4-weekday-0-0800,El General (x Los Nogales),0,4-out,960
+4,weekday,4-weekday-0-0900,El General (x Los Nogales),0,4-out,980
+4,weekday,4-weekday-0-1000,El General (x Los Nogales),0,4-out,1000
+4,weekday,4-weekday-0-1100,El General (x Los Nogales),0,4-out,1020
+4,weekday,4-weekday-0-1200,El General (x Los Nogales),0,4-out,1040
+4,weekday,4-weekday-0-1300,El General (x Los Nogales),0,4-out,1060
+4,weekday,4-weekday-0-1400,El General (x Los Nogales),0,4-out,1080
+4,weekday,4-weekday-0-1500,El General (x Los Nogales),0,4-out,1100
+4,weekday,4-weekday-0-1600,El General (x Los Nogales),0,4-out,1120
+4,weekday,4-weekday-0-1700,El General (x Los Nogales),0,4-out,1140
+4,weekday,4-weekday-0-1800,El General (x Los Nogales),0,4-out,1160
+4,weekday,4-weekday-0-1900,El General (x Los Nogales),0,4-out,1180
+4,weekday,4-weekday-0-2000,El General (x Los Nogales),0,4-out,1200
+4,weekday,4-weekday-0-2100,El General (x Los Nogales),0,4-out,1220
+4,weekday,4-weekday-0-2200,El General (x Los Nogales),0,4-out,1240
+4,weekday,4-weekday-0-2300,El General (x Los Nogales),0,4-out,1260
+4,weekday,4-weekday-1-0525,Centro (x Los Nogales),1,4-in,910
+4,weekday,4-weekday-1-0630,Centro (x Los Nogales),1,4-in,930
+4,weekday,4-weekday-1-0730,Centro (x Los Nogales),1,4-in,950
+4,weekday,4-weekday-1-0830,Centro (x Los Nogales),1,4-in,970
+4,weekday,4-weekday-1-0930,Centro (x Los Nogales),1,4-in,990
+4,weekday,4-weekday-1-1030,Centro (x Los Nogales),1,4-in,1010
+4,weekday,4-weekday-1-1130,Centro (x Los Nogales),1,4-in,1030
+4,weekday,4-weekday-1-1230,Centro (x Los Nogales),1,4-in,1050
+4,weekday,4-weekday-1-1330,Centro (x Los Nogales),1,4-in,1070
+4,weekday,4-weekday-1-1430,Centro (x Los Nogales),1,4-in,1090
+4,weekday,4-weekday-1-1530,Centro (x Los Nogales),1,4-in,1110
+4,weekday,4-weekday-1-1630,Centro (x Los Nogales),1,4-in,1130
+4,weekday,4-weekday-1-1730,Centro (x Los Nogales),1,4-in,1150
+4,weekday,4-weekday-1-1830,Centro (x Los Nogales),1,4-in,1170
+4,weekday,4-weekday-1-1930,Centro (x Los Nogales),1,4-in,1190
+4,weekday,4-weekday-1-2030,Centro (x Los Nogales),1,4-in,1210
+4,weekday,4-weekday-1-2130,Centro (x Los Nogales),1,4-in,1230
+4,weekday,4-weekday-1-2230,Centro (x Los Nogales),1,4-in,1250
+5,weekday,5-weekday-0-0730,El General (x Ruta 1),0,5-out,1410
+5,weekday,5-weekday-1-0800,Centro (x Ruta 1),1,5-in,1420
+8,weekday,8-weekday-0-0800,El General (Algodones),0,8-out,2500
+8,weekday,8-weekday-0-0900,El General (Algodones),0,8-out,2510
+8,weekday,8-weekday-0-1000,El General (Algodones),0,8-out,2520
+8,weekday,8-weekday-0-1100,El General (Algodones),0,8-out,2530
+8,weekday,8-weekday-0-1200,El General (Algodones),0,8-out,2540
+8,weekday,8-weekday-0-1300,El General (Algodones),0,8-out,2550
+8,weekday,8-weekday-0-1400,El General (Algodones),0,8-out,2560
+8,weekday,8-weekday-0-1500,El General (Algodones),0,8-out,2570
+8,weekday,8-weekday-0-1600,El General (Algodones),0,8-out,2580
+8,weekday,8-weekday-0-1700,El General (Algodones),0,8-out,2590
+8,weekday,8-weekday-0-1800,El General (Algodones),0,8-out,2600
+8,weekday,8-weekday-0-1900,El General (Algodones),0,8-out,2610
+8,weekday,8-weekday-0-2000,El General (Algodones),0,8-out,2620
+8,weekday,8-weekday-1-0700,Centro,1,8-in,2300
+8,weekday,8-weekday-1-0730,Centro,1,8-in,2310
+8,weekday,8-weekday-1-0830,Centro,1,8-in,2320
+8,weekday,8-weekday-1-0930,Centro,1,8-in,2330
+8,weekday,8-weekday-1-1030,Centro,1,8-in,2340
+8,weekday,8-weekday-1-1130,Centro,1,8-in,2350
+8,weekday,8-weekday-1-1230,Centro,1,8-in,2360
+8,weekday,8-weekday-1-1330,Centro,1,8-in,2370
+8,weekday,8-weekday-1-1430,Centro,1,8-in,2380
+8,weekday,8-weekday-1-1530,Centro,1,8-in,2390
+8,weekday,8-weekday-1-1630,Centro,1,8-in,2400
+8,weekday,8-weekday-1-1730,Centro,1,8-in,2410
+8,weekday,8-weekday-1-1830,Centro,1,8-in,2420
+8,weekday,8-weekday-1-1930,Centro,1,8-in,2430
+4,saturday,4-saturday-0-0600,El General (x Los Nogales),0,4-out,920
+4,saturday,4-saturday-0-0700,El General (x Los Nogales),0,4-out,940
+4,saturday,4-saturday-0-0800,El General (x Los Nogales),0,4-out,960
+4,saturday,4-saturday-0-0900,El General (x Los Nogales),0,4-out,980
+4,saturday,4-saturday-0-1000,El General (x Los Nogales),0,4-out,1000
+4,saturday,4-saturday-0-1100,El General (x Los Nogales),0,4-out,1020
+4,saturday,4-saturday-0-1200,El General (x Los Nogales),0,4-out,1040
+4,saturday,4-saturday-0-1300,El General (x Los Nogales),0,4-out,1060
+4,saturday,4-saturday-0-1400,El General (x Los Nogales),0,4-out,1080
+4,saturday,4-saturday-0-1500,El General (x Los Nogales),0,4-out,1100
+4,saturday,4-saturday-0-1600,El General (x Los Nogales),0,4-out,1120
+4,saturday,4-saturday-0-1700,El General (x Los Nogales),0,4-out,1140
+4,saturday,4-saturday-0-1800,El General (x Los Nogales),0,4-out,1160
+4,saturday,4-saturday-0-1900,El General (x Los Nogales),0,4-out,1180
+4,saturday,4-saturday-0-2000,El General (x Los Nogales),0,4-out,1200
+4,saturday,4-saturday-0-2100,El General (x Los Nogales),0,4-out,1220
+4,saturday,4-saturday-0-2200,El General (x Los Nogales),0,4-out,1240
+4,saturday,4-saturday-0-2300,El General (x Los Nogales),0,4-out,1260
+4,saturday,4-saturday-1-0525,Centro (x Los Nogales),1,4-in,910
+4,saturday,4-saturday-1-0630,Centro (x Los Nogales),1,4-in,930
+4,saturday,4-saturday-1-0730,Centro (x Los Nogales),1,4-in,950
+4,saturday,4-saturday-1-0830,Centro (x Los Nogales),1,4-in,970
+4,saturday,4-saturday-1-0930,Centro (x Los Nogales),1,4-in,990
+4,saturday,4-saturday-1-1030,Centro (x Los Nogales),1,4-in,1010
+4,saturday,4-saturday-1-1130,Centro (x Los Nogales),1,4-in,1030
+4,saturday,4-saturday-1-1230,Centro (x Los Nogales),1,4-in,1050
+4,saturday,4-saturday-1-1330,Centro (x Los Nogales),1,4-in,1070
+4,saturday,4-saturday-1-1430,Centro (x Los Nogales),1,4-in,1090
+4,saturday,4-saturday-1-1530,Centro (x Los Nogales),1,4-in,1110
+4,saturday,4-saturday-1-1630,Centro (x Los Nogales),1,4-in,1130
+4,saturday,4-saturday-1-1730,Centro (x Los Nogales),1,4-in,1150
+4,saturday,4-saturday-1-1830,Centro (x Los Nogales),1,4-in,1170
+4,saturday,4-saturday-1-1930,Centro (x Los Nogales),1,4-in,1190
+4,saturday,4-saturday-1-2030,Centro (x Los Nogales),1,4-in,1210
+4,saturday,4-saturday-1-2130,Centro (x Los Nogales),1,4-in,1230
+4,saturday,4-saturday-1-2230,Centro (x Los Nogales),1,4-in,1250
+4,sunday,4-sunday-0-0600,El General (x Los Nogales),0,4-out,920
+4,sunday,4-sunday-0-0700,El General (x Los Nogales),0,4-out,940
+4,sunday,4-sunday-0-0800,El General (x Los Nogales),0,4-out,960
+4,sunday,4-sunday-0-0900,El General (x Los Nogales),0,4-out,980
+4,sunday,4-sunday-0-1000,El General (x Los Nogales),0,4-out,1000
+4,sunday,4-sunday-0-1100,El General (x Los Nogales),0,4-out,1020
+4,sunday,4-sunday-0-1200,El General (x Los Nogales),0,4-out,1040
+4,sunday,4-sunday-0-1300,El General (x Los Nogales),0,4-out,1060
+4,sunday,4-sunday-0-1400,El General (x Los Nogales),0,4-out,1080
+4,sunday,4-sunday-0-1500,El General (x Los Nogales),0,4-out,1100
+4,sunday,4-sunday-0-1600,El General (x Los Nogales),0,4-out,1120
+4,sunday,4-sunday-0-1700,El General (x Los Nogales),0,4-out,1140
+4,sunday,4-sunday-0-1800,El General (x Los Nogales),0,4-out,1160
+4,sunday,4-sunday-0-1900,El General (x Los Nogales),0,4-out,1180
+4,sunday,4-sunday-0-2000,El General (x Los Nogales),0,4-out,1200
+4,sunday,4-sunday-0-2100,El General (x Los Nogales),0,4-out,1220
+4,sunday,4-sunday-1-0525,Centro (x Los Nogales),1,4-in,910
+4,sunday,4-sunday-1-0630,Centro (x Los Nogales),1,4-in,930
+4,sunday,4-sunday-1-0730,Centro (x Los Nogales),1,4-in,950
+4,sunday,4-sunday-1-0830,Centro (x Los Nogales),1,4-in,970
+4,sunday,4-sunday-1-0930,Centro (x Los Nogales),1,4-in,990
+4,sunday,4-sunday-1-1030,Centro (x Los Nogales),1,4-in,1010
+4,sunday,4-sunday-1-1130,Centro (x Los Nogales),1,4-in,1030
+4,sunday,4-sunday-1-1230,Centro (x Los Nogales),1,4-in,1050
+4,sunday,4-sunday-1-1330,Centro (x Los Nogales),1,4-in,1070
+4,sunday,4-sunday-1-1430,Centro (x Los Nogales),1,4-in,1090
+4,sunday,4-sunday-1-1530,Centro (x Los Nogales),1,4-in,1110
+4,sunday,4-sunday-1-1630,Centro (x Los Nogales),1,4-in,1130
+4,sunday,4-sunday-1-1730,Centro (x Los Nogales),1,4-in,1150
+4,sunday,4-sunday-1-1830,Centro (x Los Nogales),1,4-in,1170
+4,sunday,4-sunday-1-1930,Centro (x Los Nogales),1,4-in,1190
+4,sunday,4-sunday-1-2030,Centro (x Los Nogales),1,4-in,1210
+4,sunday,4-sunday-1-2130,Centro (x Los Nogales),1,4-in,1230
+3,holiday,3-holiday-0-0700,R. de San Carlos (Pda.21),0,3-out,600
+3,holiday,3-holiday-0-0800,R. de San Carlos (Pda.21),0,3-out,620
+3,holiday,3-holiday-0-0900,R. de San Carlos (Pda.21),0,3-out,640
+3,holiday,3-holiday-0-1000,R. de San Carlos (Pda.21),0,3-out,660
+3,holiday,3-holiday-0-1100,R. de San Carlos (Pda.21),0,3-out,680
+3,holiday,3-holiday-0-1200,R. de San Carlos (Pda.21),0,3-out,700
+3,holiday,3-holiday-0-1300,R. de San Carlos (Pda.21),0,3-out,720
+3,holiday,3-holiday-0-1400,R. de San Carlos (Pda.21),0,3-out,740
+3,holiday,3-holiday-0-1500,R. de San Carlos (Pda.21),0,3-out,760
+3,holiday,3-holiday-0-1600,R. de San Carlos (Pda.21),0,3-out,780
+3,holiday,3-holiday-0-1700,R. de San Carlos (Pda.21),0,3-out,800
+3,holiday,3-holiday-0-1800,R. de San Carlos (Pda.21),0,3-out,820
+3,holiday,3-holiday-0-1900,R. de San Carlos (Pda.21),0,3-out,840
+3,holiday,3-holiday-0-2000,R. de San Carlos (Pda.21),0,3-out,860
+3,holiday,3-holiday-1-0730,Centro,1,3-in,610
+3,holiday,3-holiday-1-0830,Centro,1,3-in,630
+3,holiday,3-holiday-1-0930,Centro,1,3-in,650
+3,holiday,3-holiday-1-1030,Centro,1,3-in,670
+3,holiday,3-holiday-1-1130,Centro,1,3-in,690
+3,holiday,3-holiday-1-1230,Centro,1,3-in,710
+3,holiday,3-holiday-1-1330,Centro,1,3-in,730
+3,holiday,3-holiday-1-1430,Centro,1,3-in,750
+3,holiday,3-holiday-1-1530,Centro,1,3-in,770
+3,holiday,3-holiday-1-1630,Centro,1,3-in,790
+3,holiday,3-holiday-1-1730,Centro,1,3-in,810
+3,holiday,3-holiday-1-1830,Centro,1,3-in,830
+3,holiday,3-holiday-1-1930,Centro,1,3-in,850
+3,holiday,3-holiday-1-2030,Centro,1,3-in,870
+4,holiday,4-holiday-0-0600,El General (x Los Nogales),0,4-out,920
+4,holiday,4-holiday-0-0700,El General (x Los Nogales),0,4-out,940
+4,holiday,4-holiday-0-0800,El General (x Los Nogales),0,4-out,960
+4,holiday,4-holiday-0-0900,El General (x Los Nogales),0,4-out,980
+4,holiday,4-holiday-0-1000,El General (x Los Nogales),0,4-out,1000
+4,holiday,4-holiday-0-1100,El General (x Los Nogales),0,4-out,1020
+4,holiday,4-holiday-0-1200,El General (x Los Nogales),0,4-out,1040
+4,holiday,4-holiday-0-1300,El General (x Los Nogales),0,4-out,1060
+4,holiday,4-holiday-0-1400,El General (x Los Nogales),0,4-out,1080
+4,holiday,4-holiday-0-1500,El General (x Los Nogales),0,4-out,1100
+4,holiday,4-holiday-0-1700,El General (x Los Nogales),0,4-out,1140
+4,holiday,4-holiday-0-1800,El General (x Los Nogales),0,4-out,1160
+4,holiday,4-holiday-0-1900,El General (x Los Nogales),0,4-out,1180
+4,holiday,4-holiday-0-2000,El General (x Los Nogales),0,4-out,1200
+4,holiday,4-holiday-0-2100,El General (x Los Nogales),0,4-out,1220
+4,holiday,4-holiday-0-2200,El General (x Los Nogales),0,4-out,1240
+4,holiday,4-holiday-0-2300,El General (x Los Nogales),0,4-out,1260
+4,holiday,4-holiday-1-0525,Centro (x Los Nogales),1,4-in,910
+4,holiday,4-holiday-1-0630,Centro (x Los Nogales),1,4-in,930
+4,holiday,4-holiday-1-0730,Centro (x Los Nogales),1,4-in,950
+4,holiday,4-holiday-1-0830,Centro (x Los Nogales),1,4-in,970
+4,holiday,4-holiday-1-0930,Centro (x Los Nogales),1,4-in,990
+4,holiday,4-holiday-1-1030,Centro (x Los Nogales),1,4-in,1010
+4,holiday,4-holiday-1-1130,Centro (x Los Nogales),1,4-in,1030
+4,holiday,4-holiday-1-1230,Centro (x Los Nogales),1,4-in,1050
+4,holiday,4-holiday-1-1330,Centro (x Los Nogales),1,4-in,1070
+4,holiday,4-holiday-1-1430,Centro (x Los Nogales),1,4-in,1090
+4,holiday,4-holiday-1-1530,Centro (x Los Nogales),1,4-in,1110
+4,holiday,4-holiday-1-1630,Centro (x Los Nogales),1,4-in,1130
+4,holiday,4-holiday-1-1730,Centro (x Los Nogales),1,4-in,1150
+4,holiday,4-holiday-1-1830,Centro (x Los Nogales),1,4-in,1170
+4,holiday,4-holiday-1-1930,Centro (x Los Nogales),1,4-in,1190
+4,holiday,4-holiday-1-2030,Centro (x Los Nogales),1,4-in,1210
+4,holiday,4-holiday-1-2130,Centro (x Los Nogales),1,4-in,1230
+4,holiday,4-holiday-1-2230,Centro (x Los Nogales),1,4-in,1250
+8,holiday,8-holiday-0-0800,El General (Algodones),0,8-out,2500
+8,holiday,8-holiday-0-0900,El General (Algodones),0,8-out,2510
+8,holiday,8-holiday-0-1000,El General (Algodones),0,8-out,2520
+8,holiday,8-holiday-0-1100,El General (Algodones),0,8-out,2530
+8,holiday,8-holiday-0-1200,El General (Algodones),0,8-out,2540
+8,holiday,8-holiday-0-1300,El General (Algodones),0,8-out,2550
+8,holiday,8-holiday-0-1400,El General (Algodones),0,8-out,2560
+8,holiday,8-holiday-0-1500,El General (Algodones),0,8-out,2570
+8,holiday,8-holiday-0-1600,El General (Algodones),0,8-out,2580
+8,holiday,8-holiday-0-1700,El General (Algodones),0,8-out,2590
+8,holiday,8-holiday-0-1800,El General (Algodones),0,8-out,2600
+8,holiday,8-holiday-0-1900,El General (Algodones),0,8-out,2610
+8,holiday,8-holiday-0-2000,El General (Algodones),0,8-out,2620
+8,holiday,8-holiday-1-0730,Centro,1,8-in,2310
+8,holiday,8-holiday-1-0830,Centro,1,8-in,2320
+8,holiday,8-holiday-1-0930,Centro,1,8-in,2330
+8,holiday,8-holiday-1-1030,Centro,1,8-in,2340
+8,holiday,8-holiday-1-1130,Centro,1,8-in,2350
+8,holiday,8-holiday-1-1230,Centro,1,8-in,2360
+8,holiday,8-holiday-1-1330,Centro,1,8-in,2370
+8,holiday,8-holiday-1-1430,Centro,1,8-in,2380
+8,holiday,8-holiday-1-1530,Centro,1,8-in,2390
+8,holiday,8-holiday-1-1630,Centro,1,8-in,2400
+8,holiday,8-holiday-1-1730,Centro,1,8-in,2410
+8,holiday,8-holiday-1-1830,Centro,1,8-in,2420
+8,holiday,8-holiday-1-1930,Centro,1,8-in,2430

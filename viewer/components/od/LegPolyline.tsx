@@ -53,19 +53,25 @@ export function StopMarker({
   stopId,
   lat,
   lng,
+  onClick,
 }: {
   stopId: string;
   lat: number;
   lng: number;
+  onClick?: (stopId: string) => void;
 }): React.ReactElement | null {
   const map = useMap();
   useEffect(() => {
     if (!map) return;
     const marker = new google.maps.Marker({ position: { lat, lng }, map, title: stopId });
+    const listener = onClick
+      ? marker.addListener('click', () => onClick(stopId))
+      : null;
     return () => {
+      listener?.remove();
       marker.setMap(null);
     };
-  }, [map, stopId, lat, lng]);
+  }, [map, stopId, lat, lng, onClick]);
   return null;
 }
 /* v8 ignore stop */

@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { NextIntlClientProvider } from 'next-intl';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import esMessages from '@/messages/es.json';
@@ -24,7 +24,37 @@ vi.mock('./OriginDestinationInputs', () => ({
   },
 }));
 vi.mock('./MapCanvas', () => ({
-  MapCanvas: ({ apiKey }: { apiKey: string }) => <div data-testid="stub-map" data-apikey={apiKey} />,
+  MapCanvas: ({
+    apiKey,
+    onStopClick,
+  }: {
+    apiKey: string;
+    onStopClick?: (id: string) => void;
+  }) => (
+    <div data-testid="stub-map" data-apikey={apiKey}>
+      <button
+        data-testid="stub-stop-click"
+        onClick={() => onStopClick?.('sol-antigua:3')}
+      >
+        click stop
+      </button>
+    </div>
+  ),
+}));
+vi.mock('@/components/stop-info/StopInfoCard', () => ({
+  StopInfoCard: ({
+    state,
+    onReturnHome,
+  }: {
+    state: { state: string; error?: string };
+    onReturnHome: () => void;
+  }) => (
+    <div data-testid="stub-stop-info-card" data-state={state.state}>
+      <button data-testid="stub-return-home" onClick={onReturnHome}>
+        return-home
+      </button>
+    </div>
+  ),
 }));
 vi.mock('./ItineraryCard', () => ({
   ItineraryCard: () => <div data-testid="stub-card" />,
@@ -47,6 +77,8 @@ function jsonResponse(body: unknown, status = 200): Response {
 }
 
 function renderShell(apiKey: string | undefined): void {
+  // Reset hash before each render so tests start in OD mode.
+  window.history.replaceState(null, '', '/');
   render(
     <NextIntlClientProvider locale="es" messages={esMessages}>
       <OdModeShell apiKey={apiKey} />
@@ -114,5 +146,62 @@ describe('OdModeShell', () => {
     renderShell('test-key');
     screen.getByTestId('stub-select-both').click();
     await waitFor(() => expect(screen.queryByTestId('stub-card')).not.toBeNull());
+  });
+
+  it('R-02 tap-on-stop activates the stop-info mode + hides OD inputs', async () => {
+    // Arrivals query mounts a fetch — give it an empty stub so the card doesn't crash.
+    fetchMock.mockResolvedValue(jsonResponse({ stop: { id: 'sol-antigua:3', name: 'X', lat: 0, lon: 0 }, arrivals: [], meta: { queriedAt: '2026-05-20T14:30:00Z', realtime_available: false } }));
+    renderShell('test-key');
+    expect(screen.queryByTestId('stub-stop-info-card')).toBeNull();
+    act(() => {
+      fireEvent.click(screen.getByTestId('stub-stop-click'));
+    });
+    await waitFor(() => expect(screen.queryByTestId('stub-stop-info-card')).not.toBeNull());
+    // The hash now reflects the stop.
+    expect(window.location.hash).toBe('#stop=sol-antigua%3A3');
+    // OD inputs are hidden when the mode is stop-info.
+    expect(screen.queryByTestId('stub-select-both')).toBeNull();
+  });
+
+  it('R-02 deep-link initial hash drives the initial mode', async () => {
+    fetchMock.mockResolvedValue(jsonResponse({ stop: { id: 'sol-antigua:3', name: 'X', lat: 0, lon: 0 }, arrivals: [], meta: { queriedAt: '2026-05-20T14:30:00Z', realtime_available: false } }));
+    window.history.replaceState(null, '', '#stop=sol-antigua:3');
+    render(
+      <NextIntlClientProvider locale="es" messages={esMessages}>
+        <OdModeShell apiKey="test-key" />
+      </NextIntlClientProvider>,
+    );
+    await waitFor(() => expect(screen.queryByTestId('stub-stop-info-card')).not.toBeNull());
+    expect(screen.queryByTestId('stub-select-both')).toBeNull();
+  });
+
+  it('R-04 onReturnHome forces mode to OD (not_found recovery path)', async () => {
+    fetchMock.mockResolvedValue(jsonResponse({ stop: { id: 'sol-antigua:3', name: 'X', lat: 0, lon: 0 }, arrivals: [], meta: { queriedAt: '2026-05-20T14:30:00Z', realtime_available: false } }));
+    renderShell('test-key');
+    act(() => {
+      fireEvent.click(screen.getByTestId('stub-stop-click'));
+    });
+    await waitFor(() => expect(screen.queryByTestId('stub-stop-info-card')).not.toBeNull());
+    act(() => {
+      fireEvent.click(screen.getByTestId('stub-return-home'));
+    });
+    await waitFor(() => expect(screen.queryByTestId('stub-stop-info-card')).toBeNull());
+    expect(window.location.hash).toBe('');
+  });
+
+  it('R-02 backdrop click closes the stop-info sheet + returns to OD', async () => {
+    fetchMock.mockResolvedValue(jsonResponse({ stop: { id: 'sol-antigua:3', name: 'X', lat: 0, lon: 0 }, arrivals: [], meta: { queriedAt: '2026-05-20T14:30:00Z', realtime_available: false } }));
+    renderShell('test-key');
+    act(() => {
+      fireEvent.click(screen.getByTestId('stub-stop-click'));
+    });
+    await waitFor(() => expect(screen.queryByTestId('stub-stop-info-card')).not.toBeNull());
+    act(() => {
+      fireEvent.click(screen.getByTestId('bottom-sheet-backdrop'));
+    });
+    await waitFor(() => expect(screen.queryByTestId('stub-stop-info-card')).toBeNull());
+    expect(window.location.hash).toBe('');
+    // OD inputs back.
+    expect(screen.queryByTestId('stub-select-both')).not.toBeNull();
   });
 });

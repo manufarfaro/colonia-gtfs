@@ -36,6 +36,29 @@
       "errorOtp": "El servicio de planificación no está disponible. Reintentar en un minuto.",
       "errorInvalid": "Origen y destino tienen que estar dentro de Colonia urbano.",
       "errorEmpty": "No encontramos una opción de viaje para ese trayecto. Probá con un destino cercano."
+    },
+    "stopInfo": {
+      "header": {
+        "queriedAt": "Actualizado {time}",
+        "close": "Cerrar"
+      },
+      "arrival": {
+        "line": "Línea {shortName}",
+        "etaNow": "Ahora",
+        "etaMinutes": "en {minutes} min",
+        "etaAbsolute": "a las {time}",
+        "etaPassed": "Pasó hace {minutes} min",
+        "badgeLive": "En vivo",
+        "badgeScheduled": "(horario)"
+      },
+      "state": {
+        "loading": "Cargando próximas llegadas…",
+        "errorEmpty": "No hay próximos buses para esta parada en este momento.",
+        "errorOtp": "El servicio de información de paradas no está disponible. Reintentar en un minuto.",
+        "errorNotFound": "Esta parada no existe en el feed actual.",
+        "errorNotFoundReturn": "Volver al inicio",
+        "errorNetwork": "No pudimos conectarnos al servicio. Reintentar en un minuto."
+      }
     }
   }
 }

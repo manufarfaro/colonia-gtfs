@@ -2,33 +2,78 @@
   "data": {
     "routes": [
       {
-        "gtfsId": "1:4",
-        "shortName": "4",
-        "longName": "Línea 4 — Real de San Carlos",
+        "gtfsId": "1:999",
+        "shortName": "999",
+        "longName": "Línea 999 — Real de San Carlos",
         "patterns": [
           {
             "directionId": 0,
             "headsign": "Centro",
             "stops": [
-              { "gtfsId": "1:1", "name": "Terminal", "lat": -34.4706, "lon": -57.8471 },
-              { "gtfsId": "1:2", "name": "Plaza Mayor", "lat": -34.4711, "lon": -57.8434 }
+              {
+                "gtfsId": "1:1",
+                "name": "Terminal",
+                "lat": -34.4706,
+                "lon": -57.8471
+              },
+              {
+                "gtfsId": "1:2",
+                "name": "Plaza Mayor",
+                "lat": -34.4711,
+                "lon": -57.8434
+              }
             ],
-            "patternGeometry": { "points": "_p~iF~ps|U_ulLnnqC" },
+            "patternGeometry": {
+              "points": "_p~iF~ps|U_ulLnnqC"
+            },
             "trips": [
-              { "gtfsId": "1:t-100", "stoptimes": [{ "scheduledDeparture": 21600 }] },
-              { "gtfsId": "1:t-101", "stoptimes": [{ "scheduledDeparture": 25200 }] }
+              {
+                "gtfsId": "1:t-100",
+                "stoptimes": [
+                  {
+                    "scheduledDeparture": 21600
+                  }
+                ]
+              },
+              {
+                "gtfsId": "1:t-101",
+                "stoptimes": [
+                  {
+                    "scheduledDeparture": 25200
+                  }
+                ]
+              }
             ]
           },
           {
             "directionId": 1,
             "headsign": "Real de San Carlos",
             "stops": [
-              { "gtfsId": "1:2", "name": "Plaza Mayor", "lat": -34.4711, "lon": -57.8434 },
-              { "gtfsId": "1:1", "name": "Terminal", "lat": -34.4706, "lon": -57.8471 }
+              {
+                "gtfsId": "1:2",
+                "name": "Plaza Mayor",
+                "lat": -34.4711,
+                "lon": -57.8434
+              },
+              {
+                "gtfsId": "1:1",
+                "name": "Terminal",
+                "lat": -34.4706,
+                "lon": -57.8471
+              }
             ],
-            "patternGeometry": { "points": "_ulLnnqC_p~iF~ps|U" },
+            "patternGeometry": {
+              "points": "_ulLnnqC_p~iF~ps|U"
+            },
             "trips": [
-              { "gtfsId": "1:t-200", "stoptimes": [{ "scheduledDeparture": 23400 }] }
+              {
+                "gtfsId": "1:t-200",
+                "stoptimes": [
+                  {
+                    "scheduledDeparture": 23400
+                  }
+                ]
+              }
             ]
           }
         ]

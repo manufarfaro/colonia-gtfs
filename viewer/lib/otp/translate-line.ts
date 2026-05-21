@@ -60,6 +60,8 @@ export interface RestLineResponse {
   meta: { date: string };
 }
 
+import { CANONICAL_SHAPES } from '@/lib/shapes/canonical-shapes';
+
 function secondsToHHMM(secs: number): string {
   const safe = ((secs % 86400) + 86400) % 86400;
   const hh = Math.floor(safe / 3600).toString().padStart(2, '0');
@@ -105,22 +107,32 @@ export function translateLineResponse(
     })
     .sort((a, b) => a.directionId - b.directionId);
 
-  const shape: RestShape[] = Array.from(patternsByDir.entries())
-    .map(([directionId, patterns]) => {
-      const withGeom = patterns.filter(
-        (p): p is OtpPattern & { patternGeometry: { points: string } } =>
-          p.patternGeometry !== null,
-      );
-      if (withGeom.length === 0) return null;
-      const canonical = withGeom.reduce(
-        (longest, p) =>
-          p.patternGeometry.points.length > longest.patternGeometry.points.length ? p : longest,
-        withGeom[0],
-      );
-      return { directionId, points: canonical.patternGeometry.points };
-    })
-    .filter((s): s is RestShape => s !== null)
-    .sort((a, b) => a.directionId - b.directionId);
+  // OTP's `patternGeometry` returns ~one vertex per stop with inter-stop
+  // straight-line jumps that look like criss-cross spaghetti at city
+  // scale. Override with the AVL-derived canonical shapes baked at
+  // build time from `data/shapes.txt`. Fall back to the OTP pattern
+  // geometry if no canonical shape is registered for this route.
+  const canonical = CANONICAL_SHAPES[route.shortName];
+  const shape: RestShape[] = canonical
+    ? canonical.map((s) => ({ directionId: s.directionId, points: s.points }))
+    : Array.from(patternsByDir.entries())
+        .map(([directionId, patterns]) => {
+          const withGeom = patterns.filter(
+            (p): p is OtpPattern & { patternGeometry: { points: string } } =>
+              p.patternGeometry !== null,
+          );
+          if (withGeom.length === 0) return null;
+          const canonicalPattern = withGeom.reduce(
+            (longest, p) =>
+              p.patternGeometry.points.length > longest.patternGeometry.points.length
+                ? p
+                : longest,
+            withGeom[0],
+          );
+          return { directionId, points: canonicalPattern.patternGeometry.points };
+        })
+        .filter((s): s is RestShape => s !== null)
+        .sort((a, b) => a.directionId - b.directionId);
   return {
     line: { id: route.gtfsId, shortName: route.shortName, longName: route.longName },
     shape,

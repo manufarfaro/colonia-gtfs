@@ -4,21 +4,21 @@ import { translateLineResponse } from './translate-line';
 
 describe('translateLineResponse', () => {
   it('R-06 maps the matching route to { line, shape, directions[] }', () => {
-    const result = translateLineResponse(fixture, '4', '2026-05-19');
+    const result = translateLineResponse(fixture, '999', '2026-05-19');
     expect(result.line).not.toBeNull();
-    expect(result.line!.id).toBe('1:4');
-    expect(result.line!.shortName).toBe('4');
-    expect(result.line!.longName).toBe('Línea 4 — Real de San Carlos');
+    expect(result.line!.id).toBe('1:999');
+    expect(result.line!.shortName).toBe('999');
+    expect(result.line!.longName).toBe('Línea 999 — Real de San Carlos');
   });
 
   it('R-06 returns one shape per direction (encoded polyline from patternGeometry)', () => {
-    const result = translateLineResponse(fixture, '4', '2026-05-19');
+    const result = translateLineResponse(fixture, '999', '2026-05-19');
     expect(result.shape.length).toBe(2);
     expect(result.shape[0].points).toBe('_p~iF~ps|U_ulLnnqC');
   });
 
   it('R-06 directions carry stops[] and scheduledDepartures[]', () => {
-    const result = translateLineResponse(fixture, '4', '2026-05-19');
+    const result = translateLineResponse(fixture, '999', '2026-05-19');
     expect(result.directions.length).toBe(2);
     expect(result.directions[0].headsign).toBe('Centro');
     expect(result.directions[0].stops.length).toBe(2);
@@ -27,7 +27,7 @@ describe('translateLineResponse', () => {
   });
 
   it('R-06 surfaces meta.date in Montevideo TZ', () => {
-    const result = translateLineResponse(fixture, '4', '2026-05-19');
+    const result = translateLineResponse(fixture, '999', '2026-05-19');
     expect(result.meta.date).toBe('2026-05-19');
   });
 
@@ -54,9 +54,9 @@ describe('translateLineResponse', () => {
       data: {
         routes: [
           {
-            gtfsId: '1:4',
-            shortName: '4',
-            longName: 'L4',
+            gtfsId: '1:999',
+            shortName: '999',
+            longName: 'L999',
             patterns: [
               {
                 directionId: 0,
@@ -81,7 +81,7 @@ describe('translateLineResponse', () => {
         ],
       },
     };
-    const result = translateLineResponse(multi, '4', '2026-05-19');
+    const result = translateLineResponse(multi, '999', '2026-05-19');
     expect(result.directions).toHaveLength(1);
     expect(result.directions[0].headsign).toBe('Full out');
     expect(result.directions[0].stops).toHaveLength(3);
@@ -90,14 +90,49 @@ describe('translateLineResponse', () => {
     expect(result.shape[0].points).toBe('longer-geometry-string');
   });
 
+  it('R-06 overrides the shape with the CANONICAL_SHAPES entry when one exists for the line', () => {
+    // A minimal route entry for line 3 — the translate function will
+    // see this and substitute the bake-time canonical polylines from
+    // data/shapes.txt, ignoring whatever (if any) patternGeometry is
+    // here.
+    const withLine3 = {
+      data: {
+        routes: [
+          {
+            gtfsId: '1:3',
+            shortName: '3',
+            longName: 'Línea 3',
+            patterns: [
+              {
+                directionId: 0,
+                headsign: 'R. de San Carlos',
+                stops: [{ gtfsId: '1:1', name: 'REAL', lat: 0, lon: 0 }],
+                patternGeometry: { points: 'broken-otp-output' },
+                trips: [],
+              },
+            ],
+          },
+        ],
+      },
+    };
+    const result = translateLineResponse(withLine3, '3', '2026-05-19');
+    expect(result.shape).toHaveLength(2);
+    expect(result.shape[0].directionId).toBe(0);
+    expect(result.shape[1].directionId).toBe(1);
+    // Real canonical line-3 shapes encode 79+75 vertices — much longer
+    // than the placeholder string above.
+    expect(result.shape[0].points.length).toBeGreaterThan(40);
+    expect(result.shape[0].points).not.toBe('broken-otp-output');
+  });
+
   it('R-06 skips patterns without patternGeometry when building shape', () => {
     const noGeom = {
       data: {
         routes: [
           {
-            gtfsId: '1:4',
-            shortName: '4',
-            longName: 'L4',
+            gtfsId: '1:999',
+            shortName: '999',
+            longName: 'L999',
             patterns: [
               {
                 directionId: 0,
@@ -111,7 +146,7 @@ describe('translateLineResponse', () => {
         ],
       },
     };
-    const result = translateLineResponse(noGeom, '4', '2026-05-19');
+    const result = translateLineResponse(noGeom, '999', '2026-05-19');
     expect(result.shape).toEqual([]);
     expect(result.directions.length).toBe(1);
   });

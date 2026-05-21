@@ -6,7 +6,6 @@ import { getLineColor } from '@/lib/colors/lines';
 import {
   closestDepartureIndex,
   minutesSinceMidnightMVD,
-  nextArrivalAtStop,
 } from '@/lib/time/schedule';
 import { computeStopArrivals } from '@/lib/time/stop-arrivals';
 import type { RestLineResponse } from '@/lib/otp/translate-line';
@@ -117,11 +116,12 @@ export function LineScheduleCard({
         </h3>
         <ol aria-label="stops" className="flex flex-col gap-1 text-sm">
           {active.stops.map((stop, i) => {
-            const nextArrival = nextArrivalAtStop(uniqueDepartures, stop.arrivalOffsetSeconds, nowMinutes);
+            const arrivals = computeStopArrivals(uniqueDepartures, stop.arrivalOffsetSeconds, nowMinutes);
+            const pastArrivals = arrivals.filter((a) => a.status === 'past');
+            const futureArrivals = arrivals.filter((a) => a.status !== 'past');
+            const lastPast = pastArrivals[pastArrivals.length - 1] ?? null;
+            const nextUp = futureArrivals[0] ?? null;
             const isExpanded = expandedStopId === stop.id;
-            const arrivalsAtStop = isExpanded
-              ? computeStopArrivals(uniqueDepartures, stop.arrivalOffsetSeconds, nowMinutes)
-              : [];
             return (
               <li
                 key={stop.id}
@@ -137,10 +137,10 @@ export function LineScheduleCard({
                   type="button"
                   onClick={() => setExpandedStopId(isExpanded ? null : stop.id)}
                   aria-expanded={isExpanded}
-                  className="flex w-full items-center gap-2 rounded px-2 py-1 text-left transition-colors hover:bg-muted/50"
+                  className="flex w-full items-start gap-2 rounded px-2 py-1.5 text-left transition-colors hover:bg-muted/50"
                 >
                   <span
-                    className="font-mono text-xs tabular-nums w-6"
+                    className="mt-px font-mono text-xs tabular-nums w-6"
                     style={isExpanded ? { color } : undefined}
                   >
                     {String(i + 1).padStart(2, '0')}
@@ -153,9 +153,22 @@ export function LineScheduleCard({
                   </span>
                   <span
                     data-testid={`line-stop-eta-${stop.id}`}
-                    className="font-mono text-xs tabular-nums text-muted-foreground"
+                    className="flex flex-col items-end gap-0.5 tabular-nums leading-tight"
                   >
-                    {nextArrival ?? '—'}
+                    <span
+                      className="font-mono text-[10px]"
+                      style={{ color: 'var(--color-muted-foreground)', opacity: 0.7 }}
+                    >
+                      {lastPast
+                        ? t('arrivalPastShort', { minutes: Math.abs(lastPast.diffMinutes) })
+                        : '—'}
+                    </span>
+                    <span
+                      className="font-mono text-xs font-semibold"
+                      style={nextUp ? { color } : { color: 'var(--color-muted-foreground)' }}
+                    >
+                      {nextUp ? t('arrivalNextShort', { minutes: nextUp.diffMinutes }) : '—'}
+                    </span>
                   </span>
                 </button>
                 {isExpanded && (
@@ -163,35 +176,33 @@ export function LineScheduleCard({
                     data-testid={`line-stop-detail-${stop.id}`}
                     className="px-3 pb-3 pt-1"
                   >
+                    <h4 className="mb-1 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+                      {t('upcomingHeader')}
+                    </h4>
                     <ol className="flex flex-col gap-0.5 text-xs">
-                      {arrivalsAtStop.map((a, idx) => (
-                        <li
-                          key={`${a.arrivalTime}-${idx}`}
-                          data-testid={`line-stop-arrival-${stop.id}-${a.status}`}
-                          className="flex items-baseline gap-2 tabular-nums"
-                        >
-                          <span
-                            className="font-mono w-12"
-                            style={{
-                              color: a.status === 'past' ? 'var(--color-muted-foreground)' : color,
-                              opacity: a.status === 'past' ? 0.55 : 1,
-                              fontWeight: a.status === 'next' ? 600 : 400,
-                            }}
+                      {futureArrivals.length === 0 ? (
+                        <li className="text-muted-foreground">{t('upcomingEmpty')}</li>
+                      ) : (
+                        futureArrivals.slice(0, 8).map((a, idx) => (
+                          <li
+                            key={`${a.arrivalTime}-${idx}`}
+                            data-testid={`line-stop-arrival-${stop.id}-${a.status}`}
+                            className="flex items-baseline gap-2 tabular-nums"
                           >
-                            {a.arrivalTime}
-                          </span>
-                          <span
-                            className="text-muted-foreground"
-                            style={a.status === 'past' ? { opacity: 0.55 } : undefined}
-                          >
-                            {a.status === 'past'
-                              ? t('arrivalPast', { minutes: Math.abs(a.diffMinutes) })
-                              : a.status === 'next'
+                            <span
+                              className="font-mono w-12"
+                              style={{ color, fontWeight: a.status === 'next' ? 600 : 400 }}
+                            >
+                              {a.arrivalTime}
+                            </span>
+                            <span className="text-muted-foreground">
+                              {a.status === 'next'
                                 ? t('arrivalNext', { minutes: a.diffMinutes })
                                 : t('arrivalFuture', { minutes: a.diffMinutes })}
-                          </span>
-                        </li>
-                      ))}
+                            </span>
+                          </li>
+                        ))
+                      )}
                     </ol>
                   </div>
                 )}

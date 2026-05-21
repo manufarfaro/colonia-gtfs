@@ -78,7 +78,11 @@
         "departuresHeader": "Salidas programadas ({count})",
         "arrivalPast": "Pasó hace {minutes} min",
         "arrivalNext": "Próximo bus en {minutes} min",
-        "arrivalFuture": "En {minutes} min"
+        "arrivalFuture": "En {minutes} min",
+        "arrivalPastShort": "hace {minutes}m",
+        "arrivalNextShort": "en {minutes}m",
+        "upcomingHeader": "Próximos buses",
+        "upcomingEmpty": "Sin más buses hoy"
       },
       "state": {
         "loading": "Cargando información de la línea…",

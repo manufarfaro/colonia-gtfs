@@ -91,15 +91,16 @@ describe('LineScheduleCard', () => {
     expect(screen.getByText('06:00')).toBeInTheDocument();
   });
 
-  it('R-03 tap on a stop expands an inline panel with past/next/future arrival rows', () => {
+  it('R-03 tap on a stop expands an inline panel showing the upcoming arrivals (next + future, no past)', () => {
     render(withProvider(<LineScheduleCard data={twoDirections} />));
     expect(screen.queryByTestId('line-stop-detail-sol-antigua:1')).toBeNull();
     fireEvent.click(screen.getByText('Terminal'));
     expect(screen.queryByTestId('line-stop-detail-sol-antigua:1')).not.toBeNull();
-    // now = 06:25 Montevideo; offset 0 → arrivals at 06:00 (past), 06:30 (next), 07:00 (future).
-    expect(screen.queryByTestId('line-stop-arrival-sol-antigua:1-past')).not.toBeNull();
+    // now = 06:25 Montevideo; offset 0 → next 06:30, future 07:00. Past 06:00 is excluded
+    // from the expanded list (its summary lives in the row's right column instead).
     expect(screen.queryByTestId('line-stop-arrival-sol-antigua:1-next')).not.toBeNull();
     expect(screen.queryByTestId('line-stop-arrival-sol-antigua:1-future')).not.toBeNull();
+    expect(screen.queryByTestId('line-stop-arrival-sol-antigua:1-past')).toBeNull();
   });
 
   it('R-03 externally-controlled selectedStopId expands the matching row', () => {
@@ -135,13 +136,16 @@ describe('LineScheduleCard', () => {
     expect(screen.queryByTestId('line-stop-detail-sol-antigua:1')).toBeNull();
   });
 
-  it('R-03 each stop row shows the next arrival ETA computed from the offset + now', () => {
+  it('R-03 each stop row shows "hace Xm" (last passed) + "en Ym" (next) in the right column', () => {
     render(withProvider(<LineScheduleCard data={twoDirections} />));
-    // First stop: offset 0 → next arrival = next departure ≥ 06:25 = 06:30
-    expect(screen.getByTestId('line-stop-eta-sol-antigua:1').textContent).toBe('06:30');
-    // Second stop: offset 360s = 6 min → arrivals at 06:06, 06:36, 07:06.
-    // First arrival ≥ 06:25 is 06:36.
-    expect(screen.getByTestId('line-stop-eta-sol-antigua:2').textContent).toBe('06:36');
+    // First stop (offset 0): arrivals at 06:00, 06:30, 07:00. now=06:25 → past 06:00 (25 min ago), next 06:30 (in 5).
+    const eta1 = screen.getByTestId('line-stop-eta-sol-antigua:1').textContent ?? '';
+    expect(eta1).toContain('hace 25m');
+    expect(eta1).toContain('en 5m');
+    // Second stop (offset 6 min): arrivals at 06:06, 06:36, 07:06. now=06:25 → past 06:06 (19 ago), next 06:36 (in 11).
+    const eta2 = screen.getByTestId('line-stop-eta-sol-antigua:2').textContent ?? '';
+    expect(eta2).toContain('hace 19m');
+    expect(eta2).toContain('en 11m');
   });
 
   it('R-03 the departure chip closest to now gets the line-color emphasis', () => {
@@ -151,10 +155,21 @@ describe('LineScheduleCard', () => {
     expect(closest.textContent).toBe('06:30');
   });
 
-  it('R-03 renders an em-dash for the stop ETA when all departures are in the past', () => {
+  it('R-03 the right column shows an em-dash for the "next" line when all departures are in the past', () => {
     vi.setSystemTime(new Date('2026-05-22T01:00:00Z')); // 22:00 Montevideo — past all 06:00–07:00 departures
     render(withProvider(<LineScheduleCard data={twoDirections} />));
-    expect(screen.getByTestId('line-stop-eta-sol-antigua:1').textContent).toBe('—');
+    const eta = screen.getByTestId('line-stop-eta-sol-antigua:1').textContent ?? '';
+    // No future arrivals → "en —", but the past summary is still present.
+    expect(eta).toContain('—');
+    expect(eta).toContain('hace');
+  });
+
+  it('R-03 the expanded panel shows the "no more buses today" copy when nothing future remains', () => {
+    vi.setSystemTime(new Date('2026-05-22T01:00:00Z'));
+    render(withProvider(<LineScheduleCard data={twoDirections} />));
+    fireEvent.click(screen.getByText('Terminal'));
+    const detail = screen.getByTestId('line-stop-detail-sol-antigua:1');
+    expect(detail.textContent).toMatch(/Sin más buses hoy/);
   });
 
   it('R-03 deduplicates the departures list (no repeated chips)', () => {

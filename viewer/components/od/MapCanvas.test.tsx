@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import type { RestItinerary } from '@/lib/otp/translate-plan';
 
@@ -41,8 +41,13 @@ vi.mock('./LegPolyline', () => ({
       data-points={leg.legGeometry?.points ?? ''}
     />
   ),
-  StopMarker: ({ stopId, lat, lng }: { stopId: string; lat: number; lng: number }) => (
-    <div data-testid={`marker-${stopId}`} data-lat={lat} data-lng={lng} />
+  StopMarker: ({ stopId, lat, lng, onClick }: { stopId: string; lat: number; lng: number; onClick?: (id: string) => void }) => (
+    <button
+      data-testid={`marker-${stopId}`}
+      data-lat={lat}
+      data-lng={lng}
+      onClick={() => onClick?.(stopId)}
+    />
   ),
 }));
 
@@ -145,5 +150,21 @@ describe('MapCanvas', () => {
     const map = screen.getByTestId('map');
     expect(map.getAttribute('data-bounds')).toBe('');
     expect(map.getAttribute('data-center')).toBe('-34.467,-57.84');
+  });
+
+  it('R-07 forwards onStopClick to each rendered StopMarker', () => {
+    const onStopClick = vi.fn();
+    render(<MapCanvas apiKey="test" itinerary={busItinerary()} onStopClick={onStopClick} />);
+    fireEvent.click(screen.getByTestId('marker-1:2'));
+    expect(onStopClick).toHaveBeenCalledWith('1:2');
+    fireEvent.click(screen.getByTestId('marker-1:42'));
+    expect(onStopClick).toHaveBeenCalledWith('1:42');
+  });
+
+  it('R-07 omits onStopClick gracefully (markers still render)', () => {
+    render(<MapCanvas apiKey="test" itinerary={busItinerary()} />);
+    fireEvent.click(screen.getByTestId('marker-1:2'));
+    // No error; nothing dispatches.
+    expect(screen.getByTestId('marker-1:2')).toBeInTheDocument();
   });
 });

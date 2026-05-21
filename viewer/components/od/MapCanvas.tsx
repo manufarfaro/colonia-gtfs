@@ -28,9 +28,16 @@ function fitBoundsFromItinerary(itinerary: RestItinerary): MapBounds | undefined
 export function MapCanvas({
   apiKey,
   itinerary,
+  onStopClick,
 }: {
   apiKey: string;
   itinerary: RestItinerary | null;
+  /**
+   * Optional click handler — when provided, every `StopMarker` rendered
+   * by the canvas dispatches `onStopClick(stopId)` on tap. The OD shell
+   * wires this to the mode hook's `setMode({type:'stop-info', stopId})`.
+   */
+  onStopClick?: (stopId: string) => void;
 }): React.ReactElement {
   const bounds = itinerary ? fitBoundsFromItinerary(itinerary) : undefined;
 
@@ -57,6 +64,7 @@ export function MapCanvas({
                   stopId={end.stopId!}
                   lat={end.lat}
                   lng={end.lon}
+                  onClick={onStopClick}
                 />
               )),
           )}

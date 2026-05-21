@@ -72,7 +72,9 @@
       },
       "card": {
         "directionLabel": "Sentido",
-        "scheduledDeparturesLabel": "Horarios del día"
+        "scheduledDeparturesLabel": "Horarios del día",
+        "stopsHeader": "Paradas del recorrido ({count})",
+        "departuresHeader": "Salidas programadas ({count})"
       },
       "state": {
         "loading": "Cargando información de la línea…",

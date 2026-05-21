@@ -43,15 +43,35 @@ export function LineRouteLayer({
 
   useEffect(() => {
     if (!map) return;
-    const instances = polylines.map((p) =>
-      new google.maps.Polyline({
+    const color = getLineColor(shortName);
+    const instances = polylines.map((p) => {
+      const isInbound = p.directionId === 1;
+      if (isInbound) {
+        return new google.maps.Polyline({
+          path: p.path,
+          strokeColor: color,
+          strokeOpacity: 0,
+          strokeWeight: 5,
+          icons: [
+            {
+              icon: { path: 'M 0,-1 0,1', strokeOpacity: 0.85, scale: 3 },
+              offset: '0',
+              repeat: '14px',
+            },
+          ],
+          map,
+          zIndex: 2,
+        });
+      }
+      return new google.maps.Polyline({
         path: p.path,
-        strokeColor: getLineColor(shortName),
-        strokeOpacity: 1,
+        strokeColor: color,
+        strokeOpacity: 0.95,
         strokeWeight: 5,
         map,
-      }),
-    );
+        zIndex: 3,
+      });
+    });
     return () => {
       instances.forEach((pl) => pl.setMap(null));
     };

@@ -32,6 +32,24 @@ vi.mock('@vis.gl/react-google-maps', () => ({
   ),
 }));
 
+vi.mock('@/components/line-schedule/LineRouteLayer', () => ({
+  LineRouteLayer: ({
+    data,
+    vehicles,
+  }: {
+    data: { line: { shortName: string } | null; directions: Array<{ stops: unknown[] }>; shape: Array<{ points: string }> };
+    vehicles: Array<{ id: string }>;
+  }) => (
+    <div
+      data-testid="stub-line-layer"
+      data-shortname={data.line?.shortName ?? ''}
+      data-directions={data.directions.length}
+      data-shape={data.shape.length}
+      data-vehicles={vehicles.length}
+    />
+  ),
+}));
+
 vi.mock('./LegPolyline', () => ({
   LegPolyline: ({ leg }: { leg: RestItinerary['legs'][number] }) => (
     <div
@@ -166,5 +184,52 @@ describe('MapCanvas', () => {
     fireEvent.click(screen.getByTestId('marker-1:2'));
     // No error; nothing dispatches.
     expect(screen.getByTestId('marker-1:2')).toBeInTheDocument();
+  });
+
+  it('R-02 lineLayer wins over itinerary (modes are mutually exclusive)', () => {
+    const lineLayer = {
+      data: {
+        line: { id: '1:4', shortName: '4', longName: 'L4' },
+        shape: [{ directionId: 0, points: '_p~iF~ps|U' }],
+        directions: [{ directionId: 0, headsign: 'Centro', stops: [], scheduledDepartures: [] }],
+        meta: { date: '2026-05-20' },
+      },
+      vehicles: [{ id: 'v-1', label: 'L4', routeId: '4', directionId: 0, lat: 0, lon: 0, bearing: null, timestamp: null }],
+    };
+    render(<MapCanvas apiKey="test" itinerary={busItinerary()} lineLayer={lineLayer} />);
+    // Line layer rendered, OD polylines NOT rendered.
+    expect(screen.getByTestId('stub-line-layer').getAttribute('data-shortname')).toBe('4');
+    expect(screen.queryAllByTestId('leg-polyline')).toHaveLength(0);
+  });
+
+  it('R-02 lineLayer bounds the map to the union of its polylines', () => {
+    const lineLayer = {
+      data: {
+        line: { id: '1:4', shortName: '4', longName: 'L4' },
+        shape: [{ directionId: 0, points: '_p~iF~ps|U' }],
+        directions: [],
+        meta: { date: '2026-05-20' },
+      },
+      vehicles: [],
+    };
+    render(<MapCanvas apiKey="test" itinerary={null} lineLayer={lineLayer} />);
+    const bounds = screen.getByTestId('map').getAttribute('data-bounds');
+    expect(bounds).toBeTruthy();
+  });
+
+  it('R-02 lineLayer without shape falls back to default center', () => {
+    const lineLayer = {
+      data: {
+        line: { id: '1:4', shortName: '4', longName: 'L4' },
+        shape: [],
+        directions: [],
+        meta: { date: '2026-05-20' },
+      },
+      vehicles: [],
+    };
+    render(<MapCanvas apiKey="test" itinerary={null} lineLayer={lineLayer} />);
+    const map = screen.getByTestId('map');
+    expect(map.getAttribute('data-bounds')).toBe('');
+    expect(map.getAttribute('data-center')).toBe('-34.467,-57.84');
   });
 });

@@ -4,6 +4,7 @@ import { getLocale, getMessages } from 'next-intl/server';
 import { Header } from '@/components/chrome/Header';
 import { DisclaimerBanner } from '@/components/chrome/DisclaimerBanner';
 import { ThemeProvider } from '@/components/theme/ThemeProvider';
+import { QueryProvider } from '@/components/providers/QueryProvider';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -26,11 +27,13 @@ export default async function RootLayout({
     <html lang={locale} suppressHydrationWarning>
       <body className="min-h-screen flex flex-col">
         <ThemeProvider>
-          <NextIntlClientProvider locale={locale} messages={messages}>
-            <Header />
-            <main className="flex-1">{children}</main>
-            <DisclaimerBanner />
-          </NextIntlClientProvider>
+          <QueryProvider>
+            <NextIntlClientProvider locale={locale} messages={messages}>
+              <Header />
+              <main className="flex-1">{children}</main>
+              <DisclaimerBanner />
+            </NextIntlClientProvider>
+          </QueryProvider>
         </ThemeProvider>
       </body>
     </html>

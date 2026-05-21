@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 
 const POLL_INTERVAL_MS = 30_000;
 
@@ -25,71 +25,38 @@ export type ArrivalsState =
   | { state: 'success'; data: ArrivalsResponse; error: null }
   | { state: 'error'; data: null; error: ArrivalsError };
 
+class ArrivalsQueryError extends Error {
+  constructor(public readonly tag: ArrivalsError) {
+    super(tag);
+    this.name = 'ArrivalsQueryError';
+  }
+}
+
 export function useArrivalsQuery(stopId: string | null): ArrivalsState {
-  const [snapshot, setSnapshot] = useState<ArrivalsState>({ state: 'idle', data: null, error: null });
-  const abortRef = useRef<AbortController | null>(null);
-
-  useEffect(() => {
-    if (stopId === null) {
-      abortRef.current?.abort();
-      abortRef.current = null;
-      setSnapshot({ state: 'idle', data: null, error: null });
-      return;
-    }
-
-    let cancelled = false;
-
-    async function poll(): Promise<void> {
-      abortRef.current?.abort();
-      const controller = new AbortController();
-      abortRef.current = controller;
-      // Race guard: cleanup ran before the effect re-entered. Defensive.
-      /* v8 ignore next 3 */
-      if (!cancelled) {
-        setSnapshot((prev) => (prev.state === 'idle' ? { state: 'loading', data: null, error: null } : prev));
-      }
+  const enabled = stopId !== null;
+  const query = useQuery<ArrivalsResponse, ArrivalsQueryError>({
+    queryKey: ['arrivals', stopId],
+    enabled,
+    refetchInterval: POLL_INTERVAL_MS,
+    queryFn: async ({ signal }) => {
+      let res: Response;
       try {
-        const res = await fetch(`/api/stops/${encodeURIComponent(stopId!)}/arrivals?limit=10`, {
-          signal: controller.signal,
-        });
-        // Post-resolution abort race — practically unreachable in tests.
-        /* v8 ignore next */
-        if (cancelled || controller.signal.aborted) return;
-        if (res.status === 404) {
-          setSnapshot({ state: 'error', data: null, error: 'not_found' });
-          return;
-        }
-        if (res.status === 502) {
-          setSnapshot({ state: 'error', data: null, error: 'otp_unavailable' });
-          return;
-        }
-        const body = (await res.json()) as ArrivalsResponse;
-        /* v8 ignore next */
-        if (cancelled || controller.signal.aborted) return;
-        if (!body.arrivals || body.arrivals.length === 0) {
-          setSnapshot({ state: 'error', data: null, error: 'empty' });
-          return;
-        }
-        setSnapshot({ state: 'success', data: body, error: null });
-      } catch (err) {
-        if ((err as { name?: string })?.name === 'AbortError') return;
-        // Race guard: stale fetch after cleanup. Practically unreachable.
-        /* v8 ignore next */
-        if (cancelled) return;
-        setSnapshot({ state: 'error', data: null, error: 'network' });
+        res = await fetch(`/api/stops/${encodeURIComponent(stopId!)}/arrivals?limit=10`, { signal });
+      } catch {
+        throw new ArrivalsQueryError('network');
       }
-    }
+      if (res.status === 404) throw new ArrivalsQueryError('not_found');
+      if (res.status === 502) throw new ArrivalsQueryError('otp_unavailable');
+      const body = (await res.json()) as ArrivalsResponse;
+      if (!body.arrivals || body.arrivals.length === 0) {
+        throw new ArrivalsQueryError('empty');
+      }
+      return body;
+    },
+  });
 
-    setSnapshot({ state: 'loading', data: null, error: null });
-    void poll();
-    const interval = setInterval(() => void poll(), POLL_INTERVAL_MS);
-
-    return () => {
-      cancelled = true;
-      clearInterval(interval);
-      abortRef.current?.abort();
-    };
-  }, [stopId]);
-
-  return snapshot;
+  if (!enabled) return { state: 'idle', data: null, error: null };
+  if (query.isPending) return { state: 'loading', data: null, error: null };
+  if (query.isError) return { state: 'error', data: null, error: query.error.tag };
+  return { state: 'success', data: query.data!, error: null };
 }

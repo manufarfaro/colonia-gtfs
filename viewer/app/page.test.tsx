@@ -2,6 +2,7 @@ import { render, screen } from '@testing-library/react';
 import { NextIntlClientProvider } from 'next-intl';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import esMessages from '@/messages/es.json';
+import { makeQueryWrapper } from '@/test/query-test-wrapper';
 
 // Stub all OD primitives so we don't need to mock the Maps SDK here —
 // this suite is purely about the server component's wiring of the env
@@ -30,10 +31,13 @@ afterEach(() => {
 async function renderPage(): Promise<void> {
   vi.resetModules();
   const HomePage = (await import('./page')).default;
+  const { Wrapper } = makeQueryWrapper();
   render(
-    <NextIntlClientProvider locale="es" messages={esMessages}>
-      {HomePage()}
-    </NextIntlClientProvider>,
+    <Wrapper>
+      <NextIntlClientProvider locale="es" messages={esMessages}>
+        {HomePage()}
+      </NextIntlClientProvider>
+    </Wrapper>,
   );
 }
 

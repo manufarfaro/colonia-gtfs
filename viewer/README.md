@@ -12,9 +12,11 @@ Single Next.js 16 app (App Router) que combina dos responsabilidades del stack v
 - **Next.js 16.x** (App Router, standalone output) + **React 19** + **TypeScript**.
 - **shadcn/ui** + **Tailwind CSS v4** (CSS-first config, base color `neutral`).
 - **next-intl** para i18n type-safe (locales declarados en `i18n/routing.ts`; `es` único en v0).
+- **next-themes** para el toggle light/dark con `prefers-color-scheme` + persistence.
 - **axios** como cliente HTTP de OTP y del bridge.
 - **gtfs-realtime-bindings** para decodificar el feed protobuf del bridge.
 - **zod** para validación de bodies en route handlers.
+- **@vis.gl/react-google-maps** como wrapper React del Google Maps JS API — usado por el modo O→D (canvas + Places Autocomplete + decode de encoded polylines).
 - **vitest** + **@testing-library/react** + **happy-dom** para tests (TDD-discipline; ver `test/`).
 
 Node pin: **26.x** (alineado con bridge). `engines.node` en `package.json`.
@@ -51,8 +53,8 @@ npm run start:dev
 
 | Route | Método | Propósito |
 |---|---|---|
-| `/` | GET | Landing — chrome persistente (header + disclaimer banner) + placeholder de la UI. |
-| `/api/plan` | POST | Itinerario multi-modal. Body Zod: `{from:{lat,lon}, to:{lat,lon}, date, time}`. Traduce a GraphQL contra OTP. |
+| `/` | GET | Modo O→D — mapa Google Maps full-bleed, search bar con Places Autocomplete biased a Colonia, card del itinerario en bottom sheet. Si `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` falta, render del banner "Falta configurar la API key" en lugar del mapa (chrome + endpoints siguen funcionando). |
+| `/api/plan` | POST | Itinerario multi-modal. Body Zod: `{from:{lat,lon}, to:{lat,lon}, date, time}`. Traduce a GraphQL contra OTP. Cada leg devuelve `legGeometry: { points: string } | null` (Google encoded polyline) y cada itinerary devuelve `fare: { regular: { cents, currency } } | null` (null → fallback "Consultar al chofer" en cliente). |
 | `/api/stops/:stopId/arrivals` | GET | Próximas llegadas. Query `?limit=10` (clamp 1..50). Mezcla scheduled + realtime de OTP. |
 | `/api/lines/:lineId` | GET | Datos completos de una línea (shape + directions + stops + scheduledDepartures). Cache TTL 60 s por `(lineId, date)`. |
 | `/api/lines/:lineId/vehicles` | GET | Vehículos en vivo de la línea, decodificados del `vehicle-positions.pb` del bridge. Sin cache. |
@@ -78,6 +80,24 @@ Una sola locale en v0 (`es`), pero el cableado de `next-intl` ya está armado pa
 - `messages/es.json` tiene las claves seed (`chrome.*`, `landing.*`). Toda string user-facing pasa por `t("...")` desde día uno — agregar idiomas no requiere refactor.
 
 Los toponímicos del operador (nombres de paradas, headsigns) **no se traducen** — viven en `data/*.txt` siempre en español.
+
+## Modo O→D (la pantalla principal)
+
+El root route (`app/page.tsx`) sirve el modo O→D: el turista escribe origen + destino con Places Autocomplete (sesgado a Colonia urbano vía bbox y `country: 'uy'`), el cliente envía `POST /api/plan` con `date`/`time` anclados a `America/Montevideo` (+1 min de margen) y el primer itinerary se renderiza sobre el mapa de Google con polylines coloreadas por línea (`3=rojo`, `4=azul`, `5=verde`, `8=ámbar`, walk gris dashed) + markers en los stops de las bus legs. La card en bottom sheet muestra duración total, distancia caminada, lista de legs (caminar / línea bus + destino) y la tarifa.
+
+Estados explícitos (todos con copy en `messages/es.json` namespace `od.*`): `idle` (hint de elegir origen/destino) · `loading` (skeleton) · `success` (itinerary + card) · `error.otp_unavailable` · `error.invalid_request` · `error.empty` (sin opciones).
+
+### Google Maps API key
+
+El modo O→D necesita una key de Google Cloud expuesta vía `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` (Next.js la bundlea al cliente por el prefijo). La seguridad **no** está en ocultar la key — está en una **restricción por HTTP referrer** configurada en la GCP Console:
+
+1. Crear o reusar un GCP project, habilitar Maps JavaScript API + Places API.
+2. Generar una API key.
+3. En la sección "Application restrictions" de la key: elegir "HTTP referrers (websites)" y agregar el dominio del demo + `http://localhost:8080/*` para dev.
+4. En "API restrictions": permitir solo Maps JavaScript API + Places API.
+5. Copiar la key al `.env` (gitignored) como `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=...`.
+
+Sin la key, el modo O→D renderiza un banner "Falta configurar la API key" en lugar del mapa. Todos los endpoints + la chrome siguen funcionando.
 
 ## CORS
 

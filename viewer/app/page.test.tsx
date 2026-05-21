@@ -1,21 +1,54 @@
-import { render } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
+import { render, screen } from '@testing-library/react';
+import { NextIntlClientProvider } from 'next-intl';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import esMessages from '@/messages/es.json';
 
-// next-intl/server reads from a request-scoped context that vitest doesn't
-// run inside. Mock the translator factory to return a stub `t(key)` that
-// echoes its argument — the assertion below verifies the keys hit.
-vi.mock('next-intl/server', () => ({
-  getTranslations: vi.fn().mockImplementation(async (ns: string) => (key: string) => `${ns}.${key}`),
+// Stub all OD primitives so we don't need to mock the Maps SDK here —
+// this suite is purely about the server component's wiring of the env
+// var into the client shell.
+vi.mock('@/components/od/OriginDestinationInputs', () => ({
+  OriginDestinationInputs: () => <div data-testid="stub-inputs" />,
+}));
+vi.mock('@/components/od/MapCanvas', () => ({
+  MapCanvas: ({ apiKey }: { apiKey: string }) => (
+    <div data-testid="stub-map" data-apikey={apiKey} />
+  ),
+}));
+vi.mock('@/components/od/ItineraryCard', () => ({
+  ItineraryCard: () => <div data-testid="stub-card" />,
 }));
 
-import HomePage from './page';
+const previous = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+beforeEach(() => {
+  delete process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+});
+afterEach(() => {
+  if (previous === undefined) delete process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+  else process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY = previous;
+});
+
+async function renderPage(): Promise<void> {
+  vi.resetModules();
+  const HomePage = (await import('./page')).default;
+  render(
+    <NextIntlClientProvider locale="es" messages={esMessages}>
+      {HomePage()}
+    </NextIntlClientProvider>,
+  );
+}
 
 describe('app/page.tsx', () => {
-  it('R-01 renders the landing title and subtitle from the i18n catalog', async () => {
-    const element = await HomePage();
-    const { container } = render(element);
-    expect(container.textContent).toContain('landing.title');
-    expect(container.textContent).toContain('landing.subtitle');
-    expect(container.querySelector('h1')).not.toBeNull();
+  it('R-01 renders the OD shell with map when NEXT_PUBLIC_GOOGLE_MAPS_API_KEY is set', async () => {
+    process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY = 'prod-key';
+    await renderPage();
+    expect(screen.getByTestId('od-shell')).toBeInTheDocument();
+    expect(screen.getByTestId('stub-map').getAttribute('data-apikey')).toBe('prod-key');
+    expect(screen.queryByTestId('od-api-key-missing')).not.toBeInTheDocument();
+  });
+
+  it('R-02 renders the API-key-missing banner when the env var is unset', async () => {
+    await renderPage();
+    expect(screen.getByTestId('od-api-key-missing')).toBeInTheDocument();
+    expect(screen.queryByTestId('stub-map')).not.toBeInTheDocument();
   });
 });

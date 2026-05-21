@@ -52,6 +52,14 @@ export const LINE_QUERY = `
   }
 `;
 
+// Note: OTP 2.10's GTFS GraphQL replaced the legacy `Itinerary.fare { regular ... }`
+// shape with FareProducts on legs. The viewer's REST contract keeps
+// `itineraries[i].fare` as an optional (RestFare | null) and the
+// translator emits `null` when OTP returns nothing — which triggers the
+// PRD §9 plan-B fallback "Consultar al chofer" in the card. Until the
+// FareProducts mapping is implemented in a follow-up, we don't request
+// the field from OTP (it would fail GraphQL validation and zero the
+// whole plan response).
 export const PLAN_QUERY = `
   query Plan($from: InputCoordinates!, $to: InputCoordinates!, $date: String!, $time: String!) {
     plan(from: $from, to: $to, date: $date, time: $time, transportModes: [{mode: TRANSIT}, {mode: WALK}]) {
@@ -67,6 +75,7 @@ export const PLAN_QUERY = `
           realTime
           realtimeState
           route { shortName longName }
+          legGeometry { points }
           from { name lat lon stop { gtfsId } }
           to { name lat lon stop { gtfsId } }
         }

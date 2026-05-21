@@ -284,7 +284,7 @@ Tras la aprobación de este PRD:
    | `otp-deployment` | Container de OTP, `router-config.json`, updaters apuntando al bridge, mounts |
    | `bridge-gtfs-rt` | Parseo del AVL XML (ISO-8859-1), matching markers → trip_id (Q1: `srv` vs sintético), emisión `.pb`, healthz, backoff |
    | `viewer-shell-and-api` | Una sola Next.js app (App Router) que combina **viewer shell + i18n + API routes**: stack del viewer (Q4), i18n infra (Q5), chrome persistente, disclaimer banner, language toggle preparado, endpoints `/api/plan`, `/api/stops/:id/arrivals`, `/api/lines/:id`, `/api/lines/:id/vehicles`, stubs `/api/tickets` y `/api/pois`, healthz aggregate, CORS por env. Reemplaza al pair `bff-api-and-routes` + `viewer-shell-and-i18n` del plan original |
-   | `viewer-od-mode` | Modo O→D con Places autocomplete, render de itinerario, card de tarifa |
+   | `viewer-od-mode` | Modo O→D con Places autocomplete (bbox a Colonia + UY-only), render de itinerario sobre Google Maps canvas (polylines coloreadas por línea, markers en stops del bus leg), card en bottom sheet con duración + walking distance + legs + tarifa (con fallback "Consultar al chofer" cuando `fare_attributes.txt` no la declara). Extiende `viewer-shell-and-api` `/api/plan` con `legGeometry` (Google encoded polyline) + `fare` opcionales. Stack añadido: `@vis.gl/react-google-maps` + `next-themes` (theming light/dark). API key vía `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` con HTTP referrer restriction en GCP |
    | `viewer-stop-info-mode` | Bottom sheet con próximos buses, distinción live vs programado |
    | `viewer-line-schedule-mode` | Vista de línea con trazado, paradas, vehículos live |
    | `deployment-and-disclaimers` | Docker compose final, HTTPS, dominio del demo, contenido exacto del disclaimer |

@@ -62,12 +62,12 @@ export function LineRouteLayer({
         path: p.path,
         strokeColor: color,
         strokeOpacity: 0,
-        strokeWeight: 5,
+        strokeWeight: 4,
         icons: [
           {
-            icon: { path: 'M 0,-1 0,1', strokeOpacity: 0.7, scale: 3 },
+            icon: { path: 'M 0,-1 0,1', strokeOpacity: 0.35, scale: 3 },
             offset: '0',
-            repeat: '14px',
+            repeat: '16px',
           },
         ],
         map,

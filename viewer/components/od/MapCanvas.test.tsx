@@ -52,6 +52,12 @@ vi.mock('@/components/line-schedule/LineRouteLayer', () => ({
   ),
 }));
 
+vi.mock('@/components/od/OdItineraryVehicles', () => ({
+  OdItineraryVehicles: ({ shortName }: { shortName: string }) => (
+    <div data-testid={`stub-od-vehicles-${shortName}`} />
+  ),
+}));
+
 vi.mock('./LegPolyline', () => ({
   LegPolyline: ({ leg }: { leg: RestItinerary['legs'][number] }) => (
     <div

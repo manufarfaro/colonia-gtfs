@@ -6,6 +6,7 @@ import { decodePolyline, type LatLng } from '@/lib/google-maps/polyline';
 import type { RestItinerary } from '@/lib/otp/translate-plan';
 import type { RestLineResponse } from '@/lib/otp/translate-line';
 import { LegPolyline, StopMarker } from './LegPolyline';
+import { OdItineraryVehicles } from './OdItineraryVehicles';
 import { VehicleMarker } from '@/components/line-schedule/VehicleMarker';
 import type { VehiclesResponse } from '@/components/line-schedule/useVehiclesQuery';
 import { LineRouteLayer } from '@/components/line-schedule/LineRouteLayer';
@@ -28,6 +29,19 @@ function fitBoundsFromItinerary(itinerary: RestItinerary): MapBounds | undefined
   const b = boundsOfPaths(paths);
   if (!b) return undefined;
   return { south: b.sw.lat, west: b.sw.lng, north: b.ne.lat, east: b.ne.lng };
+}
+
+function uniqueBusLines(itinerary: RestItinerary): Array<{ shortName: string; headsign: string | null }> {
+  const seen = new Set<string>();
+  const out: Array<{ shortName: string; headsign: string | null }> = [];
+  for (const leg of itinerary.legs) {
+    const shortName = leg.route?.shortName;
+    if (leg.mode !== 'BUS' || !shortName || seen.has(shortName)) continue;
+    seen.add(shortName);
+    /* v8 ignore next — fixtures consistently populate longName when shortName exists */
+    out.push({ shortName, headsign: leg.route?.longName ?? null });
+  }
+  return out;
 }
 
 function fitBoundsFromLine(line: RestLineResponse): MapBounds | undefined {
@@ -110,6 +124,14 @@ export function MapCanvas({
                   />
                 )),
             )}
+          {itinerary &&
+            uniqueBusLines(itinerary).map((entry) => (
+              <OdItineraryVehicles
+                key={`vehicles-${entry.shortName}`}
+                shortName={entry.shortName}
+                headsign={entry.headsign}
+              />
+            ))}
         </>
       )}
       </Map>

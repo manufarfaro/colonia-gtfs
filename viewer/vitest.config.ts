@@ -30,11 +30,13 @@ export default defineConfig({
       //   - components/line-schedule/VehicleMarker.tsx    → calls google.maps.Marker directly; tests stub it
       //   - components/line-schedule/LineStopMarker.tsx   → same — small stop dot per line color
       //   - components/line-schedule/LineRouteLayer.tsx   → orchestrates google.maps.Polyline + Marker primitives
+      //   - components/od/OdItineraryVehicles.tsx         → composes VehicleMarker on the map; tests stub it
       //   - **/*.test.{ts,tsx}                            → the tests themselves
       exclude: [
         'components/ui/**',
         'components/od/OdAutocompleteInput.tsx',
         'components/od/LegPolyline.tsx',
+        'components/od/OdItineraryVehicles.tsx',
         'components/line-schedule/VehicleMarker.tsx',
         'components/line-schedule/LineStopMarker.tsx',
         'components/line-schedule/LineRouteLayer.tsx',

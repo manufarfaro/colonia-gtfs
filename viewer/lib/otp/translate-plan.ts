@@ -24,6 +24,16 @@ export interface RestLeg {
   endTime: string;
   realtimeState: RealtimeState;
   route: RestRoute | null;
+  /** OTP-provided trip direction (0 or 1) for BUS legs. `null` for
+   *  walk legs and when OTP omits the field. Used to filter realtime
+   *  vehicles on the map to those doing the SAME direction as the
+   *  rider's bus segment — line 4 is a loop, the OUTBOUND bus is on
+   *  the OPPOSITE side of the city from the INBOUND one. */
+  directionId: number | null;
+  /** Headsign of the specific trip the leg uses (e.g., "Centro (x Los
+   *  Nogales)"). Mostly informational; the directionId is what we
+   *  filter on. */
+  tripHeadsign: string | null;
   // Google encoded polyline string. `null` when OTP did not compute the
   // geometry for this leg (the OD-mode client skips the polyline render
   // for that leg, the leg row still appears in the itinerary card).
@@ -64,6 +74,7 @@ interface OtpPlanResponse {
           endTime: string;
           realtimeState: string | null;
           route: { shortName: string; longName: string } | null;
+          trip?: { directionId?: string | number | null; tripHeadsign?: string | null } | null;
           legGeometry?: { points: string } | null;
           from: { name: string; lat: number; lon: number; stop: { gtfsId: string } | null };
           to: { name: string; lat: number; lon: number; stop: { gtfsId: string } | null };
@@ -71,6 +82,12 @@ interface OtpPlanResponse {
       }>;
     };
   };
+}
+
+function parseDirectionId(raw: string | number | null | undefined): number | null {
+  if (raw === null || raw === undefined) return null;
+  const n = typeof raw === 'number' ? raw : Number.parseInt(raw, 10);
+  return Number.isFinite(n) ? n : null;
 }
 
 function mapEnd(e: {
@@ -102,6 +119,8 @@ export function translatePlanResponse(raw: OtpPlanResponse): RestPlanResponse {
         endTime: leg.endTime,
         realtimeState: leg.realtimeState as RealtimeState,
         route: leg.route ? { shortName: leg.route.shortName, longName: leg.route.longName } : null,
+        directionId: parseDirectionId(leg.trip?.directionId),
+        tripHeadsign: leg.trip?.tripHeadsign ?? null,
         legGeometry: leg.legGeometry ?? null,
         from: mapEnd(leg.from),
         to: mapEnd(leg.to),

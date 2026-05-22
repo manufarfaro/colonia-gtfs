@@ -97,6 +97,7 @@ export const PLAN_QUERY = `
           realTime
           realtimeState
           route { shortName longName }
+          trip { directionId tripHeadsign }
           legGeometry { points }
           from { name lat lon stop { gtfsId } }
           to { name lat lon stop { gtfsId } }

@@ -62,4 +62,84 @@ describe('translatePlanResponse', () => {
     expect(out.itineraries[0].fare).toBeNull();
     expect(out.itineraries[1].fare).toEqual({ regular: { cents: 7500, currency: 'UYU' } });
   });
+
+  it('R-04 leg carries directionId + tripHeadsign from OTP trip block', () => {
+    const raw = {
+      data: {
+        plan: {
+          itineraries: [
+            {
+              duration: 100,
+              walkDistance: 50,
+              legs: [
+                {
+                  mode: 'BUS',
+                  duration: 100,
+                  distance: 1000,
+                  startTime: '2026-01-05T08:00:00Z',
+                  endTime: '2026-01-05T08:10:00Z',
+                  realtimeState: 'SCHEDULED',
+                  route: { shortName: '4', longName: 'L4' },
+                  trip: { directionId: '1', tripHeadsign: 'Centro' },
+                  legGeometry: { points: 'abc' },
+                  from: { name: 'A', lat: 0, lon: 0, stop: null },
+                  to: { name: 'B', lat: 0, lon: 0, stop: null },
+                },
+                {
+                  mode: 'BUS',
+                  duration: 100,
+                  distance: 1000,
+                  startTime: '2026-01-05T08:00:00Z',
+                  endTime: '2026-01-05T08:10:00Z',
+                  realtimeState: 'SCHEDULED',
+                  route: { shortName: '5', longName: 'L5' },
+                  // numeric direction; tripHeadsign omitted
+                  trip: { directionId: 0 },
+                  legGeometry: null,
+                  from: { name: 'A', lat: 0, lon: 0, stop: null },
+                  to: { name: 'B', lat: 0, lon: 0, stop: null },
+                },
+                {
+                  mode: 'WALK',
+                  duration: 60,
+                  distance: 100,
+                  startTime: '2026-01-05T08:00:00Z',
+                  endTime: '2026-01-05T08:01:00Z',
+                  realtimeState: null,
+                  route: null,
+                  // walk legs have no trip
+                  trip: null,
+                  legGeometry: null,
+                  from: { name: 'A', lat: 0, lon: 0, stop: null },
+                  to: { name: 'B', lat: 0, lon: 0, stop: null },
+                },
+                {
+                  mode: 'BUS',
+                  duration: 100,
+                  distance: 1000,
+                  startTime: '2026-01-05T08:00:00Z',
+                  endTime: '2026-01-05T08:10:00Z',
+                  realtimeState: 'SCHEDULED',
+                  route: { shortName: '6', longName: 'L6' },
+                  // OTP returned a non-numeric directionId (defensive)
+                  trip: { directionId: 'NaN' },
+                  legGeometry: null,
+                  from: { name: 'A', lat: 0, lon: 0, stop: null },
+                  to: { name: 'B', lat: 0, lon: 0, stop: null },
+                },
+              ],
+            },
+          ],
+        },
+      },
+    };
+    const out = translatePlanResponse(raw);
+    expect(out.itineraries[0].legs[0].directionId).toBe(1);
+    expect(out.itineraries[0].legs[0].tripHeadsign).toBe('Centro');
+    expect(out.itineraries[0].legs[1].directionId).toBe(0);
+    expect(out.itineraries[0].legs[1].tripHeadsign).toBeNull();
+    expect(out.itineraries[0].legs[2].directionId).toBeNull();
+    expect(out.itineraries[0].legs[2].tripHeadsign).toBeNull();
+    expect(out.itineraries[0].legs[3].directionId).toBeNull();
+  });
 });

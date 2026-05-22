@@ -32,15 +32,26 @@ function fitBoundsFromItinerary(itinerary: RestItinerary): MapBounds | undefined
   return { south: b.sw.lat, west: b.sw.lng, north: b.ne.lat, east: b.ne.lng };
 }
 
-function uniqueBusLines(itinerary: RestItinerary): Array<{ shortName: string; headsign: string | null }> {
+function uniqueBusLines(
+  itinerary: RestItinerary,
+): Array<{ shortName: string; directionId: number | null; headsign: string | null }> {
   const seen = new Set<string>();
-  const out: Array<{ shortName: string; headsign: string | null }> = [];
+  const out: Array<{ shortName: string; directionId: number | null; headsign: string | null }> = [];
   for (const leg of itinerary.legs) {
     const shortName = leg.route?.shortName;
-    if (leg.mode !== 'BUS' || !shortName || seen.has(shortName)) continue;
-    seen.add(shortName);
-    /* v8 ignore next — fixtures consistently populate longName when shortName exists */
-    out.push({ shortName, headsign: leg.route?.longName ?? null });
+    if (leg.mode !== 'BUS' || !shortName) continue;
+    // Key on (line, direction) — line 4 is a loop, the same shortName
+    // can appear in both directions; we don't want to render the
+    // opposite-direction bus on top of the user's leg.
+    const key = `${shortName}/${leg.directionId ?? '?'}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push({
+      shortName,
+      directionId: leg.directionId,
+      /* v8 ignore next — fixtures consistently populate longName when shortName exists */
+      headsign: leg.tripHeadsign ?? leg.route?.longName ?? null,
+    });
   }
   return out;
 }
@@ -131,8 +142,9 @@ export function MapCanvas({
           {itinerary &&
             uniqueBusLines(itinerary).map((entry) => (
               <OdItineraryVehicles
-                key={`vehicles-${entry.shortName}`}
+                key={`vehicles-${entry.shortName}-${entry.directionId ?? 'any'}`}
                 shortName={entry.shortName}
+                directionId={entry.directionId}
                 headsign={entry.headsign}
               />
             ))}

@@ -22,6 +22,10 @@ interface Props {
   lng: number;
   bearing: number | null;
   timestamp: number | null;
+  /** When true, render at reduced opacity — used in OD mode for buses
+   *  going the opposite direction of the rider's leg (still on the
+   *  line, but irrelevant to this specific trip). */
+  dimmed?: boolean;
 }
 
 function formatTimestamp(ts: number | null): string {
@@ -83,7 +87,7 @@ function easeInOutQuad(t: number): number {
 }
 
 export function VehicleMarker(props: Props): React.ReactElement | null {
-  const { shortName, label, lat, lng, bearing } = props;
+  const { shortName, label, lat, lng, bearing, dimmed } = props;
   const map = useMap();
   const markerRef = useRef<google.maps.Marker | null>(null);
   const infoWindowRef = useRef<google.maps.InfoWindow | null>(null);
@@ -102,7 +106,8 @@ export function VehicleMarker(props: Props): React.ReactElement | null {
         scaledSize: new google.maps.Size(32, 32),
         anchor: new google.maps.Point(16, 16),
       },
-      zIndex: 10,
+      opacity: dimmed ? 0.4 : 1,
+      zIndex: dimmed ? 5 : 10,
     });
     const infoWindow = new google.maps.InfoWindow({ disableAutoPan: false });
     const listener = marker.addListener('click', () => {
@@ -126,6 +131,8 @@ export function VehicleMarker(props: Props): React.ReactElement | null {
     const marker = markerRef.current;
     if (!marker) return;
     marker.setTitle(bearing !== null ? `${label ?? shortName} · ${bearing}°` : (label ?? shortName));
+    marker.setOpacity(dimmed ? 0.4 : 1);
+    marker.setZIndex(dimmed ? 5 : 10);
     const current = marker.getPosition();
     const from = current
       ? { lat: current.lat(), lng: current.lng() }
@@ -150,7 +157,7 @@ export function VehicleMarker(props: Props): React.ReactElement | null {
       }
     };
     animationRef.current = requestAnimationFrame(step);
-  }, [lat, lng, label, bearing, shortName]);
+  }, [lat, lng, label, bearing, shortName, dimmed]);
 
   return null;
 }

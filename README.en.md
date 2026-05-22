@@ -54,3 +54,10 @@ Work starts from a PRD, then an OpenSpec spec, then code.
 ## Development
 
 The Python toolchain (build/validate/refresh scripts, tests, lints, CI helpers) lives under [`tooling/`](tooling/). Setup, commands, and dependencies in [`tooling/README.md`](tooling/README.md).
+
+## Licensing
+
+This repo is **dual-licensed**:
+
+- **Code** — [MIT](LICENSE). Covers everything outside `data/`: viewer, bridge, tooling, deployment, openspec, docs.
+- **GTFS data** — [CC BY 4.0](data/LICENSE). Covers the contents of `data/` (the `.txt` files, `shapes.txt`, the `colonia.osm.pbf` excerpt) and the `gtfs.zip` published in GitHub Releases. If you reuse the feed, attribute `colonia-gtfs` with a link back to the repo.

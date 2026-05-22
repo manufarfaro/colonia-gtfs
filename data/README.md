@@ -56,3 +56,7 @@ Para flipear a modo confirmado:
 Build artefacts (no en git):
 
 - `output/gtfs.zip` — empaquetado producido por `scripts/build-gtfs-zip.sh`.
+
+## Licencia
+
+El contenido de este directorio y el `gtfs.zip` publicado en GitHub Releases se distribuyen bajo [CC BY 4.0](LICENSE). Si reutilizás el feed (consumo directo, derivados, mashups), atribuí a `colonia-gtfs` con link al repo. El código del resto del monorepo está bajo MIT — ver [`/LICENSE`](../LICENSE).

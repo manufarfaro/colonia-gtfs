@@ -78,6 +78,16 @@ function parseHms(hms: string): number {
   return h * 3600 + m * 60 + s;
 }
 
+// How far OUTSIDE a trip's [first stop arrival, last stop arrival]
+// window we still treat as "the bus is at the start" / "the bus is at
+// the end". Buses parked at the terminal for a few minutes before /
+// after the trip is normal operation. Beyond this grace we refuse to
+// snap to that trip — it's not running anymore, so emitting a
+// VehiclePosition + TripUpdate for it would trip the MobilityData
+// validator (E029 vehicle off-shape, E041 empty stop_time_updates)
+// and confuse downstream consumers.
+const TRIP_WINDOW_GRACE_SECONDS = 600;
+
 function interpolatePosition(
   stopTimes: ReadonlyArray<StopTime>,
   gtfs: GtfsStaticService,
@@ -86,14 +96,22 @@ function interpolatePosition(
   // Find the bracket [stopTimes[i], stopTimes[i+1]] such that
   // arrival(i) <= secondsFromMidnight < arrival(i+1).
   if (stopTimes.length === 0) return null;
+  const firstArrival = parseHms(stopTimes[0].arrivalTime);
+  const lastArrival = parseHms(stopTimes[stopTimes.length - 1].arrivalTime);
+  if (
+    secondsFromMidnight < firstArrival - TRIP_WINDOW_GRACE_SECONDS ||
+    secondsFromMidnight > lastArrival + TRIP_WINDOW_GRACE_SECONDS
+  ) {
+    return null;
+  }
   const firstStop = gtfs.getStop(stopTimes[0].stopId);
   if (!firstStop) return null;
-  if (secondsFromMidnight <= parseHms(stopTimes[0].arrivalTime)) {
+  if (secondsFromMidnight <= firstArrival) {
     return { lat: firstStop.stopLat, lon: firstStop.stopLon };
   }
   const lastStop = gtfs.getStop(stopTimes[stopTimes.length - 1].stopId);
   if (!lastStop) return null;
-  if (secondsFromMidnight >= parseHms(stopTimes[stopTimes.length - 1].arrivalTime)) {
+  if (secondsFromMidnight >= lastArrival) {
     return { lat: lastStop.stopLat, lon: lastStop.stopLon };
   }
   for (let i = 0; i < stopTimes.length - 1; i++) {

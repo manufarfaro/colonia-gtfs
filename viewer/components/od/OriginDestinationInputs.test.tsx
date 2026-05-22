@@ -4,12 +4,12 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import esMessages from '@/messages/es.json';
 import type { PlanInput } from './usePlanQuery';
 
-// Capture every <OdAutocompleteInput> mounted so the test can drive the
-// synthetic `place_changed` callback and verify the wired props.
 type MountedInput = {
   id: string;
   bounds: unknown;
   componentRestrictions: unknown;
+  value: string;
+  onValueChange: (next: string) => void;
   onPlaceSelected: (place: PlanInput['from'] | null) => void;
 };
 const mounted: MountedInput[] = [];
@@ -21,18 +21,25 @@ vi.mock('./OdAutocompleteInput', () => ({
     placeholder: string;
     bounds: unknown;
     componentRestrictions: unknown;
+    value: string;
+    onValueChange: (next: string) => void;
     onPlaceSelected: (place: PlanInput['from'] | null) => void;
   }): React.ReactElement {
-    mounted.push({
+    const idx = mounted.findIndex((m) => m.id === props.id);
+    const snapshot = {
       id: props.id,
       bounds: props.bounds,
       componentRestrictions: props.componentRestrictions,
+      value: props.value,
+      onValueChange: props.onValueChange,
       onPlaceSelected: props.onPlaceSelected,
-    });
+    };
+    if (idx >= 0) mounted[idx] = snapshot;
+    else mounted.push(snapshot);
     return (
-      <div data-testid={`stub-${props.id}`} data-bounds-sw-lat={(props.bounds as { sw: { lat: number } }).sw.lat}>
+      <div data-testid={`stub-${props.id}`} data-bounds-sw-lat={(props.bounds as { sw: { lat: number } }).sw.lat} data-value={props.value}>
         <label htmlFor={props.id}>{props.label}</label>
-        <input id={props.id} placeholder={props.placeholder} />
+        <input id={props.id} placeholder={props.placeholder} value={props.value} onChange={(e) => props.onValueChange(e.target.value)} />
         <button onClick={() => props.onPlaceSelected(null)} aria-label={`clear-${props.id}`}>
           ×
         </button>
@@ -111,5 +118,29 @@ describe('OriginDestinationInputs', () => {
     renderInputs(onChange);
     fireEvent.click(screen.getByLabelText('clear-origin'));
     expect(onChange).toHaveBeenLastCalledWith({ from: null, to: null });
+  });
+
+  it('R-03 swap button is disabled until at least one input has text', () => {
+    renderInputs(() => {});
+    const swap = screen.getByTestId('od-swap');
+    expect(swap.hasAttribute('disabled')).toBe(true);
+    fireEvent.change(screen.getByLabelText('Origen'), { target: { value: 'Buquebus' } });
+    expect(swap.hasAttribute('disabled')).toBe(false);
+  });
+
+  it('R-03 swap exchanges typed text + resolved coords between origin and destination', () => {
+    const onChange = vi.fn();
+    renderInputs(onChange);
+    fireEvent.change(screen.getByLabelText('Origen'), { target: { value: 'Buquebus' } });
+    fireEvent.change(screen.getByLabelText('Destino'), { target: { value: 'Plaza de Toros' } });
+    mounted.find((m) => m.id === 'origin')!.onPlaceSelected({ lat: -34.471, lon: -57.852 });
+    mounted.find((m) => m.id === 'destination')!.onPlaceSelected({ lat: -34.437, lon: -57.865 });
+    fireEvent.click(screen.getByTestId('od-swap'));
+    expect(onChange).toHaveBeenLastCalledWith({
+      from: { lat: -34.437, lon: -57.865 },
+      to: { lat: -34.471, lon: -57.852 },
+    });
+    expect((screen.getByLabelText('Origen') as HTMLInputElement).value).toBe('Plaza de Toros');
+    expect((screen.getByLabelText('Destino') as HTMLInputElement).value).toBe('Buquebus');
   });
 });

@@ -28,13 +28,18 @@ export default defineConfig({
       //   - components/od/OdAutocompleteInput.tsx         → calls the live Google Maps Places API; tests stub it
       //   - components/od/LegPolyline.tsx                 → calls google.maps.Polyline / Marker directly; tests stub it
       //   - components/line-schedule/VehicleMarker.tsx    → calls google.maps.Marker directly; tests stub it
+      //   - components/line-schedule/LineStopMarker.tsx   → same — small stop dot per line color
       //   - components/line-schedule/LineRouteLayer.tsx   → orchestrates google.maps.Polyline + Marker primitives
+      //   - components/od/OdItineraryVehicles.tsx         → composes VehicleMarker on the map; tests stub it
       //   - **/*.test.{ts,tsx}                            → the tests themselves
       exclude: [
         'components/ui/**',
         'components/od/OdAutocompleteInput.tsx',
         'components/od/LegPolyline.tsx',
+        'components/od/OdItineraryVehicles.tsx',
+        'components/od/TripEndpointMarkers.tsx',
         'components/line-schedule/VehicleMarker.tsx',
+        'components/line-schedule/LineStopMarker.tsx',
         'components/line-schedule/LineRouteLayer.tsx',
         '**/*.{test,spec}.{ts,tsx}',
       ],

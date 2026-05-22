@@ -26,19 +26,26 @@ export async function GET(
   const limitRaw = Number.parseInt(url.searchParams.get('limit') ?? `${DEFAULT_LIMIT}`, 10);
   const limit = Math.min(Math.max(Number.isFinite(limitRaw) ? limitRaw : DEFAULT_LIMIT, 1), MAX_LIMIT);
 
+  const date = todayInMontevideo();
   try {
     const { data } = await queryOtp({
       query: ARRIVALS_QUERY,
-      variables: { stopId, limit },
+      variables: { stopId, date },
     });
     const translated = translateArrivalsResponse(
       data as Parameters<typeof translateArrivalsResponse>[0],
-      todayInMontevideo(),
+      date,
     );
     if (translated.stop === null) {
       return NextResponse.json({ error: 'stop_not_found' }, { status: 404 });
     }
-    return NextResponse.json(translated);
+    // OTP does not accept a server-side limit on `stoptimesForServiceDate`;
+    // cap the upcoming arrivals client-side after translation.
+    const capped = {
+      ...translated,
+      arrivals: translated.arrivals.slice(0, limit),
+    };
+    return NextResponse.json(capped);
   } catch (err) {
     if (err instanceof OtpUnavailableError) {
       return NextResponse.json({ error: 'otp_unavailable' }, { status: 502 });

@@ -63,11 +63,16 @@ jobs:
         run: |
           set -euo pipefail
           # Same rationale as bridge-rt-validate.yml — pin the fixture
-          # markers near wall clock so RT entries are not stale.
+          # markers near wall clock so RT entries are not stale. The
+          # operator schema uses `<fec>DD/MM/YYYY</fec>` + `<hor>HH:MM:SS</hor>`
+          # child elements (not the old `time="…"` attribute).
           mkdir -p smoke-out
-          STAMP=$(TZ=America/Montevideo date -d '5 minutes ago' '+%Y-%m-%d %H:%M:%S')
-          echo "rebasing all marker.time → \"$STAMP\""
-          LC_ALL=C sed -E "s/time=\"[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}\"/time=\"$STAMP\"/g" \
+          FEC=$(TZ=America/Montevideo date -d '5 minutes ago' '+%d/%m/%Y')
+          HOR=$(TZ=America/Montevideo date -d '5 minutes ago' '+%H:%M:%S')
+          echo "rebasing fec=$FEC hor=$HOR"
+          LC_ALL=C sed -E \
+            -e "s|<fec>[0-9]{2}/[0-9]{2}/[0-9]{4}</fec>|<fec>$FEC</fec>|g" \
+            -e "s|<hor>[0-9]{2}:[0-9]{2}:[0-9]{2}</hor>|<hor>$HOR</hor>|g" \
             bridge/test/fixtures/avl-sample.xml > smoke-out/avl-rebased.xml
 
       - name: Write smoke-specific compose override

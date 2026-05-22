@@ -74,26 +74,31 @@ describe('GET /api/stops/:stopId/arrivals', () => {
     ).rejects.toThrow();
   });
 
-  it('R-05 honors ?limit query (default 10, clamped)', async () => {
+  it('R-05 honors ?limit by slicing the upcoming arrivals client-side', async () => {
     mockPost.mockResolvedValueOnce({ data: fixture });
     const { GET } = await loadHandler();
-    await GET(req('?limit=5'), { params: Promise.resolve({ stopId: 'sol-antigua:3' }) });
-    expect(mockPost).toHaveBeenCalledWith(
-      '/otp/gtfs/v1',
-      expect.objectContaining({
-        variables: expect.objectContaining({ limit: 5 }),
-      }),
-    );
+    const res = await GET(req('?limit=1'), { params: Promise.resolve({ stopId: 'sol-antigua:3' }) });
+    const body = await res.json();
+    expect(body.arrivals.length).toBe(1);
   });
 
-  it('R-05 falls back to default limit when ?limit is not a finite number', async () => {
+  it('R-05 ignores a non-finite ?limit and uses the default cap of 10', async () => {
     mockPost.mockResolvedValueOnce({ data: fixture });
     const { GET } = await loadHandler();
-    await GET(req('?limit=abc'), { params: Promise.resolve({ stopId: 'sol-antigua:3' }) });
+    const res = await GET(req('?limit=abc'), { params: Promise.resolve({ stopId: 'sol-antigua:3' }) });
+    // Fixture has 2 arrivals — default limit 10 keeps them all.
+    const body = await res.json();
+    expect(body.arrivals.length).toBe(2);
+  });
+
+  it('R-05 passes the Montevideo-local date to OTP (required for stoptimesForServiceDate)', async () => {
+    mockPost.mockResolvedValueOnce({ data: fixture });
+    const { GET } = await loadHandler();
+    await GET(req(), { params: Promise.resolve({ stopId: 'sol-antigua:3' }) });
     expect(mockPost).toHaveBeenCalledWith(
       '/otp/gtfs/v1',
       expect.objectContaining({
-        variables: expect.objectContaining({ limit: 10 }),
+        variables: expect.objectContaining({ date: expect.stringMatching(/^\d{4}-\d{2}-\d{2}$/) }),
       }),
     );
   });

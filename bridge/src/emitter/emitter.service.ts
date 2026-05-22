@@ -87,6 +87,10 @@ export class EmitterService {
           trip: {
             tripId,
             routeId: trip?.routeId,
+            // Without `directionId` the field defaults to 0 on the wire,
+            // which silently breaks downstream filters that bucket
+            // vehicles by tab (line-schedule's `activeDirectionId`).
+            directionId: trip?.directionId,
             startDate: ymdLocal(marker.time),
             scheduleRelationship: transit_realtime.TripDescriptor.ScheduleRelationship.SCHEDULED,
           },

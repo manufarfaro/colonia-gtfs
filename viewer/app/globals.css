@@ -99,10 +99,10 @@
   /* Typography. `next/font` sets these variables on <html> at runtime
      with the loaded font's local name. The fallbacks here only apply
      before the font snaps in. */
-  --font-display: var(--font-fraunces), "Fraunces", ui-serif, Georgia, serif;
-  --font-body: var(--font-plex-sans), "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-manrope), "Manrope", "Mont", ui-sans-serif, system-ui, sans-serif;
+  --font-body: var(--font-manrope), "Manrope", "Mont Book", ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-plex-mono), "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
-  --font-sans: var(--font-plex-sans), "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-manrope), "Manrope", ui-sans-serif, system-ui, sans-serif;
 }
 
 @layer base {

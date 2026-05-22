@@ -1,11 +1,27 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
-<markers>
-  <marker id="OPAQUE-001" lin="3" dir="0" lat="-34.441258" lon="-57.853689" time="2026-06-02 08:30:00" speed="0" head="180" label="L3 Centro"/>
-  <marker id="OPAQUE-002" lin="3" dir="1" lat="-34.471" lon="-57.84" time="2026-06-02 08:35:30" speed="28" head="90" label="L3 hacia El General"/>
-  <marker id="OPAQUE-003" lin="4" dir="0" lat="-34.436904" lon="-57.802365" time="2026-06-02 08:30:00" speed="0" head="270" label="Línea 4 Centro"/>
-  <marker id="OPAQUE-004" lin="4" dir="1" lat="-34.47" lon="-57.836" time="2026-06-02 08:32:15" speed="35" head="270" label="L4 hacia Algodones"/>
-  <marker id="OPAQUE-005" lin="5" dir="0" lat="-34.440749" lon="-57.804908" time="2026-06-02 08:00:00" speed="0" head="0" label="L5 inicio"/>
-  <marker id="OPAQUE-006" lin="5" dir="1" lat="-34.455353" lon="-57.815925" time="2026-06-02 07:30:00" speed="0" head="270" label="L5 hacia inicio"/>
-  <marker id="OPAQUE-007" lin="8" dir="0" lat="-34.443939" lon="-57.79122" time="2026-06-02 08:30:00" speed="0" head="270" label="L8 inicio"/>
-  <marker id="OPAQUE-008" lin="8" dir="1" lat="-34.46" lon="-57.82" time="2026-06-02 08:35:00" speed="40" head="90" label="L8 vuelta"/>
-</markers>
+<list>
+<marker>
+<lat>-34.441258</lat><lon>-57.853689</lon><id>OPAQUE-001</id><rum>180</rum><est>n</est><bus>001</bus><bmt>LTC -001</bmt><bac>0</bac><bas>41</bas><bpp>25</bpp><fec>02/06/2026</fec><hor>08:30:00</hor><lin>3</lin><tra>1</tra><sen>1</sen><lnm>L3 Centro</lnm><sal>08:00</sal><ord>1</ord><p1c>1</p1c><p1n>REAL</p1n><ico>p0o</ico>
+</marker>
+<marker>
+<lat>-34.471</lat><lon>-57.84</lon><id>OPAQUE-002</id><rum>90</rum><est>n</est><bus>002</bus><bmt>LTC -002</bmt><bac>28</bac><bas>41</bas><bpp>25</bpp><fec>02/06/2026</fec><hor>08:30:00</hor><lin>3</lin><tra>2</tra><sen>2</sen><lnm>L3 hacia El General</lnm><sal>08:00</sal><ord>1</ord><p1c>1</p1c><p1n>REAL</p1n><ico>p0o</ico>
+</marker>
+<marker>
+<lat>-34.436904</lat><lon>-57.802365</lon><id>OPAQUE-003</id><rum>270</rum><est>n</est><bus>003</bus><bmt>LTC -003</bmt><bac>0</bac><bas>41</bas><bpp>25</bpp><fec>02/06/2026</fec><hor>08:30:00</hor><lin>4</lin><tra>1</tra><sen>1</sen><lnm>Línea 4 Centro</lnm><sal>08:00</sal><ord>1</ord><p1c>1</p1c><p1n>REAL</p1n><ico>p0o</ico>
+</marker>
+<marker>
+<lat>-34.47</lat><lon>-57.836</lon><id>OPAQUE-004</id><rum>270</rum><est>n</est><bus>004</bus><bmt>LTC -004</bmt><bac>35</bac><bas>41</bas><bpp>25</bpp><fec>02/06/2026</fec><hor>08:30:00</hor><lin>4</lin><tra>2</tra><sen>2</sen><lnm>L4 hacia Algodones</lnm><sal>08:00</sal><ord>1</ord><p1c>1</p1c><p1n>REAL</p1n><ico>p0o</ico>
+</marker>
+<marker>
+<lat>-34.440749</lat><lon>-57.804908</lon><id>OPAQUE-005</id><rum>0</rum><est>n</est><bus>005</bus><bmt>LTC -005</bmt><bac>0</bac><bas>41</bas><bpp>25</bpp><fec>02/06/2026</fec><hor>08:30:00</hor><lin>5</lin><tra>1</tra><sen>1</sen><lnm>L5 inicio</lnm><sal>08:00</sal><ord>1</ord><p1c>1</p1c><p1n>REAL</p1n><ico>p0o</ico>
+</marker>
+<marker>
+<lat>-34.455353</lat><lon>-57.815925</lon><id>OPAQUE-006</id><rum>270</rum><est>n</est><bus>006</bus><bmt>LTC -006</bmt><bac>0</bac><bas>41</bas><bpp>25</bpp><fec>02/06/2026</fec><hor>08:30:00</hor><lin>5</lin><tra>2</tra><sen>2</sen><lnm>L5 hacia inicio</lnm><sal>08:00</sal><ord>1</ord><p1c>1</p1c><p1n>REAL</p1n><ico>p0o</ico>
+</marker>
+<marker>
+<lat>-34.443939</lat><lon>-57.79122</lon><id>OPAQUE-007</id><rum>270</rum><est>n</est><bus>007</bus><bmt>LTC -007</bmt><bac>0</bac><bas>41</bas><bpp>25</bpp><fec>02/06/2026</fec><hor>08:30:00</hor><lin>8</lin><tra>1</tra><sen>1</sen><lnm>L8 inicio</lnm><sal>08:00</sal><ord>1</ord><p1c>1</p1c><p1n>REAL</p1n><ico>p0o</ico>
+</marker>
+<marker>
+<lat>-34.46</lat><lon>-57.82</lon><id>OPAQUE-008</id><rum>90</rum><est>n</est><bus>008</bus><bmt>LTC -008</bmt><bac>40</bac><bas>41</bas><bpp>25</bpp><fec>02/06/2026</fec><hor>08:30:00</hor><lin>8</lin><tra>2</tra><sen>2</sen><lnm>L8 vuelta</lnm><sal>08:00</sal><ord>1</ord><p1c>1</p1c><p1n>REAL</p1n><ico>p0o</ico>
+</marker>
+</list>

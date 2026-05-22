@@ -57,7 +57,11 @@ interface CsvRow {
 
 async function readCsv(filePath: string): Promise<CsvRow[]> {
   const raw = await fs.readFile(filePath, 'utf8');
-  const [header, ...rows] = raw.trim().split('\n');
+  // Normalize CRLF → LF so the last field on each row does not carry
+  // a trailing \r (the AVL pipeline writes CRLF when it edits files on
+  // certain hosts, and a `\r` in `original_trip_id` silently breaks
+  // the matcher's srv fast-path lookup).
+  const [header, ...rows] = raw.replace(/\r\n/g, '\n').trim().split('\n');
   const cols = header.split(',');
   return rows.map((row) => {
     const cells = row.split(',');
@@ -74,6 +78,7 @@ export class GtfsStaticService {
   private routes = new Map<string, Route>();
   private trips = new Map<string, Trip>();
   private tripsByRouteAndDirection = new Map<string, Trip[]>();
+  private tripsByOriginalId = new Map<string, Trip[]>();
   private stops = new Map<string, Stop>();
   private stopTimesByTrip = new Map<string, StopTime[]>();
   private calendar = new Map<string, CalendarEntry>();
@@ -116,6 +121,15 @@ export class GtfsStaticService {
         originalTripId: r.original_trip_id ?? '',
       };
       this.trips.set(trip.tripId, trip);
+      if (trip.originalTripId !== '') {
+        // Map operator's srv → synthetic trip_id. One operator srv may
+        // run on multiple service_ids (weekday + saturday + …); keep
+        // all candidates so the matcher can pick the right one for
+        // today's date.
+        const list = this.tripsByOriginalId.get(trip.originalTripId) ?? [];
+        list.push(trip);
+        this.tripsByOriginalId.set(trip.originalTripId, list);
+      }
       const route = this.routes.get(trip.routeId);
       if (route) {
         const key = `${route.routeShortName}-${trip.directionId}`;
@@ -198,6 +212,13 @@ export class GtfsStaticService {
 
   getTripsByRouteAndDirection(routeShortName: string, directionId: 0 | 1): Trip[] {
     return this.tripsByRouteAndDirection.get(`${routeShortName}-${directionId}`) ?? [];
+  }
+
+  /** Look up trips by the operator's `original_trip_id` (`srv` in the
+   *  AVL feed). Returns ALL candidate trips — the matcher picks the
+   *  one whose service_id is active today. */
+  getTripsByOriginalId(originalTripId: string): Trip[] {
+    return this.tripsByOriginalId.get(originalTripId) ?? [];
   }
 
   getStop(stopId: string): Stop | undefined {

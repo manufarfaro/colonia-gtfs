@@ -1,8 +1,20 @@
 'use client';
 
+import { useEffect, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
 
+// Aligned to the bridge's upstream poll cadence (15s — see
+// .env POLL_INTERVAL_MS). Polling more frequently just returns the
+// same cached snapshot until the bridge fetches the next AVL frame.
 const POLL_INTERVAL_MS = 15_000;
+
+// How long a non-empty vehicles response stays "fresh" — when the
+// next poll returns `vehicles: []` (a transient bridge/AVL miss), we
+// keep showing the previous positions for this many milliseconds
+// before accepting the empty state. 5 minutes covers extended
+// upstream gaps (operator dropouts, matcher misses) without showing
+// indefinitely stale data.
+const STALE_HOLD_MS = 5 * 60_000;
 
 export interface VehiclesResponse {
   lineId: string;
@@ -40,9 +52,6 @@ export function useVehiclesQuery(shortName: string | null): VehiclesState {
     queryKey: ['vehicles', shortName],
     enabled,
     refetchInterval: POLL_INTERVAL_MS,
-    // Endpoint always returns 200 (per viewer-shell-and-api R-07, bridge
-    // down sends `{vehicles:[], meta:{realtime_available:false}}`), so
-    // `staleTime: 0` keeps each poll fresh without dedup.
     staleTime: 0,
     queryFn: async ({ signal }) => {
       let res: Response;
@@ -55,8 +64,26 @@ export function useVehiclesQuery(shortName: string | null): VehiclesState {
     },
   });
 
+  const lastNonEmpty = useRef<{ data: VehiclesResponse; ts: number } | null>(null);
+
+  useEffect(() => {
+    if (query.isSuccess && query.data.vehicles.length > 0) {
+      lastNonEmpty.current = { data: query.data, ts: Date.now() };
+    }
+  }, [query.data, query.isSuccess]);
+
+  useEffect(() => {
+    lastNonEmpty.current = null;
+  }, [shortName]);
+
   if (!enabled) return { state: 'idle', data: null, error: null };
   if (query.isPending) return { state: 'loading', data: null, error: null };
   if (query.isError) return { state: 'error', data: null, error: query.error.tag };
-  return { state: 'success', data: query.data!, error: null };
+
+  const fresh = query.data!;
+  const cached = lastNonEmpty.current;
+  if (fresh.vehicles.length === 0 && cached && Date.now() - cached.ts < STALE_HOLD_MS) {
+    return { state: 'success', data: cached.data, error: null };
+  }
+  return { state: 'success', data: fresh, error: null };
 }

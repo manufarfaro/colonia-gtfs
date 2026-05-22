@@ -75,6 +75,39 @@ describe('useVehiclesQuery', () => {
     expect(fetchMock.mock.calls[1][0]).toContain('/api/lines/5/vehicles');
   });
 
+  it('R-07 keeps showing the last non-empty vehicles when a refetch returns empty', async () => {
+    fetchMock.mockResolvedValueOnce(jsonResponse(okBody));
+    fetchMock.mockResolvedValueOnce(
+      jsonResponse({ lineId: '4', vehicles: [], meta: { realtime_available: true, feed_timestamp: 0 } }),
+    );
+    const { Wrapper, client } = makeQueryWrapper();
+    const { result } = renderHook(() => useVehiclesQuery('4'), { wrapper: Wrapper });
+    await waitFor(() => expect(result.current.data?.vehicles).toHaveLength(1));
+    // Trigger a refetch on the same query key — the new response has
+    // empty vehicles but the stale-hold window keeps the previous data.
+    await client.invalidateQueries({ queryKey: ['vehicles', '4'] });
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2));
+    expect(result.current.data?.vehicles).toHaveLength(1);
+  });
+
+  it('R-07 clears the stale-hold cache when shortName changes', async () => {
+    fetchMock.mockResolvedValueOnce(jsonResponse(okBody));
+    fetchMock.mockResolvedValueOnce(
+      jsonResponse({ lineId: '5', vehicles: [], meta: { realtime_available: true, feed_timestamp: 0 } }),
+    );
+    const { Wrapper } = makeQueryWrapper();
+    const { result, rerender } = renderHook(
+      ({ s }: { s: string | null }) => useVehiclesQuery(s),
+      { initialProps: { s: '4' as string | null }, wrapper: Wrapper },
+    );
+    await waitFor(() => expect(result.current.data?.vehicles).toHaveLength(1));
+    rerender({ s: '5' });
+    // Different line — cache reset, empty response returns empty (no
+    // bleed-through from line 4's data).
+    await waitFor(() => expect(result.current.data?.lineId).toBe('5'));
+    expect(result.current.data?.vehicles).toHaveLength(0);
+  });
+
   it('R-07 stopping (shortName=null) resets the hook back to idle', async () => {
     fetchMock.mockResolvedValue(jsonResponse(okBody));
     const { Wrapper } = makeQueryWrapper();

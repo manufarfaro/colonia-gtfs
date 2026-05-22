@@ -6,7 +6,7 @@ import { decodePolyline } from '@/lib/google-maps/polyline';
 import { getLineColor } from '@/lib/colors/lines';
 import type { RestLineResponse } from '@/lib/otp/translate-line';
 import type { VehiclesResponse } from './useVehiclesQuery';
-import { StopMarker } from '@/components/od/LegPolyline';
+import { LineStopMarker } from './LineStopMarker';
 import { VehicleMarker } from './VehicleMarker';
 
 /**
@@ -24,10 +24,14 @@ import { VehicleMarker } from './VehicleMarker';
 export function LineRouteLayer({
   data,
   vehicles,
+  activeDirectionId,
+  selectedStopId,
   onStopClick,
 }: {
   data: RestLineResponse;
   vehicles: VehiclesResponse['vehicles'];
+  activeDirectionId: number;
+  selectedStopId?: string | null;
   onStopClick?: (stopId: string) => void;
 }): React.ReactElement {
   const map = useMap();
@@ -43,50 +47,79 @@ export function LineRouteLayer({
 
   useEffect(() => {
     if (!map) return;
-    const instances = polylines.map((p) =>
-      new google.maps.Polyline({
+    const color = getLineColor(shortName);
+    const instances = polylines.map((p) => {
+      const isActive = p.directionId === activeDirectionId;
+      if (isActive) {
+        return new google.maps.Polyline({
+          path: p.path,
+          strokeColor: color,
+          strokeOpacity: 0.95,
+          strokeWeight: 5,
+          map,
+          zIndex: 3,
+        });
+      }
+      return new google.maps.Polyline({
         path: p.path,
-        strokeColor: getLineColor(shortName),
-        strokeOpacity: 1,
-        strokeWeight: 5,
+        strokeColor: color,
+        strokeOpacity: 0,
+        strokeWeight: 4,
+        icons: [
+          {
+            icon: { path: 'M 0,-1 0,1', strokeOpacity: 0.35, scale: 3 },
+            offset: '0',
+            repeat: '16px',
+          },
+        ],
         map,
-      }),
-    );
+        zIndex: 2,
+      });
+    });
     return () => {
       instances.forEach((pl) => pl.setMap(null));
     };
-  }, [map, polylines, shortName]);
+  }, [map, polylines, shortName, activeDirectionId]);
 
   // Stops + vehicles are React-composable primitives (already cover their
   // own runtime exclusion).
-  const uniqueStops = useMemo(() => {
-    const seen = new Set<string>();
-    const out: Array<{ id: string; lat: number; lng: number }> = [];
-    for (const dir of data.directions) {
-      for (const stop of dir.stops) {
-        if (seen.has(stop.id)) continue;
-        seen.add(stop.id);
-        out.push({ id: stop.id, lat: stop.lat, lng: stop.lon });
-      }
-    }
-    return out;
-  }, [data.directions]);
+  const activeStops = useMemo(() => {
+    const dir = data.directions.find((d) => d.directionId === activeDirectionId);
+    if (!dir) return [];
+    return dir.stops.map((s) => ({ id: s.id, name: s.name, lat: s.lat, lng: s.lon }));
+  }, [data.directions, activeDirectionId]);
 
   return (
     <>
-      {uniqueStops.map((stop) => (
-        <StopMarker key={stop.id} stopId={stop.id} lat={stop.lat} lng={stop.lng} onClick={onStopClick} />
-      ))}
-      {vehicles.map((v) => (
-        <VehicleMarker
-          key={v.id}
+      {activeStops.map((stop) => (
+        <LineStopMarker
+          key={stop.id}
+          stopId={stop.id}
+          name={stop.name}
           shortName={shortName}
-          label={v.label}
-          lat={v.lat}
-          lng={v.lon}
-          bearing={v.bearing}
+          lat={stop.lat}
+          lng={stop.lng}
+          selected={stop.id === selectedStopId}
+          onClick={onStopClick}
         />
       ))}
+      {vehicles
+        .filter((v) => v.directionId === activeDirectionId)
+        .map((v) => {
+          const direction = data.directions.find((d) => d.directionId === v.directionId);
+          return (
+            <VehicleMarker
+              key={v.id}
+              shortName={shortName}
+              label={v.label}
+              headsign={direction?.headsign ?? null}
+              lat={v.lat}
+              lng={v.lon}
+              bearing={v.bearing}
+              timestamp={v.timestamp}
+            />
+          );
+        })}
     </>
   );
 }

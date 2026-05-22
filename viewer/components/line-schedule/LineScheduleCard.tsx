@@ -1,35 +1,89 @@
 'use client';
 
-import { useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useTranslations } from 'next-intl';
+import { getLineColor } from '@/lib/colors/lines';
+import {
+  closestDepartureIndex,
+  minutesSinceMidnightMVD,
+} from '@/lib/time/schedule';
+import { computeStopArrivals } from '@/lib/time/stop-arrivals';
 import type { RestLineResponse } from '@/lib/otp/translate-line';
 
-/**
- * The card is only mounted when the shell has confirmed `data.line` is
- * non-null (line-found response) and there is at least one direction.
- * Those preconditions are guarded by the parent so the card's render
- * code can assume them.
- */
 export function LineScheduleCard({
   data,
-  onStopClick,
+  onActiveDirectionChange,
+  selectedStopId,
+  onSelectedStopChange,
 }: {
   data: RestLineResponse;
-  onStopClick: (stopId: string) => void;
+  onActiveDirectionChange?: (directionId: number) => void;
+  /** Externally-driven selection (e.g., the user clicked a stop dot on
+   *  the map). When set, the matching row expands + scrolls into view
+   *  with line-color emphasis. */
+  selectedStopId?: string | null;
+  /** Called when the user toggles a row via the sidebar (so the parent
+   *  can keep the map's selection in sync). */
+  onSelectedStopChange?: (id: string | null) => void;
 }): React.ReactElement {
-  // `data.directions[0]` is guaranteed by the shell's mounting guard;
-  // the `?? 0` is purely a TypeScript defensive fallback.
+  const t = useTranslations('od.lineSchedule.card');
   /* v8 ignore next */
   const [activeDir, setActiveDir] = useState<number>(data.directions[0]?.directionId ?? 0);
+  const [internalExpanded, setInternalExpanded] = useState<string | null>(null);
+  const expandedStopId = selectedStopId !== undefined ? selectedStopId : internalExpanded;
+  const setExpandedStopId = useCallback(
+    (id: string | null): void => {
+      if (onSelectedStopChange) onSelectedStopChange(id);
+      else setInternalExpanded(id);
+    },
+    [onSelectedStopChange],
+  );
+  const rowRefs = useRef(new Map<string, HTMLLIElement | null>());
   const showTabs = data.directions.length > 1;
-  // Same guarantee — find() always hits the activeDir entry since the
-  // user can only switch to tabs we render.
   /* v8 ignore next */
   const active = data.directions.find((d) => d.directionId === activeDir) ?? data.directions[0];
   const line = data.line!;
+  const color = getLineColor(line.shortName);
+
+  useEffect(() => {
+    onActiveDirectionChange?.(activeDir);
+  }, [activeDir, onActiveDirectionChange]);
+
+  useEffect(() => {
+    if (selectedStopId !== undefined) return;
+    setInternalExpanded(null);
+  }, [activeDir, selectedStopId]);
+
+  useEffect(() => {
+    if (!expandedStopId) return;
+    /* v8 ignore start */
+    const el = rowRefs.current.get(expandedStopId);
+    if (el && typeof el.scrollIntoView === 'function') {
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+    /* v8 ignore stop */
+  }, [expandedStopId]);
+
+  const uniqueDepartures = useMemo(
+    () => Array.from(new Set(active.scheduledDepartures)),
+    [active.scheduledDepartures],
+  );
+
+  // Wall-clock anchored in Montevideo, ticked once per minute so the
+  // "nearest scheduled departure" highlight stays accurate without a
+  // dependency on the vehicles poll.
+  const [nowMinutes, setNowMinutes] = useState(() => minutesSinceMidnightMVD(new Date()));
+  useEffect(() => {
+    /* v8 ignore next */
+    const t = setInterval(() => setNowMinutes(minutesSinceMidnightMVD(new Date())), 30_000);
+    return () => clearInterval(t);
+  }, []);
+
+  const closestIdx = closestDepartureIndex(uniqueDepartures, nowMinutes);
 
   return (
-    <section data-testid="line-schedule-card">
-      <header data-testid="line-card-header" className="flex items-baseline justify-between pb-2">
+    <section data-testid="line-schedule-card" className="flex flex-col gap-4">
+      <header data-testid="line-card-header" className="flex items-baseline justify-between">
         <span className="text-lg font-semibold tracking-tight">{`Línea ${line.shortName}`}</span>
         <span className="text-xs text-muted-foreground">{line.longName}</span>
       </header>
@@ -44,7 +98,9 @@ export function LineScheduleCard({
               role="tab"
               aria-selected={activeDir === dir.directionId}
               className={`px-3 py-1 text-sm ${
-                activeDir === dir.directionId ? 'border-b-2 border-foreground font-medium' : 'text-muted-foreground'
+                activeDir === dir.directionId
+                  ? 'border-b-2 border-foreground font-medium'
+                  : 'text-muted-foreground'
               }`}
               onClick={() => setActiveDir(dir.directionId)}
             >
@@ -54,30 +110,135 @@ export function LineScheduleCard({
         </div>
       )}
 
-      {active && (
-        <div className="mt-3 grid gap-3 text-sm sm:grid-cols-[1fr_2fr]">
-          <ul aria-label="stops" className="space-y-1">
-            {active.stops.map((stop) => (
-              <li key={stop.id}>
+      <section data-testid="line-stops-section">
+        <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+          {t('stopsHeader', { count: active.stops.length })}
+        </h3>
+        <ol aria-label="stops" className="flex flex-col gap-1 text-sm">
+          {active.stops.map((stop, i) => {
+            const arrivals = computeStopArrivals(uniqueDepartures, stop.arrivalOffsetSeconds, nowMinutes);
+            const pastArrivals = arrivals.filter((a) => a.status === 'past');
+            const futureArrivals = arrivals.filter((a) => a.status !== 'past');
+            const lastPast = pastArrivals[pastArrivals.length - 1] ?? null;
+            const nextUp = futureArrivals[0] ?? null;
+            const isExpanded = expandedStopId === stop.id;
+            return (
+              <li
+                key={stop.id}
+                ref={(el) => {
+                  rowRefs.current.set(stop.id, el);
+                }}
+                data-testid={`line-stop-row-${stop.id}`}
+                data-selected={isExpanded}
+                className={isExpanded ? 'rounded-md border bg-card' : ''}
+                style={isExpanded ? { borderColor: color, backgroundColor: `${color}0d` } : undefined}
+              >
                 <button
                   type="button"
-                  onClick={() => onStopClick(stop.id)}
-                  className="text-left text-foreground underline-offset-2 hover:underline"
+                  onClick={() => setExpandedStopId(isExpanded ? null : stop.id)}
+                  aria-expanded={isExpanded}
+                  className="flex w-full items-start gap-2 rounded px-2 py-1.5 text-left transition-colors hover:bg-muted/50"
                 >
-                  {stop.name}
+                  <span
+                    className="mt-px font-mono text-xs tabular-nums w-6"
+                    style={isExpanded ? { color } : undefined}
+                  >
+                    {String(i + 1).padStart(2, '0')}
+                  </span>
+                  <span
+                    className="flex-1 truncate text-foreground"
+                    style={isExpanded ? { color, fontWeight: 600 } : undefined}
+                  >
+                    {stop.name}
+                  </span>
+                  <span
+                    data-testid={`line-stop-eta-${stop.id}`}
+                    className="flex flex-col items-end gap-0.5 tabular-nums leading-tight"
+                  >
+                    <span
+                      className="font-mono text-[10px]"
+                      style={{ color: 'var(--color-muted-foreground)', opacity: 0.7 }}
+                    >
+                      {lastPast
+                        ? t('arrivalPastShort', { minutes: Math.abs(lastPast.diffMinutes) })
+                        : '—'}
+                    </span>
+                    <span
+                      className="font-mono text-xs font-semibold"
+                      style={nextUp ? { color } : { color: 'var(--color-muted-foreground)' }}
+                    >
+                      {nextUp ? t('arrivalNextShort', { minutes: nextUp.diffMinutes }) : '—'}
+                    </span>
+                  </span>
                 </button>
+                {isExpanded && (
+                  <div
+                    data-testid={`line-stop-detail-${stop.id}`}
+                    className="px-3 pb-3 pt-1"
+                  >
+                    <h4 className="mb-1 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+                      {t('upcomingHeader')}
+                    </h4>
+                    <ol className="flex flex-col gap-0.5 text-xs">
+                      {futureArrivals.length === 0 ? (
+                        <li className="text-muted-foreground">{t('upcomingEmpty')}</li>
+                      ) : (
+                        futureArrivals.slice(0, 8).map((a, idx) => (
+                          <li
+                            key={`${a.arrivalTime}-${idx}`}
+                            data-testid={`line-stop-arrival-${stop.id}-${a.status}`}
+                            className="flex items-baseline gap-2 tabular-nums"
+                          >
+                            <span
+                              className="font-mono w-12"
+                              style={{ color, fontWeight: a.status === 'next' ? 600 : 400 }}
+                            >
+                              {a.arrivalTime}
+                            </span>
+                            <span className="text-muted-foreground">
+                              {a.status === 'next'
+                                ? t('arrivalNext', { minutes: a.diffMinutes })
+                                : t('arrivalFuture', { minutes: a.diffMinutes })}
+                            </span>
+                          </li>
+                        ))
+                      )}
+                    </ol>
+                  </div>
+                )}
               </li>
-            ))}
-          </ul>
-          <ul aria-label="departures" className="flex flex-wrap gap-2">
-            {active.scheduledDepartures.map((time) => (
-              <li key={time} className="rounded-md border border-border px-2 py-0.5 text-xs">
+            );
+          })}
+        </ol>
+      </section>
+
+      <section data-testid="line-departures-section">
+        <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+          {t('departuresHeader', { count: uniqueDepartures.length })}
+        </h3>
+        <ul aria-label="departures" className="flex flex-wrap gap-1.5">
+          {uniqueDepartures.map((time, i) => {
+            const isClosest = i === closestIdx;
+            return (
+              <li
+                key={time}
+                data-testid={isClosest ? 'line-departure-closest' : undefined}
+                className={[
+                  'rounded-md border px-2 py-0.5 font-mono text-xs tabular-nums transition-colors',
+                  isClosest ? 'text-foreground font-medium' : 'border-border',
+                ].join(' ')}
+                style={
+                  isClosest
+                    ? { backgroundColor: `${color}1f`, borderColor: color }
+                    : undefined
+                }
+              >
                 {time}
               </li>
-            ))}
-          </ul>
-        </div>
-      )}
+            );
+          })}
+        </ul>
+      </section>
     </section>
   );
 }

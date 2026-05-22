@@ -24,7 +24,7 @@ function getClient(): AxiosInstance {
 
 export async function fetchVehiclePositions(): Promise<Uint8Array> {
   try {
-    const { data } = await getClient().get('/api/v1/gtfs-rt/vehicle-positions.pb');
+    const { data } = await getClient().get('/gtfs-rt/vehicle-positions.pb');
     return new Uint8Array(data as ArrayBuffer);
   } catch (err) {
     if (err instanceof AxiosError) {

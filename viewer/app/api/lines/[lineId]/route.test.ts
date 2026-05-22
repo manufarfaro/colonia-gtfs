@@ -24,10 +24,10 @@ describe('GET /api/lines/:lineId', () => {
   it('R-06 returns 200 with line + shape + directions', async () => {
     mockPost.mockResolvedValueOnce({ data: fixture });
     const { GET } = await loadHandler();
-    const res = await GET(req(), { params: Promise.resolve({ lineId: '4' }) });
+    const res = await GET(req(), { params: Promise.resolve({ lineId: '999' }) });
     expect(res.status).toBe(200);
     const body = await res.json();
-    expect(body.line.shortName).toBe('4');
+    expect(body.line.shortName).toBe('999');
     expect(body.directions.length).toBe(2);
     expect(body.shape.length).toBe(2);
   });

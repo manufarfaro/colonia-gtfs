@@ -78,6 +78,16 @@ function parseHms(hms: string): number {
   return h * 3600 + m * 60 + s;
 }
 
+// How far OUTSIDE a trip's [first stop arrival, last stop arrival]
+// window we still treat as "the bus is at the start" / "the bus is at
+// the end". Buses parked at the terminal for a few minutes before /
+// after the trip is normal operation. Beyond this grace we refuse to
+// snap to that trip — it's not running anymore, so emitting a
+// VehiclePosition + TripUpdate for it would trip the MobilityData
+// validator (E029 vehicle off-shape, E041 empty stop_time_updates)
+// and confuse downstream consumers.
+const TRIP_WINDOW_GRACE_SECONDS = 600;
+
 function interpolatePosition(
   stopTimes: ReadonlyArray<StopTime>,
   gtfs: GtfsStaticService,
@@ -86,14 +96,22 @@ function interpolatePosition(
   // Find the bracket [stopTimes[i], stopTimes[i+1]] such that
   // arrival(i) <= secondsFromMidnight < arrival(i+1).
   if (stopTimes.length === 0) return null;
+  const firstArrival = parseHms(stopTimes[0].arrivalTime);
+  const lastArrival = parseHms(stopTimes[stopTimes.length - 1].arrivalTime);
+  if (
+    secondsFromMidnight < firstArrival - TRIP_WINDOW_GRACE_SECONDS ||
+    secondsFromMidnight > lastArrival + TRIP_WINDOW_GRACE_SECONDS
+  ) {
+    return null;
+  }
   const firstStop = gtfs.getStop(stopTimes[0].stopId);
   if (!firstStop) return null;
-  if (secondsFromMidnight <= parseHms(stopTimes[0].arrivalTime)) {
+  if (secondsFromMidnight <= firstArrival) {
     return { lat: firstStop.stopLat, lon: firstStop.stopLon };
   }
   const lastStop = gtfs.getStop(stopTimes[stopTimes.length - 1].stopId);
   if (!lastStop) return null;
-  if (secondsFromMidnight >= parseHms(stopTimes[stopTimes.length - 1].arrivalTime)) {
+  if (secondsFromMidnight >= lastArrival) {
     return { lat: lastStop.stopLat, lon: lastStop.stopLon };
   }
   for (let i = 0; i < stopTimes.length - 1; i++) {
@@ -120,16 +138,24 @@ export class MatcherService {
   constructor(private readonly gtfs: GtfsStaticService) {}
 
   match(marker: AvlMarker, now: Date): MatchResult {
-    // 1. SRV fast-path: marker.srv literally equals a known trip_id.
-    if (marker.srv && this.gtfs.getTrip(marker.srv)) {
-      return { kind: 'matched', tripId: marker.srv, via: 'srv' };
-    }
-
-    // 2. Resolve service_id for `now` in operator-local TZ.
+    // Resolve service_id for `now` in operator-local TZ (used by both
+    // fast-path and slow-path).
     const parts = montevideoParts(now);
     const activeServices = this.resolveActiveServices(parts.yyyymmdd, parts.dayOfWeek);
     if (activeServices.size === 0) {
       return { kind: 'unmatched', reason: 'no-active-service' };
+    }
+
+    // 1. SRV fast-path: the operator's `srv` is the value stored as
+    // `original_trip_id` in trips.txt. The lookup may return multiple
+    // candidates (same srv across service_ids); pick the one whose
+    // service is active today.
+    if (marker.srv) {
+      const tripCandidates = this.gtfs.getTripsByOriginalId(marker.srv);
+      const activeTrip = tripCandidates.find((t) => activeServices.has(t.serviceId));
+      if (activeTrip) {
+        return { kind: 'matched', tripId: activeTrip.tripId, via: 'srv' };
+      }
     }
 
     // 3. Candidates: trips matching (route_short_name == marker.lin,

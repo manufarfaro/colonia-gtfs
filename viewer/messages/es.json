@@ -1,8 +1,9 @@
 {
   "chrome": {
-    "title": "colonia-gtfs",
+    "title": "Maps",
     "disclaimer": "Datos preliminares · operador no oficial · tarifas a confirmar",
-    "themeToggle": "Cambiar tema"
+    "themeToggle": "Cambiar tema",
+    "logoAlt": "Intendencia de Colonia"
   },
   "landing": {
     "title": "Viajes en bus en Colonia",
@@ -19,7 +20,8 @@
         "label": "Destino",
         "placeholder": "Ej: Plaza de Toros Real de San Carlos"
       },
-      "clear": "Borrar"
+      "clear": "Borrar",
+      "swap": "Intercambiar origen y destino"
     },
     "card": {
       "duration": "{minutes} min",
@@ -28,7 +30,9 @@
       "legBus": "Línea {shortName} · {minutes} min hasta {to}",
       "fare": "Tarifa",
       "fareValue": "UYU ${amount}",
-      "fareUnconfirmed": "Consultar al chofer"
+      "fareUnconfirmed": "Consultar al chofer",
+      "walkOnly": "Solo a pie",
+      "lineChip": "Línea {shortName}"
     },
     "state": {
       "idleHint": "Elegí origen y destino para ver opciones de viaje.",
@@ -69,7 +73,16 @@
       },
       "card": {
         "directionLabel": "Sentido",
-        "scheduledDeparturesLabel": "Horarios del día"
+        "scheduledDeparturesLabel": "Horarios del día",
+        "stopsHeader": "Paradas del recorrido ({count})",
+        "departuresHeader": "Salidas programadas ({count})",
+        "arrivalPast": "Pasó hace {minutes} min",
+        "arrivalNext": "Próximo bus en {minutes} min",
+        "arrivalFuture": "En {minutes} min",
+        "arrivalPastShort": "hace {minutes}m",
+        "arrivalNextShort": "en {minutes}m",
+        "upcomingHeader": "Próximos buses",
+        "upcomingEmpty": "Sin más buses hoy"
       },
       "state": {
         "loading": "Cargando información de la línea…",
@@ -79,6 +92,12 @@
       },
       "vehicles": {
         "noLive": "Sin posiciones en vivo"
+      },
+      "legend": {
+        "header": "Línea {shortName}",
+        "outbound": "Ida · {headsign}",
+        "inbound": "Vuelta · {headsign}",
+        "switchTo": "Cambiar a {headsign}"
       }
     }
   }

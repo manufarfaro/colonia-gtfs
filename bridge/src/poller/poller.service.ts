@@ -29,6 +29,9 @@ export interface PollerConfig {
   originUrl: string;
   pollIntervalMs: number;
   timeoutMs: number;
+  /** Optional headers forwarded with each upstream GET. The operator
+   *  endpoint rejects requests without a matching Referer with HTTP 415. */
+  originHeaders?: Record<string, string>;
 }
 
 export interface Snapshot {
@@ -64,7 +67,11 @@ const HISTORY_LIMIT = 50;
 interface HttpLike {
   get: (
     url: string,
-    config?: { responseType?: 'arraybuffer'; timeout?: number },
+    config?: {
+      responseType?: 'arraybuffer';
+      timeout?: number;
+      headers?: Record<string, string>;
+    },
   ) => Observable<{ data: ArrayBuffer | ArrayBufferLike | Buffer }>;
 }
 
@@ -160,7 +167,11 @@ export class PollerService {
       return fs.readFile(url.slice('file://'.length));
     }
     const response = await firstValueFrom(
-      this.http.get(url, { responseType: 'arraybuffer', timeout: this.config.timeoutMs }),
+      this.http.get(url, {
+        responseType: 'arraybuffer',
+        timeout: this.config.timeoutMs,
+        headers: this.config.originHeaders,
+      }),
     );
     return Buffer.from(response.data as ArrayBuffer);
   }

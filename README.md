@@ -10,6 +10,8 @@
 [![Bridge RT validate](https://github.com/manufarfaro/colonia-gtfs/actions/workflows/bridge-rt-validate.yml/badge.svg)](https://github.com/manufarfaro/colonia-gtfs/actions/workflows/bridge-rt-validate.yml)
 [![Viewer](https://github.com/manufarfaro/colonia-gtfs/actions/workflows/viewer.yml/badge.svg)](https://github.com/manufarfaro/colonia-gtfs/actions/workflows/viewer.yml)
 [![Viewer Smoke](https://github.com/manufarfaro/colonia-gtfs/actions/workflows/viewer-smoke.yml/badge.svg)](https://github.com/manufarfaro/colonia-gtfs/actions/workflows/viewer-smoke.yml)
+[![Code license: MIT](https://img.shields.io/badge/code-MIT-blue?style=flat-square)](LICENSE)
+[![Data license: CC BY 4.0](https://img.shields.io/badge/data-CC%20BY%204.0-lightgrey?style=flat-square)](data/LICENSE)
 
 **Español** · [English](README.en.md)
 
@@ -54,3 +56,10 @@ El trabajo arranca desde un PRD, sigue con un spec en OpenSpec y termina en cód
 ## Desarrollo
 
 El toolchain Python (scripts de build/validate/refresh, tests, lints, helpers de CI) vive bajo [`tooling/`](tooling/). Setup, comandos y dependencias en [`tooling/README.md`](tooling/README.md).
+
+## Licencias
+
+Este repo tiene **doble licencia**:
+
+- **Código** — [MIT](LICENSE). Aplica a todo lo que no esté bajo `data/`: viewer, bridge, tooling, deployment, openspec, docs.
+- **Datos GTFS** — [CC BY 4.0](data/LICENSE). Aplica al contenido de `data/` (archivos `.txt`, `shapes.txt`, el recorte `colonia.osm.pbf`) y al `gtfs.zip` publicado en GitHub Releases. Si reutilizás el feed, atribuí a `colonia-gtfs` con link al repo.

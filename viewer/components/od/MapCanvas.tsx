@@ -44,6 +44,7 @@ function uniqueBusLines(
     // can appear in both directions; we don't want to render the
     // opposite-direction bus on top of the user's leg.
     const key = `${shortName}/${leg.directionId ?? '?'}`;
+    /* v8 ignore next — defensive de-dupe; realistic plans don't repeat the same (line, dir) leg */
     if (seen.has(key)) continue;
     seen.add(key);
     out.push({

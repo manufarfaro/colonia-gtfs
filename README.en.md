@@ -21,6 +21,20 @@ Mobile-first web app that lets tourists plan bus trips between two points in Col
 
 Operator **Sol Antigua** (urban Colonia del Sacramento), lines 3, 4, 5, and 8. Other operators (ABC Coop, suburban routes) and broader geography are v0.1+.
 
+## Screenshots
+
+### Origin → Destination mode
+![OD mode: El General → Buquebus itinerary via Line 4](docs/screenshots/od-itinerary.png)
+Itinerary computed locally by OTP. Origin (cobalt circle) and destination (red pin) use the same Lucide icons as the sidebar inputs; the selected itinerary's detail expands inline beneath its card.
+
+### Line mode
+![Line mode: full Line 4 route with the bus near El General](docs/screenshots/line-schedule-route.png)
+Full route with every stop. The bus position refreshes every 15 s from the operator's AVL through our GTFS-RT bridge.
+
+### Stop detail
+![Stop detail for M FERNANDEZ with next buses at 21:35 and 22:35](docs/screenshots/line-schedule-stop-detail.png)
+Tapping a stop (sidebar or map) highlights the row and reveals the "NEXT BUSES" list with absolute time and minutes remaining.
+
 ## Conceptual stack
 
 Three services in Docker Compose: `viewer` (Next.js — UI + API routes, the only public-facing container) → `otp` (OTP 2 routing engine) + `bridge` (NestJS, AVL → GTFS-RT). Details in [PRD §6](docs/prd/mvp-v0.md#6-arquitectura-conceptual).

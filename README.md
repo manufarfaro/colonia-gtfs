@@ -21,6 +21,20 @@ App web mobile-first para que turistas vean cómo llegar en colectivo entre dos 
 
 Operador **Sol Antigua** (urbano Colonia del Sacramento), líneas 3, 4, 5 y 8. Otros operadores (ABC Coop, suburbano) y geografía extendida son v0.1+.
 
+## Capturas
+
+### Modo Origen → Destino
+![Modo OD: itinerario El General → Buquebus por Línea 4](docs/screenshots/od-itinerary.png)
+Plan calculado localmente por OTP. Origen (círculo cobalto) y destino (pin rojo) usan los mismos iconos Lucide que los inputs del sidebar; el detalle del itinerario seleccionado se expande inline bajo su tarjeta.
+
+### Modo línea
+![Modo línea: recorrido completo de Línea 4 con bus en El General](docs/screenshots/line-schedule-route.png)
+Recorrido completo de la línea con todas sus paradas. El bus se actualiza cada 15 s desde el AVL del operador a través de nuestro bridge GTFS-RT.
+
+### Detalle de parada
+![Detalle de parada M FERNANDEZ con próximos buses 21:35 y 22:35](docs/screenshots/line-schedule-stop-detail.png)
+Al tocar una parada (en el sidebar o en el mapa) se resalta la fila y aparece la lista "PRÓXIMOS BUSES" con la hora y los minutos restantes.
+
 ## Stack conceptual
 
 Tres services en Docker Compose: `viewer` (Next.js — UI + API routes, único container público) → `otp` (motor de routing OTP 2) + `bridge` (NestJS, AVL → GTFS-RT). Detalles en el [PRD §6](docs/prd/mvp-v0.md#6-arquitectura-conceptual).

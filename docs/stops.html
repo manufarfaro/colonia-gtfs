@@ -1,0 +1,290 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Paradas Sol Antigua - colonia-gtfs</title>
+  <style>
+    :root {
+      --ink: #1d2528;
+      --muted: #5f6f75;
+      --line: #d7e0dc;
+      --paper: #f8f6ee;
+      --panel: #ffffff;
+      --accent: #0f7c68;
+      --accent-2: #c14f32;
+      --shadow: 0 16px 40px rgba(29, 37, 40, 0.09);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        linear-gradient(90deg, rgba(15,124,104,0.08) 1px, transparent 1px),
+        linear-gradient(rgba(15,124,104,0.06) 1px, transparent 1px),
+        var(--paper);
+      background-size: 28px 28px;
+      font-family: Georgia, "Times New Roman", serif;
+    }
+    main {
+      width: min(1120px, calc(100% - 28px));
+      margin: 0 auto;
+      padding: 34px 0 56px;
+    }
+    header {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 20px;
+      align-items: end;
+      margin-bottom: 22px;
+      border-bottom: 3px solid var(--ink);
+      padding-bottom: 18px;
+    }
+    h1 {
+      margin: 0;
+      font-size: clamp(2rem, 5vw, 4.8rem);
+      line-height: 0.92;
+      letter-spacing: 0;
+      max-width: 760px;
+    }
+    .meta {
+      text-align: right;
+      color: var(--muted);
+      font: 700 0.82rem/1.45 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      text-transform: uppercase;
+    }
+    .note {
+      margin: 0 0 24px;
+      max-width: 760px;
+      color: var(--muted);
+      font-size: 1.05rem;
+      line-height: 1.5;
+    }
+    .table-wrap {
+      overflow-x: auto;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 760px;
+    }
+    th, td {
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      vertical-align: middle;
+    }
+    th {
+      position: sticky;
+      top: 0;
+      z-index: 1;
+      background: var(--ink);
+      color: #fff;
+      font: 800 0.76rem/1.2 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      text-transform: uppercase;
+    }
+    td {
+      font-size: 0.98rem;
+    }
+    td:first-child {
+      color: var(--accent-2);
+      font: 800 0.9rem/1 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      width: 86px;
+    }
+    tr:hover td {
+      background: #edf6f3;
+    }
+    a {
+      color: var(--accent);
+      font-weight: 700;
+      text-decoration-thickness: 2px;
+      text-underline-offset: 3px;
+    }
+    .coords {
+      color: var(--muted);
+      font: 0.86rem/1.2 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    }
+    @media (max-width: 720px) {
+      header {
+        grid-template-columns: 1fr;
+      }
+      .meta {
+        text-align: left;
+      }
+      main {
+        width: min(100% - 18px, 1120px);
+        padding-top: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <h1>Paradas urbanas de Sol Antigua</h1>
+      <div class="meta">
+        <div>136 paradas</div>
+        <div>Version GTFS 0.3.0</div>
+      </div>
+    </header>
+    <p class="note">
+      Inventario de paradas publicado desde el feed GTFS Schedule de colonia-gtfs.
+      Las coordenadas provienen de la captura AVL del operador y son referenciales
+      para planificacion y visualizacion.
+    </p>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Parada</th>
+            <th>Coordenadas</th>
+            <th>Mapa</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>1</td><td>REAL</td><td class="coords">-34.470684, -57.852208</td><td><a href="https://www.openstreetmap.org/?mlat=-34.470684&amp;mlon=-57.852208#map=18/-34.470684/-57.852208">Abrir</a></td></tr>
+          <tr><td>2</td><td>ITUZAINGO</td><td class="coords">-34.470613, -57.849220</td><td><a href="https://www.openstreetmap.org/?mlat=-34.470613&amp;mlon=-57.849220#map=18/-34.470613/-57.849220">Abrir</a></td></tr>
+          <tr><td>3</td><td>INT SUAREZ</td><td class="coords">-34.470575, -57.847071</td><td><a href="https://www.openstreetmap.org/?mlat=-34.470575&amp;mlon=-57.847071#map=18/-34.470575/-57.847071">Abrir</a></td></tr>
+          <tr><td>4</td><td>A MENDEZ</td><td class="coords">-34.470517, -57.844844</td><td><a href="https://www.openstreetmap.org/?mlat=-34.470517&amp;mlon=-57.844844#map=18/-34.470517/-57.844844">Abrir</a></td></tr>
+          <tr><td>5</td><td>AV GRAL ARTIGAS</td><td class="coords">-34.470584, -57.842887</td><td><a href="https://www.openstreetmap.org/?mlat=-34.470584&amp;mlon=-57.842887#map=18/-34.470584/-57.842887">Abrir</a></td></tr>
+          <tr><td>6</td><td>AV BUENOS AIRES</td><td class="coords">-34.471231, -57.842097</td><td><a href="https://www.openstreetmap.org/?mlat=-34.471231&amp;mlon=-57.842097#map=18/-34.471231/-57.842097">Abrir</a></td></tr>
+          <tr><td>7</td><td>RIVADAVIA</td><td class="coords">-34.469236, -57.840562</td><td><a href="https://www.openstreetmap.org/?mlat=-34.469236&amp;mlon=-57.840562#map=18/-34.469236/-57.840562">Abrir</a></td></tr>
+          <tr><td>8</td><td>CNEL ARROYO</td><td class="coords">-34.467466, -57.840584</td><td><a href="https://www.openstreetmap.org/?mlat=-34.467466&amp;mlon=-57.840584#map=18/-34.467466/-57.840584">Abrir</a></td></tr>
+          <tr><td>9</td><td>RIO NEGRO</td><td class="coords">-34.465524, -57.840652</td><td><a href="https://www.openstreetmap.org/?mlat=-34.465524&amp;mlon=-57.840652#map=18/-34.465524/-57.840652">Abrir</a></td></tr>
+          <tr><td>10</td><td>ITALIA</td><td class="coords">-34.463237, -57.840281</td><td><a href="https://www.openstreetmap.org/?mlat=-34.463237&amp;mlon=-57.840281#map=18/-34.463237/-57.840281">Abrir</a></td></tr>
+          <tr><td>11</td><td>AV JOSE P VARELA</td><td class="coords">-34.462984, -57.837917</td><td><a href="https://www.openstreetmap.org/?mlat=-34.462984&amp;mlon=-57.837917#map=18/-34.462984/-57.837917">Abrir</a></td></tr>
+          <tr><td>48</td><td>LUIS PERALTA</td><td class="coords">-34.439338, -57.852415</td><td><a href="https://www.openstreetmap.org/?mlat=-34.439338&amp;mlon=-57.852415#map=18/-34.439338/-57.852415">Abrir</a></td></tr>
+          <tr><td>49</td><td>D MADDALENA</td><td class="coords">-34.440877, -57.850169</td><td><a href="https://www.openstreetmap.org/?mlat=-34.440877&amp;mlon=-57.850169#map=18/-34.440877/-57.850169">Abrir</a></td></tr>
+          <tr><td>61</td><td>AV DOMINGO BAQUE</td><td class="coords">-34.462690, -57.840956</td><td><a href="https://www.openstreetmap.org/?mlat=-34.462690&amp;mlon=-57.840956#map=18/-34.462690/-57.840956">Abrir</a></td></tr>
+          <tr><td>62</td><td>AV GRAL ARTIGAS</td><td class="coords">-34.463221, -57.842721</td><td><a href="https://www.openstreetmap.org/?mlat=-34.463221&amp;mlon=-57.842721#map=18/-34.463221/-57.842721">Abrir</a></td></tr>
+          <tr><td>63</td><td>MANGARELLI</td><td class="coords">-34.465036, -57.842943</td><td><a href="https://www.openstreetmap.org/?mlat=-34.465036&amp;mlon=-57.842943#map=18/-34.465036/-57.842943">Abrir</a></td></tr>
+          <tr><td>64</td><td>DAYMAN</td><td class="coords">-34.466897, -57.842886</td><td><a href="https://www.openstreetmap.org/?mlat=-34.466897&amp;mlon=-57.842886#map=18/-34.466897/-57.842886">Abrir</a></td></tr>
+          <tr><td>65</td><td>FOSALBA</td><td class="coords">-34.468574, -57.840618</td><td><a href="https://www.openstreetmap.org/?mlat=-34.468574&amp;mlon=-57.840618#map=18/-34.468574/-57.840618">Abrir</a></td></tr>
+          <tr><td>66</td><td>A MENDEZ</td><td class="coords">-34.470442, -57.845250</td><td><a href="https://www.openstreetmap.org/?mlat=-34.470442&amp;mlon=-57.845250#map=18/-34.470442/-57.845250">Abrir</a></td></tr>
+          <tr><td>67</td><td>INT SUAREZ</td><td class="coords">-34.470502, -57.847639</td><td><a href="https://www.openstreetmap.org/?mlat=-34.470502&amp;mlon=-57.847639#map=18/-34.470502/-57.847639">Abrir</a></td></tr>
+          <tr><td>69</td><td>ROSENTHAL</td><td class="coords">-34.463333, -57.833819</td><td><a href="https://www.openstreetmap.org/?mlat=-34.463333&amp;mlon=-57.833819#map=18/-34.463333/-57.833819">Abrir</a></td></tr>
+          <tr><td>71</td><td>EXODO</td><td class="coords">-34.460796, -57.833249</td><td><a href="https://www.openstreetmap.org/?mlat=-34.460796&amp;mlon=-57.833249#map=18/-34.460796/-57.833249">Abrir</a></td></tr>
+          <tr><td>72</td><td>BANDENGUES</td><td class="coords">-34.458716, -57.833254</td><td><a href="https://www.openstreetmap.org/?mlat=-34.458716&amp;mlon=-57.833254#map=18/-34.458716/-57.833254">Abrir</a></td></tr>
+          <tr><td>73</td><td>RAMON BARBOT</td><td class="coords">-34.456692, -57.832722</td><td><a href="https://www.openstreetmap.org/?mlat=-34.456692&amp;mlon=-57.832722#map=18/-34.456692/-57.832722">Abrir</a></td></tr>
+          <tr><td>75</td><td>AV BATLLE Y ORDO</td><td class="coords">-34.455297, -57.835206</td><td><a href="https://www.openstreetmap.org/?mlat=-34.455297&amp;mlon=-57.835206#map=18/-34.455297/-57.835206">Abrir</a></td></tr>
+          <tr><td>76</td><td>VICTORIA</td><td class="coords">-34.454355, -57.836750</td><td><a href="https://www.openstreetmap.org/?mlat=-34.454355&amp;mlon=-57.836750#map=18/-34.454355/-57.836750">Abrir</a></td></tr>
+          <tr><td>77</td><td>DEMOCRACIA</td><td class="coords">-34.452876, -57.836998</td><td><a href="https://www.openstreetmap.org/?mlat=-34.452876&amp;mlon=-57.836998#map=18/-34.452876/-57.836998">Abrir</a></td></tr>
+          <tr><td>78</td><td>MUNICIPIO</td><td class="coords">-34.451659, -57.837447</td><td><a href="https://www.openstreetmap.org/?mlat=-34.451659&amp;mlon=-57.837447#map=18/-34.451659/-57.837447">Abrir</a></td></tr>
+          <tr><td>79</td><td>P ZUFRIATEGUI</td><td class="coords">-34.449377, -57.838512</td><td><a href="https://www.openstreetmap.org/?mlat=-34.449377&amp;mlon=-57.838512#map=18/-34.449377/-57.838512">Abrir</a></td></tr>
+          <tr><td>80</td><td>RUTA 21</td><td class="coords">-34.446774, -57.838648</td><td><a href="https://www.openstreetmap.org/?mlat=-34.446774&amp;mlon=-57.838648#map=18/-34.446774/-57.838648">Abrir</a></td></tr>
+          <tr><td>81</td><td>M FREIRE</td><td class="coords">-34.446027, -57.839273</td><td><a href="https://www.openstreetmap.org/?mlat=-34.446027&amp;mlon=-57.839273#map=18/-34.446027/-57.839273">Abrir</a></td></tr>
+          <tr><td>82</td><td>RUTA 21</td><td class="coords">-34.444823, -57.837460</td><td><a href="https://www.openstreetmap.org/?mlat=-34.444823&amp;mlon=-57.837460#map=18/-34.444823/-57.837460">Abrir</a></td></tr>
+          <tr><td>84</td><td>RUTA 21</td><td class="coords">-34.441230, -57.839823</td><td><a href="https://www.openstreetmap.org/?mlat=-34.441230&amp;mlon=-57.839823#map=18/-34.441230/-57.839823">Abrir</a></td></tr>
+          <tr><td>85</td><td>JUAN SPIKERMAN</td><td class="coords">-34.441933, -57.843924</td><td><a href="https://www.openstreetmap.org/?mlat=-34.441933&amp;mlon=-57.843924#map=18/-34.441933/-57.843924">Abrir</a></td></tr>
+          <tr><td>86</td><td>BASILIO ARAUJO</td><td class="coords">-34.442435, -57.845506</td><td><a href="https://www.openstreetmap.org/?mlat=-34.442435&amp;mlon=-57.845506#map=18/-34.442435/-57.845506">Abrir</a></td></tr>
+          <tr><td>88</td><td>AVELINO MIRANDA</td><td class="coords">-34.439581, -57.845466</td><td><a href="https://www.openstreetmap.org/?mlat=-34.439581&amp;mlon=-57.845466#map=18/-34.439581/-57.845466">Abrir</a></td></tr>
+          <tr><td>89</td><td>CALLE 17 METROS</td><td class="coords">-34.438167, -57.842577</td><td><a href="https://www.openstreetmap.org/?mlat=-34.438167&amp;mlon=-57.842577#map=18/-34.438167/-57.842577">Abrir</a></td></tr>
+          <tr><td>90</td><td>RUTA 21</td><td class="coords">-34.437063, -57.838988</td><td><a href="https://www.openstreetmap.org/?mlat=-34.437063&amp;mlon=-57.838988#map=18/-34.437063/-57.838988">Abrir</a></td></tr>
+          <tr><td>91</td><td>VIV LOS CEIBOS</td><td class="coords">-34.443908, -57.837558</td><td><a href="https://www.openstreetmap.org/?mlat=-34.443908&amp;mlon=-57.837558#map=18/-34.443908/-57.837558">Abrir</a></td></tr>
+          <tr><td>92</td><td>RUTA 21</td><td class="coords">-34.445311, -57.838224</td><td><a href="https://www.openstreetmap.org/?mlat=-34.445311&amp;mlon=-57.838224#map=18/-34.445311/-57.838224">Abrir</a></td></tr>
+          <tr><td>93</td><td>M FREIRE</td><td class="coords">-34.446801, -57.839226</td><td><a href="https://www.openstreetmap.org/?mlat=-34.446801&amp;mlon=-57.839226#map=18/-34.446801/-57.839226">Abrir</a></td></tr>
+          <tr><td>94</td><td>RUTA 21</td><td class="coords">-34.448085, -57.838224</td><td><a href="https://www.openstreetmap.org/?mlat=-34.448085&amp;mlon=-57.838224#map=18/-34.448085/-57.838224">Abrir</a></td></tr>
+          <tr><td>95</td><td>P ZUFRIATEGUI</td><td class="coords">-34.450174, -57.838811</td><td><a href="https://www.openstreetmap.org/?mlat=-34.450174&amp;mlon=-57.838811#map=18/-34.450174/-57.838811">Abrir</a></td></tr>
+          <tr><td>96</td><td>MUNICIPIO</td><td class="coords">-34.451794, -57.837203</td><td><a href="https://www.openstreetmap.org/?mlat=-34.451794&amp;mlon=-57.837203#map=18/-34.451794/-57.837203">Abrir</a></td></tr>
+          <tr><td>97</td><td>DEMOCRACIA</td><td class="coords">-34.453253, -57.836976</td><td><a href="https://www.openstreetmap.org/?mlat=-34.453253&amp;mlon=-57.836976#map=18/-34.453253/-57.836976">Abrir</a></td></tr>
+          <tr><td>98</td><td>VICTORIA</td><td class="coords">-34.454812, -57.836584</td><td><a href="https://www.openstreetmap.org/?mlat=-34.454812&amp;mlon=-57.836584#map=18/-34.454812/-57.836584">Abrir</a></td></tr>
+          <tr><td>99</td><td>INDEPENDENCIA</td><td class="coords">-34.456089, -57.833499</td><td><a href="https://www.openstreetmap.org/?mlat=-34.456089&amp;mlon=-57.833499#map=18/-34.456089/-57.833499">Abrir</a></td></tr>
+          <tr><td>101</td><td>E FRUGONI</td><td class="coords">-34.457412, -57.833414</td><td><a href="https://www.openstreetmap.org/?mlat=-34.457412&amp;mlon=-57.833414#map=18/-34.457412/-57.833414">Abrir</a></td></tr>
+          <tr><td>102</td><td>BLANDENGUES</td><td class="coords">-34.459509, -57.833259</td><td><a href="https://www.openstreetmap.org/?mlat=-34.459509&amp;mlon=-57.833259#map=18/-34.459509/-57.833259">Abrir</a></td></tr>
+          <tr><td>103</td><td>EXODO</td><td class="coords">-34.461704, -57.833576</td><td><a href="https://www.openstreetmap.org/?mlat=-34.461704&amp;mlon=-57.833576#map=18/-34.461704/-57.833576">Abrir</a></td></tr>
+          <tr><td>104</td><td>J MORAN</td><td class="coords">-34.463198, -57.835839</td><td><a href="https://www.openstreetmap.org/?mlat=-34.463198&amp;mlon=-57.835839#map=18/-34.463198/-57.835839">Abrir</a></td></tr>
+          <tr><td>105</td><td>AV A SARAVIA</td><td class="coords">-34.462771, -57.838615</td><td><a href="https://www.openstreetmap.org/?mlat=-34.462771&amp;mlon=-57.838615#map=18/-34.462771/-57.838615">Abrir</a></td></tr>
+          <tr><td>106</td><td>PIEDRA ALTA</td><td class="coords">-34.463241, -57.831988</td><td><a href="https://www.openstreetmap.org/?mlat=-34.463241&amp;mlon=-57.831988#map=18/-34.463241/-57.831988">Abrir</a></td></tr>
+          <tr><td>107</td><td>DR F BASSAHUN</td><td class="coords">-34.461071, -57.827679</td><td><a href="https://www.openstreetmap.org/?mlat=-34.461071&amp;mlon=-57.827679#map=18/-34.461071/-57.827679">Abrir</a></td></tr>
+          <tr><td>108</td><td>PARQUE FERRANDO</td><td class="coords">-34.466522, -57.831303</td><td><a href="https://www.openstreetmap.org/?mlat=-34.466522&amp;mlon=-57.831303#map=18/-34.466522/-57.831303">Abrir</a></td></tr>
+          <tr><td>109</td><td>DR L CASSANELLO</td><td class="coords">-34.469018, -57.830004</td><td><a href="https://www.openstreetmap.org/?mlat=-34.469018&amp;mlon=-57.830004#map=18/-34.469018/-57.830004">Abrir</a></td></tr>
+          <tr><td>110</td><td>G ORTIZ</td><td class="coords">-34.468575, -57.826244</td><td><a href="https://www.openstreetmap.org/?mlat=-34.468575&amp;mlon=-57.826244#map=18/-34.468575/-57.826244">Abrir</a></td></tr>
+          <tr><td>111</td><td>ARAUCARIA</td><td class="coords">-34.467933, -57.824252</td><td><a href="https://www.openstreetmap.org/?mlat=-34.467933&amp;mlon=-57.824252#map=18/-34.467933/-57.824252">Abrir</a></td></tr>
+          <tr><td>112</td><td>LIBANO</td><td class="coords">-34.466011, -57.824395</td><td><a href="https://www.openstreetmap.org/?mlat=-34.466011&amp;mlon=-57.824395#map=18/-34.466011/-57.824395">Abrir</a></td></tr>
+          <tr><td>113</td><td>G AYALA</td><td class="coords">-34.463759, -57.823915</td><td><a href="https://www.openstreetmap.org/?mlat=-34.463759&amp;mlon=-57.823915#map=18/-34.463759/-57.823915">Abrir</a></td></tr>
+          <tr><td>114</td><td>R AYALA</td><td class="coords">-34.461503, -57.823089</td><td><a href="https://www.openstreetmap.org/?mlat=-34.461503&amp;mlon=-57.823089#map=18/-34.461503/-57.823089">Abrir</a></td></tr>
+          <tr><td>115</td><td>LOS NOGALES</td><td class="coords">-34.457343, -57.819389</td><td><a href="https://www.openstreetmap.org/?mlat=-34.457343&amp;mlon=-57.819389#map=18/-34.457343/-57.819389">Abrir</a></td></tr>
+          <tr><td>116</td><td>RUTA 1</td><td class="coords">-34.455241, -57.815852</td><td><a href="https://www.openstreetmap.org/?mlat=-34.455241&amp;mlon=-57.815852#map=18/-34.455241/-57.815852">Abrir</a></td></tr>
+          <tr><td>118</td><td>F J CARBALLO</td><td class="coords">-34.452766, -57.815692</td><td><a href="https://www.openstreetmap.org/?mlat=-34.452766&amp;mlon=-57.815692#map=18/-34.452766/-57.815692">Abrir</a></td></tr>
+          <tr><td>119</td><td>MUNICIPIO</td><td class="coords">-34.450816, -57.815161</td><td><a href="https://www.openstreetmap.org/?mlat=-34.450816&amp;mlon=-57.815161#map=18/-34.450816/-57.815161">Abrir</a></td></tr>
+          <tr><td>120</td><td>10 DE MAYO</td><td class="coords">-34.450242, -57.815554</td><td><a href="https://www.openstreetmap.org/?mlat=-34.450242&amp;mlon=-57.815554#map=18/-34.450242/-57.815554">Abrir</a></td></tr>
+          <tr><td>121</td><td>CURVA</td><td class="coords">-34.448142, -57.814116</td><td><a href="https://www.openstreetmap.org/?mlat=-34.448142&amp;mlon=-57.814116#map=18/-34.448142/-57.814116">Abrir</a></td></tr>
+          <tr><td>122</td><td>HOGAR NIMMO</td><td class="coords">-34.446713, -57.812272</td><td><a href="https://www.openstreetmap.org/?mlat=-34.446713&amp;mlon=-57.812272#map=18/-34.446713/-57.812272">Abrir</a></td></tr>
+          <tr><td>123</td><td>PLAZA EL GENERAL</td><td class="coords">-34.444545, -57.809706</td><td><a href="https://www.openstreetmap.org/?mlat=-34.444545&amp;mlon=-57.809706#map=18/-34.444545/-57.809706">Abrir</a></td></tr>
+          <tr><td>124</td><td>COMP LOS ALAMOS</td><td class="coords">-34.445936, -57.809475</td><td><a href="https://www.openstreetmap.org/?mlat=-34.445936&amp;mlon=-57.809475#map=18/-34.445936/-57.809475">Abrir</a></td></tr>
+          <tr><td>125</td><td>COVIDECO I</td><td class="coords">-34.448705, -57.807580</td><td><a href="https://www.openstreetmap.org/?mlat=-34.448705&amp;mlon=-57.807580#map=18/-34.448705/-57.807580">Abrir</a></td></tr>
+          <tr><td>126</td><td>VIV POLICIALES</td><td class="coords">-34.449736, -57.804849</td><td><a href="https://www.openstreetmap.org/?mlat=-34.449736&amp;mlon=-57.804849#map=18/-34.449736/-57.804849">Abrir</a></td></tr>
+          <tr><td>127</td><td>JUAN BERNARDI</td><td class="coords">-34.449121, -57.803628</td><td><a href="https://www.openstreetmap.org/?mlat=-34.449121&amp;mlon=-57.803628#map=18/-34.449121/-57.803628">Abrir</a></td></tr>
+          <tr><td>128</td><td>JUAN BERNARDI</td><td class="coords">-34.447222, -57.802638</td><td><a href="https://www.openstreetmap.org/?mlat=-34.447222&amp;mlon=-57.802638#map=18/-34.447222/-57.802638">Abrir</a></td></tr>
+          <tr><td>129</td><td>COVIMALVINAS</td><td class="coords">-34.445935, -57.804064</td><td><a href="https://www.openstreetmap.org/?mlat=-34.445935&amp;mlon=-57.804064#map=18/-34.445935/-57.804064">Abrir</a></td></tr>
+          <tr><td>130</td><td>COVIMALVINAS</td><td class="coords">-34.444864, -57.805941</td><td><a href="https://www.openstreetmap.org/?mlat=-34.444864&amp;mlon=-57.805941#map=18/-34.444864/-57.805941">Abrir</a></td></tr>
+          <tr><td>131</td><td>D VILLANUEVA</td><td class="coords">-34.443115, -57.807735</td><td><a href="https://www.openstreetmap.org/?mlat=-34.443115&amp;mlon=-57.807735#map=18/-34.443115/-57.807735">Abrir</a></td></tr>
+          <tr><td>132</td><td>ESCUELA 82</td><td class="coords">-34.441571, -57.805886</td><td><a href="https://www.openstreetmap.org/?mlat=-34.441571&amp;mlon=-57.805886#map=18/-34.441571/-57.805886">Abrir</a></td></tr>
+          <tr><td>133</td><td>M FERNANDEZ</td><td class="coords">-34.440395, -57.803634</td><td><a href="https://www.openstreetmap.org/?mlat=-34.440395&amp;mlon=-57.803634#map=18/-34.440395/-57.803634">Abrir</a></td></tr>
+          <tr><td>134</td><td>A COLO</td><td class="coords">-34.438054, -57.802914</td><td><a href="https://www.openstreetmap.org/?mlat=-34.438054&amp;mlon=-57.802914#map=18/-34.438054/-57.802914">Abrir</a></td></tr>
+          <tr><td>135</td><td>F J CARBALLO</td><td class="coords">-34.437048, -57.802403</td><td><a href="https://www.openstreetmap.org/?mlat=-34.437048&amp;mlon=-57.802403#map=18/-34.437048/-57.802403">Abrir</a></td></tr>
+          <tr><td>136</td><td>F J CARBALLO</td><td class="coords">-34.435147, -57.801444</td><td><a href="https://www.openstreetmap.org/?mlat=-34.435147&amp;mlon=-57.801444#map=18/-34.435147/-57.801444">Abrir</a></td></tr>
+          <tr><td>138</td><td>F J CARBALLO</td><td class="coords">-34.435785, -57.801784</td><td><a href="https://www.openstreetmap.org/?mlat=-34.435785&amp;mlon=-57.801784#map=18/-34.435785/-57.801784">Abrir</a></td></tr>
+          <tr><td>139</td><td>F J CARBALLO</td><td class="coords">-34.436945, -57.802385</td><td><a href="https://www.openstreetmap.org/?mlat=-34.436945&amp;mlon=-57.802385#map=18/-34.436945/-57.802385">Abrir</a></td></tr>
+          <tr><td>140</td><td>A COLO</td><td class="coords">-34.438828, -57.803368</td><td><a href="https://www.openstreetmap.org/?mlat=-34.438828&amp;mlon=-57.803368#map=18/-34.438828/-57.803368">Abrir</a></td></tr>
+          <tr><td>141</td><td>M FERNANDEZ</td><td class="coords">-34.440724, -57.804918</td><td><a href="https://www.openstreetmap.org/?mlat=-34.440724&amp;mlon=-57.804918#map=18/-34.440724/-57.804918">Abrir</a></td></tr>
+          <tr><td>142</td><td>ESCUELA 82</td><td class="coords">-34.442428, -57.807042</td><td><a href="https://www.openstreetmap.org/?mlat=-34.442428&amp;mlon=-57.807042#map=18/-34.442428/-57.807042">Abrir</a></td></tr>
+          <tr><td>143</td><td>JUAN BERNARDI</td><td class="coords">-34.443884, -57.808927</td><td><a href="https://www.openstreetmap.org/?mlat=-34.443884&amp;mlon=-57.808927#map=18/-34.443884/-57.808927">Abrir</a></td></tr>
+          <tr><td>144</td><td>PLAZA EL GENERAL</td><td class="coords">-34.445422, -57.811011</td><td><a href="https://www.openstreetmap.org/?mlat=-34.445422&amp;mlon=-57.811011#map=18/-34.445422/-57.811011">Abrir</a></td></tr>
+          <tr><td>145</td><td>HOGAR NIMMO</td><td class="coords">-34.447048, -57.813090</td><td><a href="https://www.openstreetmap.org/?mlat=-34.447048&amp;mlon=-57.813090#map=18/-34.447048/-57.813090">Abrir</a></td></tr>
+          <tr><td>146</td><td>CURVA</td><td class="coords">-34.448502, -57.814597</td><td><a href="https://www.openstreetmap.org/?mlat=-34.448502&amp;mlon=-57.814597#map=18/-34.448502/-57.814597">Abrir</a></td></tr>
+          <tr><td>147</td><td>10 DE MAYO</td><td class="coords">-34.449981, -57.815074</td><td><a href="https://www.openstreetmap.org/?mlat=-34.449981&amp;mlon=-57.815074#map=18/-34.449981/-57.815074">Abrir</a></td></tr>
+          <tr><td>148</td><td>MUNICIPIO</td><td class="coords">-34.451458, -57.815503</td><td><a href="https://www.openstreetmap.org/?mlat=-34.451458&amp;mlon=-57.815503#map=18/-34.451458/-57.815503">Abrir</a></td></tr>
+          <tr><td>149</td><td>17 METROS</td><td class="coords">-34.453383, -57.816073</td><td><a href="https://www.openstreetmap.org/?mlat=-34.453383&amp;mlon=-57.816073#map=18/-34.453383/-57.816073">Abrir</a></td></tr>
+          <tr><td>150</td><td>RUTA 1</td><td class="coords">-34.456157, -57.817861</td><td><a href="https://www.openstreetmap.org/?mlat=-34.456157&amp;mlon=-57.817861#map=18/-34.456157/-57.817861">Abrir</a></td></tr>
+          <tr><td>151</td><td>RUTA 1</td><td class="coords">-34.462096, -57.828732</td><td><a href="https://www.openstreetmap.org/?mlat=-34.462096&amp;mlon=-57.828732#map=18/-34.462096/-57.828732">Abrir</a></td></tr>
+          <tr><td>152</td><td>R AYALA</td><td class="coords">-34.462463, -57.823494</td><td><a href="https://www.openstreetmap.org/?mlat=-34.462463&amp;mlon=-57.823494#map=18/-34.462463/-57.823494">Abrir</a></td></tr>
+          <tr><td>153</td><td>G AYALA</td><td class="coords">-34.464656, -57.824139</td><td><a href="https://www.openstreetmap.org/?mlat=-34.464656&amp;mlon=-57.824139#map=18/-34.464656/-57.824139">Abrir</a></td></tr>
+          <tr><td>154</td><td>LIBANO</td><td class="coords">-34.466749, -57.824330</td><td><a href="https://www.openstreetmap.org/?mlat=-34.466749&amp;mlon=-57.824330#map=18/-34.466749/-57.824330">Abrir</a></td></tr>
+          <tr><td>155</td><td>DR L CASSANELLO</td><td class="coords">-34.467939, -57.824641</td><td><a href="https://www.openstreetmap.org/?mlat=-34.467939&amp;mlon=-57.824641#map=18/-34.467939/-57.824641">Abrir</a></td></tr>
+          <tr><td>156</td><td>G ORTIZ</td><td class="coords">-34.468713, -57.828053</td><td><a href="https://www.openstreetmap.org/?mlat=-34.468713&amp;mlon=-57.828053#map=18/-34.468713/-57.828053">Abrir</a></td></tr>
+          <tr><td>157</td><td>DR L CASSANELLO</td><td class="coords">-34.467877, -57.831241</td><td><a href="https://www.openstreetmap.org/?mlat=-34.467877&amp;mlon=-57.831241#map=18/-34.467877/-57.831241">Abrir</a></td></tr>
+          <tr><td>158</td><td>PARQUE FERRANDO</td><td class="coords">-34.462675, -57.829167</td><td><a href="https://www.openstreetmap.org/?mlat=-34.462675&amp;mlon=-57.829167#map=18/-34.462675/-57.829167">Abrir</a></td></tr>
+          <tr><td>159</td><td>RUTA 1</td><td class="coords">-34.459712, -57.824968</td><td><a href="https://www.openstreetmap.org/?mlat=-34.459712&amp;mlon=-57.824968#map=18/-34.459712/-57.824968">Abrir</a></td></tr>
+          <tr><td>160</td><td>DR F BASSAHUN</td><td class="coords">-34.462502, -57.830386</td><td><a href="https://www.openstreetmap.org/?mlat=-34.462502&amp;mlon=-57.830386#map=18/-34.462502/-57.830386">Abrir</a></td></tr>
+          <tr><td>161</td><td>PIEDRA ALTA</td><td class="coords">-34.463313, -57.833202</td><td><a href="https://www.openstreetmap.org/?mlat=-34.463313&amp;mlon=-57.833202#map=18/-34.463313/-57.833202">Abrir</a></td></tr>
+          <tr><td>176</td><td>F J CARBALLO</td><td class="coords">-34.450124, -57.815128</td><td><a href="https://www.openstreetmap.org/?mlat=-34.450124&amp;mlon=-57.815128#map=18/-34.450124/-57.815128">Abrir</a></td></tr>
+          <tr><td>177</td><td>R1 / JOSE VICO</td><td class="coords">-34.459816, -57.824670</td><td><a href="https://www.openstreetmap.org/?mlat=-34.459816&amp;mlon=-57.824670#map=18/-34.459816/-57.824670">Abrir</a></td></tr>
+          <tr><td>178</td><td>AV CBO L SANCHEZ</td><td class="coords">-34.461915, -57.828581</td><td><a href="https://www.openstreetmap.org/?mlat=-34.461915&amp;mlon=-57.828581#map=18/-34.461915/-57.828581">Abrir</a></td></tr>
+          <tr><td>179</td><td>LOS NOGALES</td><td class="coords">-34.457270, -57.819857</td><td><a href="https://www.openstreetmap.org/?mlat=-34.457270&amp;mlon=-57.819857#map=18/-34.457270/-57.819857">Abrir</a></td></tr>
+          <tr><td>180</td><td>GENOVEVA DETJEN</td><td class="coords">-34.443937, -57.791250</td><td><a href="https://www.openstreetmap.org/?mlat=-34.443937&amp;mlon=-57.791250#map=18/-34.443937/-57.791250">Abrir</a></td></tr>
+          <tr><td>181</td><td>ELISA DAWSON</td><td class="coords">-34.443621, -57.794049</td><td><a href="https://www.openstreetmap.org/?mlat=-34.443621&amp;mlon=-57.794049#map=18/-34.443621/-57.794049">Abrir</a></td></tr>
+          <tr><td>182</td><td>ELMA MOURGLIA</td><td class="coords">-34.443108, -57.797132</td><td><a href="https://www.openstreetmap.org/?mlat=-34.443108&amp;mlon=-57.797132#map=18/-34.443108/-57.797132">Abrir</a></td></tr>
+          <tr><td>183</td><td>NUEVO HOSPITAL</td><td class="coords">-34.458045, -57.829252</td><td><a href="https://www.openstreetmap.org/?mlat=-34.458045&amp;mlon=-57.829252#map=18/-34.458045/-57.829252">Abrir</a></td></tr>
+          <tr><td>197</td><td>SANTIAGO GADEA</td><td class="coords">-34.440949, -57.838062</td><td><a href="https://www.openstreetmap.org/?mlat=-34.440949&amp;mlon=-57.838062#map=18/-34.440949/-57.838062">Abrir</a></td></tr>
+          <tr><td>198</td><td>MUNICIPIO / R21</td><td class="coords">-34.451308, -57.839036</td><td><a href="https://www.openstreetmap.org/?mlat=-34.451308&amp;mlon=-57.839036#map=18/-34.451308/-57.839036">Abrir</a></td></tr>
+          <tr><td>199</td><td>R21 / MUNICIPIO</td><td class="coords">-34.451539, -57.838906</td><td><a href="https://www.openstreetmap.org/?mlat=-34.451539&amp;mlon=-57.838906#map=18/-34.451539/-57.838906">Abrir</a></td></tr>
+          <tr><td>200</td><td>CORRALES DE ABAS</td><td class="coords">-34.433885, -57.800905</td><td><a href="https://www.openstreetmap.org/?mlat=-34.433885&amp;mlon=-57.800905#map=18/-34.433885/-57.800905">Abrir</a></td></tr>
+          <tr><td>205</td><td>ELMA MOURGLIA</td><td class="coords">-34.443513, -57.795150</td><td><a href="https://www.openstreetmap.org/?mlat=-34.443513&amp;mlon=-57.795150#map=18/-34.443513/-57.795150">Abrir</a></td></tr>
+          <tr><td>206</td><td>ELISA DAWSON</td><td class="coords">-34.443725, -57.793307</td><td><a href="https://www.openstreetmap.org/?mlat=-34.443725&amp;mlon=-57.793307#map=18/-34.443725/-57.793307">Abrir</a></td></tr>
+          <tr><td>208</td><td>B BRUM</td><td class="coords">-34.463316, -57.833840</td><td><a href="https://www.openstreetmap.org/?mlat=-34.463316&amp;mlon=-57.833840#map=18/-34.463316/-57.833840">Abrir</a></td></tr>
+          <tr><td>216</td><td>RUTA 1</td><td class="coords">-34.460373, -57.824348</td><td><a href="https://www.openstreetmap.org/?mlat=-34.460373&amp;mlon=-57.824348#map=18/-34.460373/-57.824348">Abrir</a></td></tr>
+          <tr><td>217</td><td>C ROJAS</td><td class="coords">-34.440929, -57.839863</td><td><a href="https://www.openstreetmap.org/?mlat=-34.440929&amp;mlon=-57.839863#map=18/-34.440929/-57.839863">Abrir</a></td></tr>
+          <tr><td>218</td><td>AREGUATI</td><td class="coords">-34.441804, -57.841803</td><td><a href="https://www.openstreetmap.org/?mlat=-34.441804&amp;mlon=-57.841803#map=18/-34.441804/-57.841803">Abrir</a></td></tr>
+          <tr><td>219</td><td>P ARTIGAS</td><td class="coords">-34.442921, -57.844954</td><td><a href="https://www.openstreetmap.org/?mlat=-34.442921&amp;mlon=-57.844954#map=18/-34.442921/-57.844954">Abrir</a></td></tr>
+          <tr><td>220</td><td>M MELENDEZ</td><td class="coords">-34.441905, -57.847594</td><td><a href="https://www.openstreetmap.org/?mlat=-34.441905&amp;mlon=-57.847594#map=18/-34.441905/-57.847594">Abrir</a></td></tr>
+          <tr><td>221</td><td>A SIERRA</td><td class="coords">-34.441409, -57.850486</td><td><a href="https://www.openstreetmap.org/?mlat=-34.441409&amp;mlon=-57.850486#map=18/-34.441409/-57.850486">Abrir</a></td></tr>
+          <tr><td>223</td><td>R ORTIZ</td><td class="coords">-34.440823, -57.848343</td><td><a href="https://www.openstreetmap.org/?mlat=-34.440823&amp;mlon=-57.848343#map=18/-34.440823/-57.848343">Abrir</a></td></tr>
+          <tr><td>224</td><td>CONT C ROJAS</td><td class="coords">-34.436958, -57.840074</td><td><a href="https://www.openstreetmap.org/?mlat=-34.436958&amp;mlon=-57.840074#map=18/-34.436958/-57.840074">Abrir</a></td></tr>
+          <tr><td>226</td><td>LICEO 2</td><td class="coords">-34.441279, -57.853681</td><td><a href="https://www.openstreetmap.org/?mlat=-34.441279&amp;mlon=-57.853681#map=18/-34.441279/-57.853681">Abrir</a></td></tr>
+          <tr><td>227</td><td>A REBUFAT</td><td class="coords">-34.439210, -57.854349</td><td><a href="https://www.openstreetmap.org/?mlat=-34.439210&amp;mlon=-57.854349#map=18/-34.439210/-57.854349">Abrir</a></td></tr>
+          <tr><td>232</td><td>VIV LOS CEIBOS</td><td class="coords">-34.442657, -57.837736</td><td><a href="https://www.openstreetmap.org/?mlat=-34.442657&amp;mlon=-57.837736#map=18/-34.442657/-57.837736">Abrir</a></td></tr>
+          <tr><td>233</td><td>CO VI ADEOM</td><td class="coords">-34.442588, -57.799041</td><td><a href="https://www.openstreetmap.org/?mlat=-34.442588&amp;mlon=-57.799041#map=18/-34.442588/-57.799041">Abrir</a></td></tr>
+          <tr><td>234</td><td>CO VI ADEOM</td><td class="coords">-34.441255, -57.802050</td><td><a href="https://www.openstreetmap.org/?mlat=-34.441255&amp;mlon=-57.802050#map=18/-34.441255/-57.802050">Abrir</a></td></tr>
+          <tr><td>237</td><td>R AYALA</td><td class="coords">-34.448004, -57.813169</td><td><a href="https://www.openstreetmap.org/?mlat=-34.448004&amp;mlon=-57.813169#map=18/-34.448004/-57.813169">Abrir</a></td></tr>
+          <tr><td>239</td><td>R AYALA</td><td class="coords">-34.464285, -57.823948</td><td><a href="https://www.openstreetmap.org/?mlat=-34.464285&amp;mlon=-57.823948#map=18/-34.464285/-57.823948">Abrir</a></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+</body>
+</html>

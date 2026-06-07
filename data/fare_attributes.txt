@@ -1,2 +1,2 @@
 fare_id,price,currency_type,payment_method,transfers
-standard-pending,0.00,UYU,0,0
+standard,40.00,UYU,0,0

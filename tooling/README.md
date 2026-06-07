@@ -14,6 +14,7 @@ tooling/
 ├── uv.lock             Lockfile reproducible (commiteado)
 ├── scripts/
 │   ├── build_gtfs_zip.py    Empaqueta data/*.txt → gtfs.zip determinístico
+│   ├── build_stops_html.py  Genera docs/stops.html desde data/stops.txt
 │   ├── refresh_osm.py       Descarga + clip OSM vía osmium-tool
 │   ├── validate_gtfs.py     Sanity check del feed con gtfs-kit
 │   └── __init__.py
@@ -46,6 +47,7 @@ Todos se corren desde la raíz del repo:
 | `uv run --directory tooling ruff check scripts tests` | Linter. |
 | `uv run --directory tooling ruff format --check scripts tests` | Format check (sin escribir). |
 | `uv run --directory tooling python scripts/build_gtfs_zip.py` | Empaqueta `data/*.txt` → `data/output/gtfs.zip`. Pre-requisito de `docker compose up otp` — ver [`deployment/README.md`](../deployment/README.md). |
+| `uv run --directory tooling python scripts/build_stops_html.py` | Genera `docs/stops.html` desde el feed actual. |
 | `uv run --directory tooling python scripts/validate_gtfs.py` | Sanity check del feed con gtfs-kit. |
 | `uv run --directory tooling python scripts/refresh_osm.py` | Regenera `data/colonia.osm.pbf` (requiere `osmium-tool` en PATH). |
 
@@ -75,9 +77,11 @@ Tres workflows en `.github/workflows/` consumen este toolchain:
 
 ## TDD
 
-Cada script Python tiene sus tests escritos primero (red), después la implementación mínima (green). 10 tests cubren:
+Cada script Python tiene sus tests escritos primero (red), después la implementación mínima (green). 15 tests cubren:
 
 - **`test_build_gtfs_zip.py`** (5): contenido del zip, determinismo byte-a-byte resistente a cambios de mtime, error con data dir vacío, CLI con default y con path absoluto.
+- **`test_build_stops_html.py`** (3): orden numérico de paradas, escaping HTML, escritura del archivo estático.
+- **`test_reference_processed_data.py`** (2): auditoría opcional contra la captura AVL procesada externa local.
 - **`test_refresh_osm.py`** (3): orchestrator con stubs de download+clip, error claro cuando falta `osmium-tool`, default target.
 - **`test_validate_gtfs.py`** (2): summary para feed válido, error con zip inexistente.
 

@@ -25,7 +25,7 @@ vi.mock('next-intl/server', () => ({
     chrome: {
       title: 'Maps',
       logoAlt: 'Intendencia de Colonia',
-      disclaimer: 'Datos preliminares · operador no oficial · tarifas a confirmar',
+      disclaimer: 'Datos preliminares · operador no oficial · horarios referenciales',
       themeToggle: 'Cambiar tema',
     },
     landing: { title: 'Viajes en bus', subtitle: 'Próximamente' },
@@ -51,7 +51,7 @@ describe('app/layout.tsx', () => {
 
     // Chrome layer renders both the header title and the disclaimer copy.
     expect(markup).toContain('Maps');
-    expect(markup).toContain('tarifas a confirmar');
+    expect(markup).toContain('horarios referenciales');
 
     // Children pass through to <main>.
     expect(markup).toContain('slot');

@@ -48,6 +48,7 @@ El trabajo arranca desde un PRD, sigue con un spec en OpenSpec y termina en cód
 - **[`docs/prd/`](docs/prd/)** — PRDs (Product Requirements Documents): el *qué* y el *por qué*.
 - **[`openspec/`](openspec/)** — Specs y propuestas de cambio: el *cómo*.
 - **[`data/`](data/)** — Feed GTFS Schedule estático (Sol Antigua urbano Colonia). Ver [`data/README.md`](data/README.md) para el contrato de mantenimiento y el flow de update.
+- **[`docs/stops.html`](docs/stops.html)** — Inventario estático de paradas generado desde `data/stops.txt`, útil para publicar/inspeccionar el feed desde GitHub Pages.
 - **[`deployment/`](deployment/)** — Stack runtime (Docker Compose): OpenTripPlanner 2 sobre el feed estático. Ver [`deployment/README.md`](deployment/README.md) para boot, healthz y troubleshooting.
 - **[`bridge/`](bridge/)** — Service NestJS que poolea el AVL del operador y emite GTFS-Realtime para OTP. Ver [`bridge/README.md`](bridge/README.md) para el contrato de endpoints, healthz, comportamiento ante AVL caído, y manejo del secret `ORIGIN_AVL`.
 - **[`viewer/`](viewer/)** — App Next.js (App Router) que combina la UI mobile-first y las API routes (BFF). Único container con puerto público. Ver [`viewer/README.md`](viewer/README.md) para boot, dev mode, endpoints, chrome persistente, i18n y CORS.

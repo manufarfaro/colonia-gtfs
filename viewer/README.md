@@ -69,7 +69,7 @@ Errores estandarizados: `400 invalid_request`, `404 *_not_found`, `502 otp_unava
 `app/layout.tsx` envuelve toda página en `NextIntlClientProvider` + dos componentes que viven en todas las rutas:
 
 - **`components/chrome/Header.tsx`** — Sticky top con el título de la app y el `LocaleSwitcher` (no-op visual mientras `locales.length === 1`).
-- **`components/chrome/DisclaimerBanner.tsx`** — Banner persistente con el texto del PRD §5.2 (`"Datos preliminares · operador no oficial · tarifas a confirmar"`). Sin botón de cierre — los disclaimers son ciudadanos de primera, no errores que esconder.
+- **`components/chrome/DisclaimerBanner.tsx`** — Banner persistente con el texto `"Datos preliminares · operador no oficial · horarios referenciales"`. Sin botón de cierre — los disclaimers son ciudadanos de primera, no errores que esconder.
 
 ## i18n
 

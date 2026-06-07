@@ -148,8 +148,8 @@ jobs:
           set -euo pipefail
           curl -fsS -o smoke-out/root.html http://localhost:8080/
           # The disclaimer copy from messages/es.json must appear in the HTML.
-          # Match the unique fragment "tarifas a confirmar" (case-insensitive).
-          grep -qi 'tarifas a confirmar' smoke-out/root.html
+          # Match the unique fragment "horarios referenciales" (case-insensitive).
+          grep -qi 'horarios referenciales' smoke-out/root.html
 
       - name: Collect logs
         if: always()

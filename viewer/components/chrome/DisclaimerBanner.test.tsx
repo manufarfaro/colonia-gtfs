@@ -5,7 +5,7 @@ import { DisclaimerBanner } from './DisclaimerBanner';
 
 const messages = {
   chrome: {
-    disclaimer: 'Datos preliminares · operador no oficial · tarifas a confirmar',
+    disclaimer: 'Datos preliminares · operador no oficial · horarios referenciales',
   },
 };
 
@@ -21,7 +21,7 @@ describe('DisclaimerBanner', () => {
   it('R-02 renders the disclaimer text from the i18n catalog', () => {
     renderWithProvider();
     expect(
-      screen.getByText('Datos preliminares · operador no oficial · tarifas a confirmar'),
+      screen.getByText('Datos preliminares · operador no oficial · horarios referenciales'),
     ).toBeInTheDocument();
   });
 

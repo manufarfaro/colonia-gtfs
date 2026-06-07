@@ -71,7 +71,7 @@ Next.js app  (App Router — UI mobile-first + API routes / BFF)
 - **Mobile-first** (turista con celular en Buquebus es el caso canon), responsive a desktop.
 - **Idioma de UI: español en v0.** Todas las strings viven detrás de `t("...")` por key desde día 1; sumar `en.json` y `pt.json` en v0.1+ es agregar archivos, no refactorizar.
 - **Datos del operador (paradas, headsigns, alertas) siempre en español** — nunca se traducen topónimos.
-- **Disclaimers visibles** consistentes con el trigger demo-ready: banner discreto pero claro ("Datos preliminares · operador no oficial · tarifas a confirmar").
+- **Disclaimers visibles** consistentes con el trigger demo-ready: banner discreto pero claro ("Datos preliminares · operador no oficial · horarios referenciales").
 - **Principio de diseño:** mimetizar Google Maps Transit (ver §5).
 
 ## 4. Out-of-scope (no v0)
@@ -205,7 +205,7 @@ Lista cerrada. Si todos los items están ✓ y los disclaimers están visibles, 
 4. El usuario hace tap en una parada del mapa y ve los próximos buses con ETAs. Cuando hay un bus tracked en vivo, el ETA usa GTFS-RT; si no, usa horario programado, claramente diferenciado.
 5. El usuario selecciona una línea (3, 4, 5 u 8) desde alguna vista de navegación y ve el trazado completo + paradas + posición live de vehículos + horarios del día.
 6. El idioma de la UI es español; las strings están detrás de `t()` por key.
-7. Los disclaimers visibles ("Datos preliminares · operador no oficial · tarifas a confirmar") aparecen en chrome persistente.
+7. Los disclaimers visibles ("Datos preliminares · operador no oficial · horarios referenciales") aparecen en chrome persistente.
 
 ### 8.2 Operación
 

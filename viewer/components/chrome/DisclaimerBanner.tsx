@@ -4,8 +4,8 @@ import { useTranslations } from 'next-intl';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 
 /**
- * Banner persistente con el disclaimer del v0 (PRD §5.2 — "Datos
- * preliminares · operador no oficial · tarifas a confirmar"). Siempre
+ * Banner persistente con el disclaimer del v0 ("Datos preliminares ·
+ * operador no oficial · horarios referenciales"). Siempre
  * visible, sin botón de cierre (D-10 del design: disclaimers son
  * ciudadanos de primera, no errores que esconder).
  *

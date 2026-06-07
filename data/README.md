@@ -27,15 +27,23 @@ Los archivos `.txt` se editan **a mano**, no se autogeneran. Las fuentes upstrea
 4. Commit con mensaje `data: refresh GTFS Schedule from processed CSV YYYY-MM-DD`.
 5. Push → el CI corre el MobilityData Canonical Validator (`.github/workflows/validate-gtfs.yml`).
 
-## Tarifas: placeholder ↔ confirmado
+## Tarifas
 
-Mientras no haya tarifa confirmada con Sol Antigua, `fare_attributes.txt` lleva un único row con `fare_id = standard-pending`, `price = 0.00`, `currency_type = UYU`. El viewer detecta `price == 0` y muestra "consultá al chofer".
+`fare_attributes.txt` modela el boleto urbano base publicado por Sol Antigua:
+`fare_id = standard`, `price = 40.00`, `currency_type = UYU`,
+`payment_method = 0`, `transfers = 0`.
 
-Para flipear a modo confirmado:
+La lista pública de precios también menciona boletos B ($45, 2 zonas),
+boletos C ($55, combinado), abonos de 40 boletos y tarjeta ($200). El feed v0
+no modela esos productos porque todavía no tiene zonas tarifarias ni reglas de
+combinación; `fare_rules.txt` aplica la tarifa A de 1 zona a las rutas urbanas
+3, 4, 5 y 8.
 
-1. Cambiar la fila en `fare_attributes.txt`: `fare_id = standard`, `price = <monto real>`.
-2. Quitar la nota "datos preliminares · tarifas a confirmar" de `feed_info.txt`.
-3. Commit: `data: confirm Sol Antigua fare ($XX UYU)`.
+Si se agregan zonas tarifarias:
+
+1. Agregar `zone_id` en `stops.txt` o las reglas necesarias en GTFS Fares.
+2. Crear filas adicionales en `fare_attributes.txt` para B/C.
+3. Extender `fare_rules.txt` con las reglas de aplicación por ruta/zona.
 
 ## Archivos
 

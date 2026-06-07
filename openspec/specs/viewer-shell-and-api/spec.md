@@ -22,7 +22,7 @@ The service definition SHALL include `restart: unless-stopped`, the env file `.e
 
 The `viewer/` workspace SHALL be a Next.js application using the App Router, React 19, and TypeScript. The root `app/layout.tsx` SHALL render chrome persistente across every page: a branded header and a disclaimer banner. The disclaimer banner SHALL be present on every page rendered by the app (it is not a dismissible overlay; per PRD §5.2 disclaimers are first-class).
 
-The banner copy SHALL match the PRD §5.2 wording: "Datos preliminares · operador no oficial · tarifas a confirmar" (or an i18n key resolving to that string in Spanish).
+The banner copy SHALL match the feed-publication state: "Datos preliminares · operador no oficial · horarios referenciales" (or an i18n key resolving to that string in Spanish).
 
 The chrome SHALL render with the **Colonia institutional theme** — a coherent palette and typography pairing derived from the Intendencia de Colonia logo (`https://colonia.gub.uy/?x=logosDescargas&p=overall`), with both light and dark variants:
 
